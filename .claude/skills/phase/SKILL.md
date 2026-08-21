@@ -11,11 +11,14 @@ statement PDF; you do everything up to (but not including) `git push`. Follow th
 repo's iron rules in CLAUDE.md at all times — especially: never break an earlier
 phase's endpoints, and debug locally, never on Render.
 
-## 1. Locate the PDF
+## 1. Get the PDF from the user — never go looking for it
 
-- If an argument was given, that is the PDF path.
-- Otherwise take the newest `*.pdf` in `docs/inbox/`.
-- If neither exists, ask the user where the PDF is and stop until answered.
+- If an argument was given: a local path is used as-is; an http(s) link is downloaded
+  with curl into `docs/inbox/`.
+- Otherwise, if the user has dropped a `*.pdf` into `docs/inbox/`, take the newest one.
+- Otherwise ASK the user for the path or link and STOP until answered. Never search
+  Downloads, the home directory, or anywhere else for candidate PDFs, and never guess
+  which file the user means — the statement must come explicitly from the user.
 
 ## 2. File it
 

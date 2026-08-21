@@ -22,6 +22,9 @@ Security, reliability and product judgment are scored, not just correctness.
    We stay on the free plan (team decision): the service spins down after ~15 idle
    minutes and takes ~50 s to wake. No keep-warm cron — the smoke test doubles as the
    warm-up, so submit to the controller right after smoking, without a long pause.
+   After the first deploy (or if the service is ever recreated): copy DEBUG_TOKEN from
+   Render dashboard → service → Environment into the local `.env` (gitignored) so
+   Claude can pull `/debug/requests` from the live server when a grader run fails.
 3. Debug locally, not on Render: `scripts/dev.sh` + `pytest`. Every push-to-debug round costs a ~2 min deploy.
 4. Per phase: save PDF → notes.md → turn the statement's examples into tests → implement → green locally → push → smoke → submit URL to controller → one line in decisions.md.
    Fast path: drop the PDF in `docs/inbox/` and run `/phase` — Claude does everything up to the push, then hands off for review.
@@ -37,4 +40,6 @@ Blueprint sync creates the new services; every push to main then rebuilds all of
 in parallel with the same commit — `/health` shows one hash to verify across URLs.
 Only if a challenge demands isolation, gate router mounting behind a per-service env
 var (e.g. `ROLE`) in main.py. Servers talking to each other is just outbound httpx
-calls in a router — not a deployment concern.
+calls in a router — not a deployment concern. Note: `generateValue: true` gives each
+service its OWN DEBUG_TOKEN — if we split, move DEBUG_TOKEN into a shared Render env
+group so one token works on every server.
