@@ -13,5 +13,5 @@ check() {
 }
 
 check "health" "$BASE/health"
-check "square" -X POST "$BASE/square" -H 'Content-Type: application/json' -d '{"number": 12}'
-check "square bad input" -X POST "$BASE/square" -H 'Content-Type: application/json' -d '{"number": "x"}'
+check "square" -X POST "$BASE/square" -H 'Content-Type: application/json' -d '{"value": 12}'
+check "square bad input" -X POST "$BASE/square" -H 'Content-Type: application/json' -d '{"value": "x"}'

@@ -1,7 +1,7 @@
 # Links
 
 - Controller platform: _fill in when we get access_
-- Deployed service: _https://<name>.onrender.com — fill in after first deploy_
+- Deployed service: https://ubs-gcc-2026.onrender.com
 - Render dashboard: https://dashboard.render.com
 - Leaderboard: _fill in_
 

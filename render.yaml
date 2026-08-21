@@ -3,7 +3,7 @@ services:
     name: ubs-gcc-2026
     runtime: python
     region: singapore
-    plan: free # switch to starter on competition day: no cold starts
+    plan: free # team decision: stay free; curl /health to warm up before triggering each evaluation
     branch: main
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT

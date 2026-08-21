@@ -3,15 +3,14 @@ import os
 from fastapi import FastAPI
 
 from app.reqlog import RequestLogMiddleware
-from app.routers import debug, sample
+from app.routers import debug, phase1
 
 app = FastAPI(title="UBS GCC 2026", version="0.1.0")
 app.add_middleware(RequestLogMiddleware)
 
 app.include_router(debug.router)
-app.include_router(sample.router)
 # phase routers get added here as statements are released:
-# app.include_router(phase1.router)
+app.include_router(phase1.router)
 
 
 def _commit() -> str:

@@ -1,5 +1,7 @@
 .venv/
 __pycache__/
+docs/inbox/*
+!docs/inbox/.gitkeep
 .pytest_cache/
 .env
 *.pyc
