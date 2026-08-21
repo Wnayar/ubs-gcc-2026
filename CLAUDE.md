@@ -13,7 +13,7 @@ Security, reliability and product judgment are scored, not just correctness.
 - `docs/phases/phase-N/` — statement PDF + notes.md per phase (copy TEMPLATE.md)
 - `docs/decisions.md` — change/decision log, kept current for Product Owner check-ins
 - `docs/entry-challenge/` — the qualifying-round problem and our solution, for style reference
-- `LINKS.md` — controller URL, deployed URL
+- `LINKS.md` — deployed service URL(s); if we ever split into multiple services, every service's URL goes there, one line per service labelled with its challenge
 - `scripts/dev.sh` — run locally with reload; `scripts/smoke.sh <url>` — curl checks
 
 ## Iron rules
