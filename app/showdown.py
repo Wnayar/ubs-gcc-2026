@@ -123,6 +123,14 @@ PHASE3_CHASE_TILT = -0.16
 # Roughly what an ordinary run of hands is worth, used to judge whether a
 # shortfall is one we can play our way out of or one that needs gambling.
 CHASE_REACH_PER_HAND = 4
+# The stack-risk prices (RAISE_RISK / CALL_RISK) exist to stop us being stacked,
+# because busting a phase 1/2 match is a flat -200 with the target unreachable.
+# At a six-seat table that reasoning inverts once we are behind: second place
+# scores exactly what last place scores, so a stack we cannot win with is worth
+# nothing and refusing to gamble it away is not caution, it is forfeiting. This
+# is how much of the stack-risk guard the chase is allowed to lift, at full
+# pressure. Live attempt 1 finished second twice, +261 and +173, for zero points.
+CHASE_RISK_RELIEF = 0.6
 
 
 def _showdown_value(n: int, c: int | None, m: int) -> float:
@@ -442,11 +450,37 @@ def _crowded_tilt(state: dict, hands_left: int) -> float:
         return 0.0
     need = max(best_other + 1 - delta, PHASE3_TARGET_DELTA - delta)
     if need > 0:
-        reachable = max(CHASE_REACH_PER_HAND * hands_left, 1)
-        return PHASE3_CHASE_TILT * min(1.0, need / reachable)
+        return PHASE3_CHASE_TILT * _chase_pressure(state, hands_left)
     if delta - best_other > 2 * hands_left:
         return PROTECT_TILT  # a lead the blinds cannot eat is worth protecting
     return 0.0
+
+
+def _chase_pressure(state: dict, hands_left: int | None = None) -> float:
+    """How badly we need chips, 0..1, at a six-seat table. 0 anywhere else.
+
+    Both halves of the clearing condition — at least +10, and strictly ahead of
+    every other seat — collapse into one number: the chips we still need. That
+    is measured against what the hands left could ordinarily produce, so a
+    shortfall we can play our way into does not count as trouble.
+    """
+    if _table_size(state) < 3:
+        return 0.0
+    if hands_left is None:
+        total, hand = _int(state.get("total_hands")), _int(state.get("hand_number"))
+        if total is None or hand is None:
+            return 0.0
+        hands_left = total - hand
+    if hands_left > PHASE3_ENDGAME_HANDS:
+        return 0.0
+    delta = _int(_me(state).get("chip_delta"))
+    best_other = _best_other_delta(state)
+    if delta is None or best_other is None:
+        return 0.0
+    need = max(best_other + 1 - delta, PHASE3_TARGET_DELTA - delta)
+    if need <= 0:
+        return 0.0
+    return min(1.0, need / max(CHASE_REACH_PER_HAND * hands_left, 1))
 
 
 def _tilt(state: dict) -> float:
@@ -494,13 +528,26 @@ def _put_in(
     floor: float,
     risk_free: bool = False,
     scale: float = 1.0,
+    solve: bool = False,
+    relief: float = 1.0,
 ) -> dict | None:
     """Bet/raise to `total`, but only if the equity covers the stack risk.
 
     `amount` is the total we will have put in *for this betting round*, and an
     out-of-range one "is not clamped for you — it counts as an illegal move".
-    Shrinking to the minimum before giving up keeps us value-betting in spots
-    where a big bet would be reckless but a small one is still profitable.
+    Shrinking before giving up keeps us value-betting in spots where a big bet
+    would be reckless but a smaller one is still profitable.
+
+    `solve` adds the size in between. The risk term is `RAISE_RISK x (chips in /
+    stack)`, so it scales with how much we are putting in — which means a strong
+    hand that wants a big bet gets the big bet refused and then drops all the way
+    to the minimum. Live attempt 1 did exactly that: holding a 2 on obsidian
+    ("a pair loses, then lower wins") against a community 10, an 88% favourite
+    with 108 behind, it bet **2** into a pot of 182 — giving up the value and
+    handing the opponent a cheap raise, the worst of both. The equity above the
+    floor is a budget; `eq >= floor + RAISE_RISK * scale * x / stack` inverts to
+    a largest affordable size, so we bet that instead of a token. Gated on the
+    six-seat tables (see the call sites) so phases 1 and 2 keep their sizing.
     """
     window = _window(state)
     if window is None:
@@ -508,8 +555,15 @@ def _put_in(
     low, high = window
     mine = _int(_me(state).get("bet_this_round"), 0) or 0
     stack = max(_int(state.get("your_stack"), 0) or 0, 1)
-    for target in (max(low, min(high, int(round(total)))), low):
-        risk = 0.0 if risk_free else RAISE_RISK * scale * (max(target - mine, 0) / stack)
+    intended = max(low, min(high, int(round(total))))
+    price = RAISE_RISK * scale * relief
+    targets = [intended]
+    if solve and not risk_free and price > 0 and eq > floor:
+        affordable = mine + int((eq - floor) / price * stack)
+        targets.append(max(low, min(high, min(intended, affordable))))
+    targets.append(low)
+    for target in targets:
+        risk = 0.0 if risk_free else price * (max(target - mine, 0) / stack)
         if eq >= floor + risk:
             return {"action": action, "amount": target}
     return None
@@ -564,6 +618,16 @@ def _play(state: dict, legal: list[str]) -> dict:
     # correct again. Below, `scale` and `tax` are both exactly 1.0 on that path,
     # so it runs the arithmetic those phases were tuned on, unchanged.
     crowded = len(live) >= 2
+    # Once we are behind at a six-seat table the stack-risk guard is protecting a
+    # stack that scores nothing, so the chase lifts part of it. Zero pressure
+    # (and every two-seat table) leaves both prices exactly where they were.
+    relief = 1.0 - CHASE_RISK_RELIEF * _chase_pressure(state)
+    # Solving for the largest affordable bet is gated on the SEATING, not on who
+    # is still live: a six-seat leg that has folded down to a duel is still a
+    # phase 3 leg scored on topping the table, and that is exactly where the
+    # token-bet defect cost us a stack. A phase 1 or 2 match seats two and is
+    # never affected.
+    solve = _table_size(state) >= 3
     scale = _field_scale(len(live)) if crowded else 1.0
     tax = 1.0 + FIELD_TAX * (len(live) - 1) if crowded else 1.0
     if crowded:
@@ -589,7 +653,8 @@ def _play(state: dict, legal: list[str]) -> dict:
         # the bet against the pot it was aimed at
         pressure = min(risked / max(pot - risked, 1), 2.0)
         needed = (
-            odds + CALL_MARGIN * scale * pressure + tilt + CALL_RISK * scale * (risked / stack)
+            odds + CALL_MARGIN * scale * pressure + tilt
+            + CALL_RISK * scale * relief * (risked / stack)
         )
         if "raise" in legal:
             # a second raise in one round means the pot is getting away from us —
@@ -605,6 +670,8 @@ def _play(state: dict, legal: list[str]) -> dict:
                     floor,
                     risk_free=locked,
                     scale=scale,
+                    solve=solve,
+                    relief=relief,
                 )
                 if raised is not None:
                     return raised
@@ -620,7 +687,7 @@ def _play(state: dict, legal: list[str]) -> dict:
             if eq >= floor:
                 opened = _put_in(
                     state, "bet", mine + pot * fraction, eq, floor,
-                    risk_free=locked, scale=scale,
+                    risk_free=locked, scale=scale, solve=solve, relief=relief,
                 )
                 if opened is not None:
                     return opened

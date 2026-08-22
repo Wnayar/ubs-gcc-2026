@@ -289,3 +289,90 @@ evidence that any threshold is at its best value, and no threshold was tuned on 
 ## Failed test cases and what fixed them
 
 - (nothing yet — not submitted)
+
+
+## Attempt 1 — 0/600
+
+Match `phase3-seed2145184885`. The four legs were the **phase 2 codenames**, which
+confirms the statement's "the mapping has not changed" and means the committed seed
+applied from hand 1.
+
+| leg | table | our delta | rank | best other |
+|---|---|---|---|---|
+| 1 | verdigris | **+261** | 2 of 6 | Rhea +534 |
+| 2 | obsidian | **−200** (busted) | 6 | Rhea +350 |
+| 3 | amaranth | **+173** | 2 of 6 | Rhea +433 |
+| 4 | cinnabar | **−200** (busted) | 6 | Miles +579 |
+
+Protocol was clean: 336 `/move` calls, every one HTTP 200, mean 8.5 ms and max 103 ms
+against a 5-second budget, no illegal actions and no out-of-range amounts.
+
+### What actually went wrong
+
+**We were never short of chips — we were short of the *right* chips.** Two legs finished
+at +261 and +173, both comfortably past the +10 threshold and both worth exactly zero,
+because one opponent ran away with the table every time. Four of the five opponents bust
+in every leg, dumping ~800 chips; Rhea (or Miles) collected 55-67% of that and we
+collected 25-33%.
+
+**Both busts were a single hand.** `chip_delta` is frozen at the start of a hand, and in
+legs 2 and 4 we were at **−1** and **−20** at the start of the last hand we ever acted
+in. We did not bleed out; we got a stack in and lost it.
+
+**The one defect the log proves, twice: a near-nuts hand bet 2 chips.**
+
+- leg 2 hand 57 — holding a **2** on `obsidian` ("a pair loses to any non-pair, then the
+  lower number wins") against a community **10**. Only a 1 beats us: an 88% favourite,
+  108 behind, 182 already in the pot. **It bet 2.** The opponent raised to 151 and we
+  called off the stack.
+- leg 4 hand 23 — a **13** on a community **8** under the standard rule, so only the 8
+  itself beats us. Pot 114. **It bet 2.**
+
+This is not a tuning question, it is `_put_in` falling through. The stack-risk price is
+`RAISE_RISK × (chips in / stack)`, so it scales with the size of the bet: the value bet
+the sizing logic asked for gets refused, and the only fallback was the *minimum*. A token
+bet with a monster is the worst of both — it gives up the value and hands the opponent a
+cheap raise.
+
+### Fixes
+
+1. **`_put_in` solves for the largest affordable size.** The equity above the floor is a
+   budget, and `eq >= floor + RAISE_RISK × scale × x / stack` inverts to a size. It now
+   tries intended → largest affordable → minimum, instead of intended → minimum. Replayed
+   against the live log this changes **6 of 333** real decisions, every one a strong hand
+   that was being under-bet, and introduces no illegal action or out-of-range amount.
+   Gated on the **seating** being three or more, so phases 1 and 2 keep their sizing
+   exactly — and so a phase 3 leg that has folded down to a duel, which is precisely
+   where the leg 2 hand happened, still gets the fix.
+2. **The chase lifts part of the stack-risk guard** (`CHASE_RISK_RELIEF`). The existing
+   comment already said it — "second place scores exactly what last place scores, which
+   is what makes a losing position the one where variance is free" — but the code only
+   nudged a threshold by 0.16, which cannot turn a 250-chip deficit around. When the
+   chase is at full pressure the guard protecting a stack that scores nothing is mostly
+   released. `_chase_pressure` is 0 at any two-seat table and 0 whenever we are in front,
+   so nothing outside a phase 3 run-in can see it.
+
+### Measured, and not shipped
+
+On the four real legs (`/tmp` harness over `tools/simulate.py --phase3`, seed loaded):
+
+| change | points | bust |
+|---|---|---|
+| as deployed | 296 | 15.0% |
+| + size solving | 304 | 15.6% |
+| + chase relief (shipped) | 308 | 16.9% |
+| chase window 18 → 30 hands | 322 | 24.4% |
+| `FIELD_TAX` 0.03 → 0 | 304 | 18.1% |
+| `CALL_RISK` 0.55 → 0.35 | 300 | 21.9% |
+
+**The simulator is optimistic and must not be trusted for the last few points.** It has
+us averaging **+396** a leg where the real attempt averaged **−42**, and it says we top
+half the legs where we topped none of four. It reproduces the *structure* well (four
+opponents busting is its modal leg, leader ~+375 against a real +474), which is why it is
+worth running at all — but a 5% difference on it is not evidence. The chase window and
+`FIELD_TAX` changes are left alone on exactly that basis; phase 2 already has a scar from
+shipping a plausible-looking staking rule.
+
+The honest reading of attempt 1 is that one demonstrable defect was worth fixing and the
+rest was a variance contest we lost 0-for-4. Retries are free and only the best attempt
+counts.

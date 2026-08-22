@@ -610,3 +610,116 @@ def test_a_crowded_decision_fits_the_five_second_budget():
         decide(state)
     each = (time.perf_counter() - start) / 10
     assert each < 0.5, f"{each * 1000:.0f} ms per /move leaves no margin in 5 s"
+
+
+# ─────────────── attempt 1 regressions (docs/phases/showdown/phase-3) ───────────
+# Attempt 1 scored 0/600: second at +261 and +173, and busted twice. These are
+# real logged spots from that attempt, replayed out of the live request log.
+
+import json as _json
+from pathlib import Path as _Path
+
+_ATTEMPT1 = _json.loads(
+    (_Path(__file__).parent / "data" / "phase3_attempt1_hands.json").read_text()
+)
+
+
+def _logged(key):
+    """A real logged /move body, with the committed seed loaded as it was in play."""
+    from app.showdown_rules import forget_all as _f, load_seed as _l
+
+    _f()
+    _l()
+    return _json.loads(_json.dumps(_ATTEMPT1[key]))
+
+
+def test_a_near_nuts_hand_is_value_bet_not_token_bet():
+    """leg 2 hand 57: holding a 2 on obsidian ("a pair loses to any non-pair,
+    then the lower number wins") against a community 10 — only a 1 beats us, an
+    88% favourite — with 108 behind and 182 already in the pot, the bot bet 2.
+
+    The stack-risk price scales with the size of the bet, so the value bet it
+    wanted was refused and it fell all the way through to the minimum, giving up
+    the value AND handing the opponent a cheap raise. _put_in now solves for the
+    largest size the equity above the floor can actually pay for.
+    """
+    from app.showdown import decide
+
+    state = _logged("2_57_post_reveal")
+    reply = decide(state)
+    assert reply["action"] == "bet"
+    assert reply["amount"] >= state["pot"] // 4, f"still a token bet: {reply}"
+
+
+def test_the_same_defect_on_a_thirteen():
+    """leg 4 hand 23: a 13 on a community 8 under cinnabar (the standard rule),
+    so only the 8 itself beats us — and it bet 2 into a pot of 114."""
+    from app.showdown import decide
+
+    state = _logged("4_23_post_reveal")
+    reply = decide(state)
+    assert reply["action"] == "bet"
+    assert reply["amount"] >= state["pot"] // 4, f"still a token bet: {reply}"
+
+
+def test_a_solved_size_never_exceeds_what_the_equity_pays_for():
+    # the solved size must satisfy the inequality it was derived from, or it is
+    # just a bigger reckless bet
+    from app.showdown import RAISE_RISK, _put_in
+
+    state = _logged("4_23_post_reveal")
+    for eq in (0.5, 0.7, 0.9, 1.0):
+        got = _put_in(state, "bet", 10_000, eq, 0.45, scale=1.0, solve=True)
+        if got is None:
+            continue
+        risk = RAISE_RISK * (got["amount"] / state["your_stack"])
+        assert eq >= 0.45 + risk - 1e-9, (eq, got, risk)
+
+
+def test_two_seat_sizing_is_left_alone():
+    # solving is gated on the SEATING, so a phase 1 or 2 match never sees it
+    from app.showdown import _table_size
+
+    state = _logged("4_23_post_reveal")
+    assert _table_size(state) == 6
+    state["players"] = state["players"][:2]
+    assert _table_size(state) == 2
+
+
+def test_the_chase_only_fires_when_behind_and_out_of_road():
+    """Second place scores what last place scores, so a stack we cannot win with
+    is worth nothing — but only once the leg is genuinely nearly over."""
+    from app.showdown import _chase_pressure
+
+    state = _logged("4_23_post_reveal")
+
+    def standings(ours, others):
+        # every seat, not just one: the leader is the max over the whole table
+        for p in state["players"]:
+            p["chip_delta"] = ours if p["name"] == "you" else others
+            p["busted"] = False
+
+    standings(ours=40, others=300)
+    state["total_hands"], state["hand_number"] = 60, 12
+    assert _chase_pressure(state) == 0.0, "not the endgame yet — play the hand"
+
+    state["hand_number"] = 58
+    assert _chase_pressure(state) > 0.5, "260 behind with 2 hands left is a chase"
+
+    standings(ours=300, others=40)
+    assert _chase_pressure(state) == 0.0, "we are the one in front"
+
+    # and being in front is not enough on its own: under +10 still needs chips
+    standings(ours=4, others=-50)
+    assert _chase_pressure(state) > 0.0, "leading but short of the +10 threshold"
+
+
+def test_a_two_seat_table_never_chases():
+    from app.showdown import _chase_pressure
+
+    state = _logged("4_23_post_reveal")
+    state["players"] = state["players"][:2]
+    state["total_hands"], state["hand_number"] = 40, 39
+    for p in state["players"]:
+        p["chip_delta"] = -100 if p["name"] == "you" else 300
+    assert _chase_pressure(state) == 0.0
