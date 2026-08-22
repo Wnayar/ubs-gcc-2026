@@ -47,17 +47,17 @@ MAX_TIMES_PER_NODE = 24
 # a graded run leaves nothing to diagnose with. Keeping the last few graded
 # batches whole (gzipped) is how the 1000-case run in graded-runs/ was captured.
 #
-# Off by default: re-serialising and gzipping a 3 MB batch measured ~30 ms here,
-# which is ~470 ms on Render at the ~16x we measured live - about 9% of a request
-# that already takes 5.1 s of the statement's 10 s hard cutoff, and a batch that
-# times out scores zero for every case in it. Set KAN_CHEONG_CAPTURE=1 to turn it
-# back on for a run that needs diagnosing.
-CAPTURES: deque = deque(maxlen=3)
+# On while the score is still unexplained: the grader generates a fresh batch every
+# run, so a run that is not captured is gone. Measured cost is ~150 ms on a request
+# that takes ~5 s of the statement's 10 s cutoff - worth it for the diagnosis, and
+# only one batch is kept. Set KAN_CHEONG_CAPTURE=0 to turn it off once we stop
+# needing it; a batch that times out scores zero for every case in it.
+CAPTURES: deque = deque(maxlen=1)
 CAPTURE_MIN_CASES = 20
 
 
 def _capturing() -> bool:
-    return os.environ.get("KAN_CHEONG_CAPTURE", "").strip() not in ("", "0", "false", "False")
+    return os.environ.get("KAN_CHEONG_CAPTURE", "1").strip() not in ("0", "false", "False")
 
 NO_ROUTE: dict[str, Any] = {
     "total_duration_sec": None,

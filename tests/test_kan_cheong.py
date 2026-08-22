@@ -770,18 +770,18 @@ def test_hard_cases_get_the_budget_left_over_by_easy_ones():
     assert elapsed < 10, f"batch took {elapsed:.1f}s, statement allows 10"
 
 
-def test_capture_is_off_unless_asked_for():
-    # gzipping a 3 MB batch costs ~470 ms on Render, ~9% of a request that already
-    # uses half the statement's 10 s cutoff, and a timeout scores zero for the
-    # whole batch. So it stays off unless a run needs diagnosing.
+def test_capture_can_be_switched_off(monkeypatch):
+    # it is on while the score is unexplained, but a batch that times out scores
+    # zero for every case, so there has to be a way to stop paying for it
     from app.routers.kan_cheong import CAPTURES
 
+    monkeypatch.setenv("KAN_CHEONG_CAPTURE", "0")
     CAPTURES.clear()
     client.post(URL, json={f"case_{i}": EXAMPLE_1 for i in range(25)})
     assert client.get("/debug/kan-cheong/captures").json() == []
 
 
-def test_graded_batches_are_captured_whole_when_enabled(monkeypatch):
+def test_graded_batches_are_captured_whole(monkeypatch):
     # the shared request log clips at 4 KB and the grader's batch is 3 MB, so a
     # run that scores short leaves nothing to examine. Keep real batches whole.
     import gzip
