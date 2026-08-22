@@ -32,6 +32,11 @@ NEG_INF = float("-inf")
 # morning, and a round trip that closes fast is tighter than one that dawdles.
 TAU_TRAIL = 3 * 3600.0
 TAU_HOLD = 2 * 3600.0
+# How quickly evidence goes stale. Structure only counts as the thing it looks like
+# while it is fresh: a round trip that closed six hours ago is far weaker evidence of
+# recurring flow than one that closed in twenty minutes, and must not outrank a
+# convergence happening right now. This gates which band a transaction reaches.
+TAU_EVIDENCE = 3600.0
 
 # The statement names its signals in increasing order of interest: money that
 # "travels onward", "fans into the same destination", or "-- especially -- loops
@@ -40,6 +45,7 @@ TAU_HOLD = 2 * 3600.0
 # *within* its band. Structural Consistency is scored on behaving coherently across
 # related scenarios, so that ordering has to hold in a busy graph too, not merely
 # in the statement's five isolated examples.
+ACTIVE_FLOOR = 0.01  # anything still inside the window outranks a truly isolated pair
 TIER_ONWARD = 0.08  # the sender was itself paid recently: flow travelling onward
 TIER_FAN = 0.30  # several routes converge on the receiver
 TIER_RETURN = 0.55  # funds have come back round to the sender
@@ -92,10 +98,14 @@ def _decay(age: float, tau: float) -> float:
     return math.exp(-max(age, 0.0) / tau)
 
 
-def _band(floor: float, ceiling: float, refine: float) -> float:
-    """Place a score inside its structural band, refined by the continuous signals."""
-    refine = min(1.0, max(0.0, refine))
-    return round(floor + (ceiling - floor) * refine, 6)
+def _band(
+    floor: float, ceiling: float, refine: float, evidence: float, below: float
+) -> float:
+    """Place a score in its band, refined by continuous signals and pulled back
+    towards the band below as the evidence for that structure goes stale."""
+    target = floor + (ceiling - floor) * min(1.0, max(0.0, refine))
+    evidence = min(1.0, max(0.0, evidence))
+    return round(below + (target - below) * evidence, 6)
 
 
 class GhostGraph:
@@ -222,9 +232,11 @@ class GhostGraph:
         if arrival is not None:
             # funds left the receiver, moved through the network in time order and
             # reached the sender: this transfer closes a genuine round trip
-            tight = _decay(when - arrival, TAU_HOLD)  # how fast it bounced back
+            span = when - arrival
+            tight = _decay(span, TAU_HOLD)  # how fast it bounced back
             short = 2.0 / (hops[sender] + 1)  # how few hops the cycle takes
             routes = 1  # the transfer being scored is one return route
+            freshest_route = arrival
             for other, times in self.inn.get(receiver, {}).items():
                 if other == sender:
                     continue
@@ -234,35 +246,53 @@ class GhostGraph:
                 index = bisect.bisect_left(times, reached)
                 if index < len(times) and times[index] <= when:
                     routes += 1  # an independent return route into the receiver
+                    freshest_route = max(freshest_route, reached)
             if routes >= 2:
                 return _band(
                     TIER_MULTI,
                     TIER_TOP,
                     0.40 * _saturate(routes - 2, K_ROUTES) + 0.30 * tight + 0.30 * short,
+                    _decay(when - freshest_route, TAU_EVIDENCE),
+                    TIER_RETURN,
                 )
             return _band(
                 TIER_RETURN,
                 TIER_MULTI,
                 0.50 * tight + 0.30 * short + 0.20 * _saturate(trail, K_TRAIL),
+                _decay(span, TAU_EVIDENCE),
+                TIER_FAN,
             )
 
         # count, not decayed weight: one common origin with a second route to the
         # receiver is the statement's convergence example, however recent it is
         if shared or len(fan_sources) >= 2:
             # money fanning into one destination, or a second route reaching it
+            newest = max(
+                [upstream[node] for node in shared]
+                + [self.inn[receiver][other][-1] for other in fan_sources],
+                default=when,
+            )
             return _band(
                 TIER_FAN,
                 TIER_RETURN,
-                0.55 * _saturate(converge, K_FAN)
-                + 0.45 * _saturate(fan, K_FAN),
+                0.55 * _saturate(converge, K_FAN) + 0.45 * _saturate(fan, K_FAN),
+                _decay(when - newest, TAU_EVIDENCE),
+                TIER_ONWARD,
             )
 
         if trail > 0.0 or fan_sources:
             # ordinary onward movement along a chain
+            newest = max(
+                [moved for node, moved in upstream.items() if node != sender]
+                + [self.inn[receiver][other][-1] for other in fan_sources],
+                default=when,
+            )
             return _band(
                 TIER_ONWARD,
                 TIER_FAN,
                 0.70 * _saturate(trail, K_TRAIL) + 0.30 * _saturate(fan, K_FAN),
+                _decay(when - newest, TAU_EVIDENCE),
+                ACTIVE_FLOOR,
             )
 
         return 0.0  # nothing has connected to either end yet
