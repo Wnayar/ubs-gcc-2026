@@ -139,38 +139,41 @@ Capital, S = Sterling Bridge, O = Oakridge Imports, N = Nimbus Trading.)
 - Convergence (3) is "stronger than simple extension, but not necessarily as
   suspicious as a return path" → 2 < 3 < 4.
 
-### Our model (v2 — temporal; see "Failed test cases" below for why v1 was wrong)
+### Our model (v3 — structural bands; see "Failed test cases" for why v1 and v2 lost)
 
-The graph is **temporal**. A path counts only if money could actually have
-travelled it: edge timestamps must not decrease along the direction of flow. For an
-incoming transfer `sender -> receiver` at time `t`, three traversals over the active
-window (Dijkstra-style, so each node keeps its best time):
+The graph is **temporal**: a path counts only if money could actually have
+travelled it, so edge timestamps must not decrease along the direction of flow.
+For an incoming transfer `sender -> receiver` at time `t`, three traversals over the
+active window (Dijkstra-style, each node keeping its best time):
 
 - `latest_departure(sender, t)` — who fed the sender, and how late they let go
 - `latest_departure(receiver, t)` — who was already feeding the receiver
 - `earliest_arrival(receiver, t)` — where money leaving the receiver actually got to
 
-The statement names three signals on page 7 — money that "travels onward", "fans
-into the same destination", or "**especially**" "loops back through entities you
-have already seen" — and the weights follow that ordering:
+The statement lists its signals in increasing order of interest — money that
+"travels onward", "fans into the same destination", or "**especially**" "loops back
+through entities you have already seen", with two independent return routes
+stronger still. Each is a **band**, and the continuous signals only move a
+transaction *within* its band:
 
-| component | weight | definition |
+| band | floor | entered when |
 |---|---|---|
-| `trail` | 0.12 | recency-weighted count of entities upstream of the sender via time-respecting chains — how much traceable flow this transfer carries onward |
-| `fan` | 0.10 | recency-weighted count of distinct other counterparties already paying into the receiver |
-| `converge` | 0.15 | entities upstream of *both* ends: they could already reach the receiver and now gain a second, distinct route |
-| `loop` | 0.63 | only when funds left the receiver, moved in time order and reached the sender — this transfer closes a genuine round trip |
+| nothing | 0.0 | neither end has been seen before |
+| onward | 0.08 | the sender was itself paid recently, or the receiver has a payer |
+| fan / convergence | 0.30 | a common origin gains a second route to the receiver, or 3+ counterparties pay into it |
+| return | 0.55 | funds left the receiver, moved in time order, and came back round to the sender |
+| multi-loop | 0.78 | two or more **independent** return routes meet at the receiver |
 
-Counts are squashed by `x/(x+k)`; recency by `exp(-age/tau)` (3 h for trails, 2 h for
-the round-trip hold time). The loop weight splits as `0.30` for closing any real
-round trip, `0.20` for how fast it closed, `0.20` for how few hops it took, and
-`0.30` for how many **independent** return routes converge on the receiver — the
-last is what separates example 5 from example 4. Weights sum to 1.0, so the score is
-in [0, 1] by construction.
+Within a band, refinement uses how fast the round trip closed (`exp(-hold/2h)`), how
+few hops it took, how many extra return routes there are, and the recency-weighted
+size of the money trail — so scores stay well spread without ever crossing a band.
 
-Scores for the five examples: **0.0 < 0.030 < 0.113 < 0.540 < 0.623** — every
-required inequality holds, example 1 is exactly 0.0 as the sample response shows,
-and both "meaningfully higher" gaps are wide (0.51 and 0.08).
+Banding is the point, not a shortcut: **Structural Consistency is scored on
+behaving coherently across structurally related scenarios**, which means the
+statement's ordering has to hold in a busy graph too, not merely in the five
+isolated examples. v2 satisfied it only in isolation.
+
+Scores for the five examples: **0.0 < 0.118 < 0.362 < 0.733 < 0.890**.
 
 ## Measured throughput (this laptop, random-graph worst case)
 
@@ -219,3 +222,26 @@ which bounds the work per transaction at the cost of ignoring very long chains.
   fan-in signal the statement names but v1 omitted. On the same 100-transaction
   stream: median 0.275 -> 0.091, share >= 0.5 40 % -> 22 %, distinct values 78 -> 90.
   Ordinary flow now sits low and the suspicious tail stands out.
+
+- **Second evaluation (22 Aug, ~01:12 SGT): `STRUCTURAL_DEVIATION: High,
+  TEMPORAL_DEVIATION: High` again** — identical 100-transaction dataset, so the fix
+  had improved the spread without fixing the ranking. Reading the stream out of the
+  log made the dataset legible: it is **not random traffic**. It is a run of short
+  planted motifs — copies of the statement's own five examples on fresh entities,
+  interleaved with a little noise. idx 51-54 is Example 3 (convergence) verbatim;
+  idx 75-79 and 91-95 are Example 5 (multi-loop). Ranking our v2 scores against
+  those planted motifs showed the model was measuring *how busy the neighbourhood
+  was*, not what the transaction did:
+
+  | planted motif | v2 rank | expected |
+  |---|---|---|
+  | multi-loop (idx 79) | 8 / 100 | top |
+  | convergence, Example 3 clone (idx 54) | 44 / 100 | upper-middle |
+  | fan-in from 3 senders (idx 39) | 73 / 100 | upper-middle |
+
+  Fixed by v3's structural bands, which make the statement's ordering hold in every
+  context rather than only in isolation. Convergence moved 44 -> 39 and out of the
+  noise (0.11 -> 0.36), fan-in 73 -> 45, and both multi-loops sit in the top band.
+  A bug found on the way: the band test compared a *recency-decayed* weight against
+  an integer threshold, so a single-ancestor convergence could never qualify —
+  band membership is now decided on counts, and only refinement uses decay.

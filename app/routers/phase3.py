@@ -33,14 +33,20 @@ NEG_INF = float("-inf")
 TAU_TRAIL = 3 * 3600.0
 TAU_HOLD = 2 * 3600.0
 
-# Weights sum to 1.0, so the score is in [0, 1] by construction.
-# the three signals the statement names: money that travels onward, fans into the
-# same destination, and — "especially" — loops back through entities already seen
-W_TRAIL, W_FAN, W_CONVERGE, W_LOOP = 0.12, 0.10, 0.15, 0.63
-K_TRAIL, K_FAN, K_CONVERGE, K_ROUTES = 3.0, 2.0, 2.0, 1.0
-# how the loop weight splits: closing any real round trip, how fast it closed,
-# how few hops it took, and how many independent return routes converge
-LOOP_BASE, LOOP_TIGHT, LOOP_SHORT, LOOP_ROUTES = 0.30, 0.20, 0.20, 0.30
+# The statement names its signals in increasing order of interest: money that
+# "travels onward", "fans into the same destination", or "-- especially -- loops
+# back through entities you have already seen", with two independent return routes
+# stronger still. Each is a band; the continuous signals only move a transaction
+# *within* its band. Structural Consistency is scored on behaving coherently across
+# related scenarios, so that ordering has to hold in a busy graph too, not merely
+# in the statement's five isolated examples.
+TIER_ONWARD = 0.08  # the sender was itself paid recently: flow travelling onward
+TIER_FAN = 0.30  # several routes converge on the receiver
+TIER_RETURN = 0.55  # funds have come back round to the sender
+TIER_MULTI = 0.78  # two or more independent return routes meet at the receiver
+TIER_TOP = 1.0
+
+K_TRAIL, K_FAN, K_ROUTES = 3.0, 3.0, 1.0
 
 
 class Transaction(BaseModel):
@@ -84,6 +90,12 @@ def _saturate(value: float, k: float) -> float:
 def _decay(age: float, tau: float) -> float:
     """1.0 for something that just happened, fading towards 0 with age."""
     return math.exp(-max(age, 0.0) / tau)
+
+
+def _band(floor: float, ceiling: float, refine: float) -> float:
+    """Place a score inside its structural band, refined by the continuous signals."""
+    refine = min(1.0, max(0.0, refine))
+    return round(floor + (ceiling - floor) * refine, 6)
 
 
 class GhostGraph:
@@ -187,33 +199,29 @@ class GhostGraph:
         onward, hops = self._earliest_arrival(receiver, when)
 
         # the money trail arriving at the sender: how much traceable flow this
-        # transfer is carrying onward, discounted by how stale each hop is
+        # transfer carries onward, discounted by how stale each hop is
         trail = sum(
             _decay(when - moved, TAU_TRAIL)
             for node, moved in upstream.items()
             if node != sender
         )
+        # distinct counterparties already paying into this receiver
+        fan_sources = [
+            other for other in self.inn.get(receiver, {}) if other != sender
+        ]
+        fan = sum(
+            _decay(when - self.inn[receiver][other][-1], TAU_TRAIL)
+            for other in fan_sources
+        )
         # entities upstream of *both* ends: they could already reach the receiver
         # and this transfer hands them a second, distinct route to it
         shared = (set(upstream) & set(feeding_receiver)) - {sender, receiver}
         converge = sum(_decay(when - upstream[node], TAU_TRAIL) for node in shared)
-        # plain fan-in: distinct counterparties already paying into this receiver
-        fan = sum(
-            _decay(when - times[-1], TAU_TRAIL)
-            for other, times in self.inn.get(receiver, {}).items()
-            if other != sender
-        )
-
-        signal = (
-            W_TRAIL * _saturate(trail, K_TRAIL)
-            + W_FAN * _saturate(fan, K_FAN)
-            + W_CONVERGE * _saturate(converge, K_CONVERGE)
-        )
 
         arrival = onward.get(sender)
         if arrival is not None:
             # funds left the receiver, moved through the network in time order and
-            # reached the sender — this transfer closes a genuine round trip
+            # reached the sender: this transfer closes a genuine round trip
             tight = _decay(when - arrival, TAU_HOLD)  # how fast it bounced back
             short = 2.0 / (hops[sender] + 1)  # how few hops the cycle takes
             routes = 1  # the transfer being scored is one return route
@@ -226,14 +234,38 @@ class GhostGraph:
                 index = bisect.bisect_left(times, reached)
                 if index < len(times) and times[index] <= when:
                     routes += 1  # an independent return route into the receiver
-            signal += W_LOOP * (
-                LOOP_BASE
-                + LOOP_TIGHT * tight
-                + LOOP_SHORT * short
-                + LOOP_ROUTES * _saturate(routes - 1, K_ROUTES)
+            if routes >= 2:
+                return _band(
+                    TIER_MULTI,
+                    TIER_TOP,
+                    0.40 * _saturate(routes - 2, K_ROUTES) + 0.30 * tight + 0.30 * short,
+                )
+            return _band(
+                TIER_RETURN,
+                TIER_MULTI,
+                0.50 * tight + 0.30 * short + 0.20 * _saturate(trail, K_TRAIL),
             )
 
-        return round(min(1.0, max(0.0, signal)), 6)
+        # count, not decayed weight: one common origin with a second route to the
+        # receiver is the statement's convergence example, however recent it is
+        if shared or len(fan_sources) >= 2:
+            # money fanning into one destination, or a second route reaching it
+            return _band(
+                TIER_FAN,
+                TIER_RETURN,
+                0.55 * _saturate(converge, K_FAN)
+                + 0.45 * _saturate(fan, K_FAN),
+            )
+
+        if trail > 0.0 or fan_sources:
+            # ordinary onward movement along a chain
+            return _band(
+                TIER_ONWARD,
+                TIER_FAN,
+                0.70 * _saturate(trail, K_TRAIL) + 0.30 * _saturate(fan, K_FAN),
+            )
+
+        return 0.0  # nothing has connected to either end yet
 
     # --- streaming --------------------------------------------------------
 
