@@ -334,6 +334,10 @@ def test_grader_probe_loop_inside_window_beats_loop_broken_by_expiry():
     expired = three_chain("hf_B", [0, 60, 24 * 60])
     assert inside > expired, f"23h loop {inside} must outrank 24h-expired {expired}"
     assert inside - expired >= 0.2
+    # the intact chain is a complete round trip inside the window, so it belongs in
+    # the return band however long it took to close: three entities whose only
+    # activity is this cycle cannot have formed it by coincidence
+    assert inside >= 0.55, f"an intact 23h round trip should read as a return, got {inside}"
 
 
 def test_grader_probe_self_transfer_scores_zero():

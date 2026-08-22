@@ -306,8 +306,32 @@ and `tests/test_phase3.py` now replays all of them.
     the rank-correlation peak (rho 0.841) *and* keeps the probe correct at 0.585,
     where 1 hour scored 3 points better on motif agreement alone but failed it.
 
-  Known gap: chain A still scores 0.300 rather than reaching the return band. It is a
-  complete cycle inside the window, and with no decay at all it would score 0.596 —
-  but that costs rho (0.841 -> 0.791) and agreement (71 -> 59). We optimised for the
-  ranking metric, since Detection Quality is explicitly rank-based. If
-  `TEMPORAL_DEVIATION` persists, this is the next constant to try.
+  Result: **364/400, up from the 252 the previous build scored** (the two are not
+  strictly comparable — this run's dataset is the larger one with the probes).
+
+- **Fifth evaluation: 369/400.** The window fix and the 3-hour decay were worth about
+  +5. Same dataset again, so the rest of the work could be done offline against it.
+  Two things came out of replaying it:
+  - The known gap was real and worse than it looked. Chain A — the *intact* 3-cycle
+    closing at 23 h — scored 0.300, sitting in the convergence band when it is a
+    complete round trip inside the window. Our own burst-based labelling had been
+    calling the hand-built probes "isolated" (they span 23 h, not a 45-minute burst),
+    which hid the defect from our own metrics. Lesson: the proxy labels are a tool,
+    not ground truth, and the probes outrank them.
+  - Decay by span can *never* fix it. Planted returns close in a median of 0.08 h and
+    the false positives span 0.17-22 h, but chain A — a designed return — spans 22 h.
+    A designed structure can be slow, so staleness cannot separate design from
+    coincidence on its own.
+
+  Fixed by narrowing what staleness means. It discounts **coincidence**: a long chain
+  of old edges through busy entities may be an accident of a dense graph. Two things
+  cannot be accidental and are exempt from the discount — money going **straight
+  back** to the entity that just paid it (a 2-hop reciprocal has no intermediaries
+  whose staleness could make it coincidental), and a cycle that accounts for
+  essentially **all of its participants' activity** in the window (chain A's three
+  entities do nothing else, so their cycle is deliberate by construction). That also
+  let the decay constant go back to one hour, which suits the motif stream better.
+
+  Agreement 75 -> 79/109, over-scoring 34 -> 30, still nothing under-scored, and all
+  nine probes now behave as designed: intact 23 h loop 0.300 -> **0.596** (return),
+  expired chain still 0.010, reciprocal 0.585 -> **0.698**, self-transfer 0.0.

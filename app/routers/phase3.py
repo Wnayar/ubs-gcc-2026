@@ -42,7 +42,7 @@ TAU_HOLD = 2 * 3600.0
 # sends a reciprocal pair an hour apart -- money going straight back, the tightest
 # round trip there is -- and an hour-scale decay demotes it out of the return band.
 # Three hours holds the rank-correlation peak and keeps that probe correct.
-TAU_EVIDENCE = 3 * 3600.0
+TAU_EVIDENCE = 3600.0
 
 # The statement names its signals in increasing order of interest: money that
 # "travels onward", "fans into the same destination", or "-- especially -- loops
@@ -259,19 +259,31 @@ class GhostGraph:
                 if index < len(times) and times[index] <= when:
                     routes += 1  # an independent return route into the receiver
                     freshest_route = max(freshest_route, reached)
+            # Staleness discounts *coincidence*: a long chain of old edges through
+            # busy entities may be an accident of a dense graph. Two cases cannot be
+            # accidental and so are not discounted — money going straight back to the
+            # entity that just paid it, and a cycle that accounts for essentially all
+            # of its participants' activity in the window.
+            traffic = sum(
+                len(times)
+                for side in (self.out, self.inn)
+                for party in (sender, receiver)
+                for times in side.get(party, {}).values()
+            )
+            deliberate = hops[sender] + 1 == 2 or traffic <= 2 * (hops[sender] + 1)
             if routes >= 2:
                 return _band(
                     TIER_MULTI,
                     TIER_TOP,
                     0.40 * _saturate(routes - 2, K_ROUTES) + 0.30 * tight + 0.30 * short,
-                    _decay(when - freshest_route, TAU_EVIDENCE),
+                    1.0 if deliberate else _decay(when - freshest_route, TAU_EVIDENCE),
                     TIER_RETURN,
                 )
             return _band(
                 TIER_RETURN,
                 TIER_MULTI,
                 0.50 * tight + 0.30 * short + 0.20 * _saturate(trail, K_TRAIL),
-                _decay(span, TAU_EVIDENCE),
+                1.0 if deliberate else _decay(span, TAU_EVIDENCE),
                 TIER_FAN,
             )
 
