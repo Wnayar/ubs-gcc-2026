@@ -122,27 +122,41 @@ def test_evidence_still_overrules_the_prior():
     assert rule_equity(belief, 1, 5) > 0.8
 
 
-def test_an_all_in_refund_is_not_treated_as_a_tie():
-    # Two winners holding DIFFERENT numbers is not a split — when both players
-    # are all in, chips nobody could cover go back and the log lists both seats.
-    # Every one we have seen came from a pot of 127-405 against a median of 8
-    # for decided hands. Believing them made three tables look like the deck was
-    # grouped into bands, and cost us a leg.
-    assert not observe("refund", match_id="m", leg=1, hand_number=1,
-                       numbers={0: 12, 1: 13}, community=4, winners=[0, 1],
-                       pot=405, starting_stack=200)
-    assert RuleBelief.for_codename("refund").count == 0
-    # a genuine tie — identical numbers — is still evidence at any pot size
-    assert observe("refund", match_id="m", leg=1, hand_number=2,
-                   numbers={0: 9, 1: 9}, community=4, winners=[0, 1],
-                   pot=405, starting_stack=200)
-    # and so is an honest tie between DIFFERENT numbers in a normal pot: under
-    # "closest to the community" a 3 and a 7 both sit two away from a 5, so the
-    # numbers alone must not condemn it — only an all-in-sized pot does
-    assert observe("refund", match_id="m", leg=1, hand_number=3,
-                   numbers={0: 3, 1: 7}, community=5, winners=[0, 1],
-                   pot=8, starting_stack=200)
-    assert RuleBelief.for_codename("refund").count == 2
+def test_a_big_pot_oddity_is_kept_as_evidence_not_filtered_away():
+    # A hand where two seats holding DIFFERENT numbers both appear as winners is
+    # strange, and it is tempting to write it off as an all-in refund. Doing that
+    # cost us a leg: it was the ONLY hand arguing against "a 7 beats everything",
+    # so discarding it took that rule to 100%, `unbeatable` waived every
+    # stack-risk guard, and the bot shoved 211 chips into a hand the log had
+    # already said the 7 did not win outright. Odd hands are evidence.
+    assert observe("odd", match_id="m", leg=1, hand_number=1,
+                   numbers={0: 7, 1: 8}, community=8, winners=[0, 1])
+    assert RuleBelief.for_codename("odd").count == 1
+
+
+def test_a_number_we_have_seen_fail_is_never_treated_as_unbeatable():
+    from app.showdown_rules import unbeatable
+
+    # taught, unambiguously, that a 7 beats everything: only a lucky-7 rule
+    # explains a 7 beating numbers above it at several community numbers
+    # beating numbers on BOTH sides of it, so that neither "higher wins" nor
+    # "lower wins" can account for the results
+    for i, (other, comm) in enumerate(
+        [(8, 3), (9, 4), (10, 5), (13, 9), (1, 6), (2, 11), (3, 12), (5, 2),
+         (12, 12), (4, 4), (11, 6), (6, 10)]
+    ):
+        observe("veto", match_id="m", leg=1, hand_number=i,
+                numbers={0: 7, 1: other}, community=comm, winners=[0])
+    assert unbeatable(posterior_for("veto"), 7, 8, codename="veto")
+    # ...then shown one hand where the 7 did NOT win outright at that community
+    observe("veto", match_id="m", leg=1, hand_number=99,
+            numbers={0: 7, 1: 8}, community=8, winners=[0, 1])
+    assert not unbeatable(posterior_for("veto"), 7, 8, codename="veto"), (
+        "one direct counter-example must outrank any amount of posterior"
+    )
+    # but the veto is community-scoped: a number that loses when it does not pair
+    # says nothing about the same number when it does
+    assert unbeatable(posterior_for("veto"), 7, 5, codename="veto")
 
 
 def test_a_lucky_number_rule_is_learnable():

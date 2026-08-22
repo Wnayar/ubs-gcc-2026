@@ -431,3 +431,56 @@ distance-based rule. A first attempt at this fix did exactly that and a test cau
 The banded-rule family is removed, since the evidence for it was those refunds. That takes
 the hypothesis set from 58 back to **27**, which also sharpens every other table's read by
 not splitting the posterior between near-identical explanations.
+
+
+## Attempt 6 — 25/400, and the fix that caused it
+
+Legs: verdigris −52, cinnabar +91, amaranth **−171**, obsidian **−176**. Amaranth and
+obsidian were the two tables read at 1.00 confidence, and they were the two that lost most.
+
+**The rule reads were not the problem.** Fitting only this attempt's showdowns, with no
+seed: verdigris `standard` 100%, cinnabar `standard` 100%, obsidian `antipair_low` 100%.
+The tables are stable and we have them right.
+
+**Nor was the strategy.** Replaying all 257 of this attempt's real `/move` requests through
+the previous build and the new one, **6 decisions differ — 2%**. A 2% difference cannot
+move a leg from +63 to −171. Most of the swing is the opponent (the bot was named Vince
+this time, Tess before) and the cards.
+
+But one of those 2% was catastrophic, and it was my doing.
+
+### How a filter became a stack-off
+
+Leg 3, hand 6: holding a **7** on amaranth, we raised to 43 and then shoved all 211 chips.
+We lost 187. `unbeatable()` had said the hand could not lose, and `unbeatable()` waives
+**every** stack-risk guard we own — that is the whole point of it, and it is correct for a
+pair under the standard rule.
+
+The hand that would have stopped us was in the log all along: `7 vs 8, community 8`, with
+**both** seats listed as winners. That directly contradicts "a 7 beats everything". The
+previous attempt's fix had discarded it as an all-in refund because its pot was 400.
+
+- keeping it: no rule explains amaranth better than **87%**, the posterior spreads, and a 7
+  is not unbeatable
+- discarding it: `lucky7` reaches **100%**, and the bot bets its whole stack on it
+
+The filter removed exactly the hands that discriminate between rules, because those are the
+hands people play for stacks. It manufactured the confidence that lost the leg.
+
+### The fix
+
+1. **The refund filter is reverted.** Odd hands are evidence, especially the expensive ones.
+2. **`unbeatable()` now takes an empirical veto.** Before waiving the risk guards, it checks
+   whether we have ever *seen* that number fail to win outright at that community number.
+   One direct counter-example outranks any amount of posterior. The check is
+   community-scoped — a 9 losing when it does not pair says nothing about a 9 that does —
+   and a genuine pair under the standard rule is still unbeatable, which is what keeps
+   phase 1 intact.
+3. **The seed is rebuilt from the raw request logs**, not from harvested observations. The
+   deployed build had already filtered the contradicting hands out of what
+   `/debug/showdown-observations` returns, so harvesting from a running service loses
+   exactly the evidence a bad attempt was supposed to teach us. 227 showdowns.
+
+Amaranth now reads `lucky7` at 0.50 rather than 1.00, and a 7 there is **not** treated as
+unbeatable. That is the honest state of the evidence: two hands say a 7 beat an 8, one says
+it did not.

@@ -1,7 +1,1918 @@
 {
- "_comment": "Showdowns observed from the live grader. A codename means the same ruleset for the whole event, and in-process memory dies with the Render dyno, so this file is the durable half. Harvest after each attempt: GET /debug/showdown-observations?token=$DEBUG_TOKEN. Hands where two seats with DIFFERENT numbers both 'won' are excluded: those are all-in refunds, not ties, and treating them as ties made three tables look banded.",
- "_source": "attempts 2026-08-22 (100, 200, 300, 300 / 400), legs verdigris/cinnabar/amaranth/obsidian",
+ "_comment": "Showdowns observed from the live grader. A codename means the same ruleset for the whole event, and in-process memory dies with the Render dyno, so this file is the durable half. Harvest after each attempt: GET /debug/showdown-observations?token=$DEBUG_TOKEN. Keep EVERY hand, including big-pot ones where two seats with different numbers both appear as winners: filtering those out once made a table look 100% explained when it was not, and the bot shoved its whole stack on the strength of it.",
+ "_source": "attempts 2026-08-22 (100, 200, 300, 300, 25/100 per 400)",
  "tables": {
+  "verdigris": [
+   {
+    "numbers": {
+     "0": 12,
+     "1": 11
+    },
+    "community": 1,
+    "winners": [
+     0,
+     1
+    ]
+   },
+   {
+    "numbers": {
+     "0": 7,
+     "1": 3
+    },
+    "community": 1,
+    "winners": [
+     0
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 9,
+     "1": 4
+    },
+    "community": 1,
+    "winners": [
+     0
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 10,
+     "1": 12
+    },
+    "community": 10,
+    "winners": [
+     0,
+     1
+    ],
+    "pot": 307
+   },
+   {
+    "numbers": {
+     "0": 12,
+     "1": 7
+    },
+    "community": 10,
+    "winners": [
+     0
+    ],
+    "pot": 8
+   },
+   {
+    "numbers": {
+     "0": 2,
+     "1": 6
+    },
+    "community": 10,
+    "winners": [
+     1
+    ]
+   },
+   {
+    "numbers": {
+     "0": 8,
+     "1": 7
+    },
+    "community": 10,
+    "winners": [
+     0
+    ],
+    "pot": 8
+   },
+   {
+    "numbers": {
+     "0": 8,
+     "1": 8
+    },
+    "community": 10,
+    "winners": [
+     0,
+     1
+    ],
+    "pot": 24
+   },
+   {
+    "numbers": {
+     "0": 10,
+     "1": 8
+    },
+    "community": 11,
+    "winners": [
+     0
+    ],
+    "pot": 24
+   },
+   {
+    "numbers": {
+     "0": 11,
+     "1": 11
+    },
+    "community": 11,
+    "winners": [
+     0,
+     1
+    ],
+    "pot": 344
+   },
+   {
+    "numbers": {
+     "0": 12,
+     "1": 12
+    },
+    "community": 11,
+    "winners": [
+     0,
+     1
+    ],
+    "pot": 338
+   },
+   {
+    "numbers": {
+     "0": 13,
+     "1": 10
+    },
+    "community": 11,
+    "winners": [
+     0
+    ],
+    "pot": 32
+   },
+   {
+    "numbers": {
+     "0": 3,
+     "1": 6
+    },
+    "community": 11,
+    "winners": [
+     1
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 5,
+     "1": 3
+    },
+    "community": 11,
+    "winners": [
+     0
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 6,
+     "1": 4
+    },
+    "community": 11,
+    "winners": [
+     0
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 13,
+     "1": 7
+    },
+    "community": 12,
+    "winners": [
+     0
+    ],
+    "pot": 12
+   },
+   {
+    "numbers": {
+     "0": 7,
+     "1": 8
+    },
+    "community": 12,
+    "winners": [
+     1
+    ],
+    "pot": 8
+   },
+   {
+    "numbers": {
+     "0": 12,
+     "1": 9
+    },
+    "community": 13,
+    "winners": [
+     0
+    ],
+    "pot": 12
+   },
+   {
+    "numbers": {
+     "0": 2,
+     "1": 7
+    },
+    "community": 13,
+    "winners": [
+     1
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 6,
+     "1": 3
+    },
+    "community": 13,
+    "winners": [
+     0
+    ]
+   },
+   {
+    "numbers": {
+     "0": 9,
+     "1": 6
+    },
+    "community": 13,
+    "winners": [
+     0
+    ],
+    "pot": 8
+   },
+   {
+    "numbers": {
+     "0": 1,
+     "1": 7
+    },
+    "community": 2,
+    "winners": [
+     1
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 1,
+     "1": 8
+    },
+    "community": 2,
+    "winners": [
+     1
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 10,
+     "1": 8
+    },
+    "community": 2,
+    "winners": [
+     0
+    ],
+    "pot": 8
+   },
+   {
+    "numbers": {
+     "0": 11,
+     "1": 9
+    },
+    "community": 2,
+    "winners": [
+     0
+    ],
+    "pot": 18
+   },
+   {
+    "numbers": {
+     "0": 12,
+     "1": 13
+    },
+    "community": 2,
+    "winners": [
+     1
+    ]
+   },
+   {
+    "numbers": {
+     "0": 5,
+     "1": 6
+    },
+    "community": 2,
+    "winners": [
+     1
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 5,
+     "1": 7
+    },
+    "community": 2,
+    "winners": [
+     1
+    ]
+   },
+   {
+    "numbers": {
+     "0": 6,
+     "1": 8
+    },
+    "community": 2,
+    "winners": [
+     1
+    ]
+   },
+   {
+    "numbers": {
+     "0": 10,
+     "1": 10
+    },
+    "community": 3,
+    "winners": [
+     0,
+     1
+    ],
+    "pot": 24
+   },
+   {
+    "numbers": {
+     "0": 10,
+     "1": 12
+    },
+    "community": 3,
+    "winners": [
+     1
+    ],
+    "pot": 46
+   },
+   {
+    "numbers": {
+     "0": 10,
+     "1": 7
+    },
+    "community": 3,
+    "winners": [
+     0
+    ],
+    "pot": 8
+   },
+   {
+    "numbers": {
+     "0": 11,
+     "1": 10
+    },
+    "community": 3,
+    "winners": [
+     0
+    ],
+    "pot": 18
+   },
+   {
+    "numbers": {
+     "0": 2,
+     "1": 6
+    },
+    "community": 3,
+    "winners": [
+     1
+    ]
+   },
+   {
+    "numbers": {
+     "0": 4,
+     "1": 7
+    },
+    "community": 3,
+    "winners": [
+     1
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 8,
+     "1": 6
+    },
+    "community": 3,
+    "winners": [
+     0
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 8,
+     "1": 9
+    },
+    "community": 3,
+    "winners": [
+     1
+    ],
+    "pot": 24
+   },
+   {
+    "numbers": {
+     "0": 9,
+     "1": 8
+    },
+    "community": 3,
+    "winners": [
+     0
+    ],
+    "pot": 18
+   },
+   {
+    "numbers": {
+     "0": 10,
+     "1": 4
+    },
+    "community": 4,
+    "winners": [
+     1
+    ],
+    "pot": 10
+   },
+   {
+    "numbers": {
+     "0": 12,
+     "1": 9
+    },
+    "community": 4,
+    "winners": [
+     0
+    ],
+    "pot": 8
+   },
+   {
+    "numbers": {
+     "0": 6,
+     "1": 8
+    },
+    "community": 4,
+    "winners": [
+     1
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 10,
+     "1": 13
+    },
+    "community": 5,
+    "winners": [
+     1
+    ],
+    "pot": 24
+   },
+   {
+    "numbers": {
+     "0": 2,
+     "1": 7
+    },
+    "community": 5,
+    "winners": [
+     1
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 6,
+     "1": 4
+    },
+    "community": 5,
+    "winners": [
+     0
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 8,
+     "1": 6
+    },
+    "community": 5,
+    "winners": [
+     0
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 11,
+     "1": 12
+    },
+    "community": 6,
+    "winners": [
+     1
+    ],
+    "pot": 58
+   },
+   {
+    "numbers": {
+     "0": 12,
+     "1": 9
+    },
+    "community": 6,
+    "winners": [
+     0
+    ],
+    "pot": 8
+   },
+   {
+    "numbers": {
+     "0": 13,
+     "1": 6
+    },
+    "community": 6,
+    "winners": [
+     1
+    ],
+    "pot": 162
+   },
+   {
+    "numbers": {
+     "0": 13,
+     "1": 8
+    },
+    "community": 6,
+    "winners": [
+     0
+    ],
+    "pot": 12
+   },
+   {
+    "numbers": {
+     "0": 5,
+     "1": 3
+    },
+    "community": 6,
+    "winners": [
+     0
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 7,
+     "1": 1
+    },
+    "community": 6,
+    "winners": [
+     0
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 9,
+     "1": 10
+    },
+    "community": 6,
+    "winners": [
+     1
+    ],
+    "pot": 8
+   },
+   {
+    "numbers": {
+     "0": 9,
+     "1": 7
+    },
+    "community": 6,
+    "winners": [
+     0
+    ],
+    "pot": 8
+   },
+   {
+    "numbers": {
+     "0": 10,
+     "1": 12
+    },
+    "community": 7,
+    "winners": [
+     1
+    ]
+   },
+   {
+    "numbers": {
+     "0": 11,
+     "1": 10
+    },
+    "community": 7,
+    "winners": [
+     0
+    ],
+    "pot": 8
+   },
+   {
+    "numbers": {
+     "0": 11,
+     "1": 12
+    },
+    "community": 7,
+    "winners": [
+     1
+    ],
+    "pot": 24
+   },
+   {
+    "numbers": {
+     "0": 11,
+     "1": 7
+    },
+    "community": 7,
+    "winners": [
+     1
+    ],
+    "pot": 20
+   },
+   {
+    "numbers": {
+     "0": 12,
+     "1": 10
+    },
+    "community": 7,
+    "winners": [
+     0
+    ]
+   },
+   {
+    "numbers": {
+     "0": 9,
+     "1": 8
+    },
+    "community": 7,
+    "winners": [
+     0
+    ],
+    "pot": 8
+   },
+   {
+    "numbers": {
+     "0": 11,
+     "1": 11
+    },
+    "community": 8,
+    "winners": [
+     0,
+     1
+    ],
+    "pot": 58
+   },
+   {
+    "numbers": {
+     "0": 11,
+     "1": 12
+    },
+    "community": 8,
+    "winners": [
+     1
+    ],
+    "pot": 46
+   },
+   {
+    "numbers": {
+     "0": 6,
+     "1": 7
+    },
+    "community": 8,
+    "winners": [
+     1
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 7,
+     "1": 2
+    },
+    "community": 8,
+    "winners": [
+     0
+    ]
+   },
+   {
+    "numbers": {
+     "0": 13,
+     "1": 6
+    },
+    "community": 9,
+    "winners": [
+     0
+    ],
+    "pot": 12
+   },
+   {
+    "numbers": {
+     "0": 4,
+     "1": 4
+    },
+    "community": 9,
+    "winners": [
+     0,
+     1
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 7,
+     "1": 5
+    },
+    "community": 9,
+    "winners": [
+     0
+    ],
+    "pot": 4
+   }
+  ],
+  "cinnabar": [
+   {
+    "numbers": {
+     "0": 10,
+     "1": 2
+    },
+    "community": 1,
+    "winners": [
+     0
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 13,
+     "1": 7
+    },
+    "community": 1,
+    "winners": [
+     0
+    ]
+   },
+   {
+    "numbers": {
+     "0": 13,
+     "1": 8
+    },
+    "community": 1,
+    "winners": [
+     0
+    ],
+    "pot": 12
+   },
+   {
+    "numbers": {
+     "0": 13,
+     "1": 9
+    },
+    "community": 1,
+    "winners": [
+     0
+    ],
+    "pot": 28
+   },
+   {
+    "numbers": {
+     "0": 5,
+     "1": 4
+    },
+    "community": 1,
+    "winners": [
+     0
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 5,
+     "1": 6
+    },
+    "community": 1,
+    "winners": [
+     1
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 8,
+     "1": 4
+    },
+    "community": 1,
+    "winners": [
+     0
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 11,
+     "1": 6
+    },
+    "community": 10,
+    "winners": [
+     0
+    ],
+    "pot": 18
+   },
+   {
+    "numbers": {
+     "0": 12,
+     "1": 12
+    },
+    "community": 10,
+    "winners": [
+     0,
+     1
+    ],
+    "pot": 46
+   },
+   {
+    "numbers": {
+     "0": 5,
+     "1": 7
+    },
+    "community": 10,
+    "winners": [
+     1
+    ]
+   },
+   {
+    "numbers": {
+     "0": 8,
+     "1": 9
+    },
+    "community": 10,
+    "winners": [
+     1
+    ]
+   },
+   {
+    "numbers": {
+     "0": 9,
+     "1": 6
+    },
+    "community": 10,
+    "winners": [
+     0
+    ],
+    "pot": 8
+   },
+   {
+    "numbers": {
+     "0": 10,
+     "1": 11
+    },
+    "community": 11,
+    "winners": [
+     1
+    ],
+    "pot": 24
+   },
+   {
+    "numbers": {
+     "0": 13,
+     "1": 1
+    },
+    "community": 11,
+    "winners": [
+     0
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 12,
+     "1": 7
+    },
+    "community": 12,
+    "winners": [
+     0
+    ],
+    "pot": 12
+   },
+   {
+    "numbers": {
+     "0": 4,
+     "1": 7
+    },
+    "community": 12,
+    "winners": [
+     1
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 10,
+     "1": 11
+    },
+    "community": 13,
+    "winners": [
+     1
+    ],
+    "pot": 24
+   },
+   {
+    "numbers": {
+     "0": 12,
+     "1": 9
+    },
+    "community": 13,
+    "winners": [
+     0
+    ],
+    "pot": 40
+   },
+   {
+    "numbers": {
+     "0": 13,
+     "1": 10
+    },
+    "community": 13,
+    "winners": [
+     0
+    ],
+    "pot": 234
+   },
+   {
+    "numbers": {
+     "0": 4,
+     "1": 6
+    },
+    "community": 13,
+    "winners": [
+     1
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 6,
+     "1": 5
+    },
+    "community": 13,
+    "winners": [
+     0
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 10,
+     "1": 12
+    },
+    "community": 2,
+    "winners": [
+     1
+    ],
+    "pot": 24
+   },
+   {
+    "numbers": {
+     "0": 10,
+     "1": 9
+    },
+    "community": 2,
+    "winners": [
+     0
+    ],
+    "pot": 24
+   },
+   {
+    "numbers": {
+     "0": 11,
+     "1": 12
+    },
+    "community": 2,
+    "winners": [
+     1
+    ],
+    "pot": 46
+   },
+   {
+    "numbers": {
+     "0": 12,
+     "1": 13
+    },
+    "community": 2,
+    "winners": [
+     0,
+     1
+    ],
+    "pot": 127
+   },
+   {
+    "numbers": {
+     "0": 6,
+     "1": 1
+    },
+    "community": 2,
+    "winners": [
+     0
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 10,
+     "1": 13
+    },
+    "community": 3,
+    "winners": [
+     1
+    ],
+    "pot": 46
+   },
+   {
+    "numbers": {
+     "0": 10,
+     "1": 8
+    },
+    "community": 3,
+    "winners": [
+     0
+    ],
+    "pot": 8
+   },
+   {
+    "numbers": {
+     "0": 11,
+     "1": 13
+    },
+    "community": 3,
+    "winners": [
+     1
+    ],
+    "pot": 58
+   },
+   {
+    "numbers": {
+     "0": 12,
+     "1": 10
+    },
+    "community": 3,
+    "winners": [
+     0
+    ],
+    "pot": 8
+   },
+   {
+    "numbers": {
+     "0": 12,
+     "1": 7
+    },
+    "community": 3,
+    "winners": [
+     0
+    ],
+    "pot": 18
+   },
+   {
+    "numbers": {
+     "0": 13,
+     "1": 12
+    },
+    "community": 3,
+    "winners": [
+     0,
+     1
+    ],
+    "pot": 405
+   },
+   {
+    "numbers": {
+     "0": 6,
+     "1": 5
+    },
+    "community": 3,
+    "winners": [
+     0
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 8,
+     "1": 7
+    },
+    "community": 3,
+    "winners": [
+     0
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 11,
+     "1": 7
+    },
+    "community": 4,
+    "winners": [
+     0
+    ]
+   },
+   {
+    "numbers": {
+     "0": 13,
+     "1": 7
+    },
+    "community": 4,
+    "winners": [
+     0
+    ]
+   },
+   {
+    "numbers": {
+     "0": 6,
+     "1": 8
+    },
+    "community": 4,
+    "winners": [
+     1
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 13,
+     "1": 10
+    },
+    "community": 5,
+    "winners": [
+     0
+    ],
+    "pot": 62
+   },
+   {
+    "numbers": {
+     "0": 12,
+     "1": 11
+    },
+    "community": 6,
+    "winners": [
+     0
+    ],
+    "pot": 58
+   },
+   {
+    "numbers": {
+     "0": 13,
+     "1": 11
+    },
+    "community": 6,
+    "winners": [
+     0
+    ],
+    "pot": 338
+   },
+   {
+    "numbers": {
+     "0": 13,
+     "1": 13
+    },
+    "community": 6,
+    "winners": [
+     0,
+     1
+    ]
+   },
+   {
+    "numbers": {
+     "0": 10,
+     "1": 12
+    },
+    "community": 7,
+    "winners": [
+     1
+    ],
+    "pot": 24
+   },
+   {
+    "numbers": {
+     "0": 11,
+     "1": 9
+    },
+    "community": 7,
+    "winners": [
+     0
+    ],
+    "pot": 18
+   },
+   {
+    "numbers": {
+     "0": 13,
+     "1": 8
+    },
+    "community": 7,
+    "winners": [
+     0
+    ]
+   },
+   {
+    "numbers": {
+     "0": 10,
+     "1": 12
+    },
+    "community": 8,
+    "winners": [
+     1
+    ],
+    "pot": 46
+   },
+   {
+    "numbers": {
+     "0": 10,
+     "1": 6
+    },
+    "community": 8,
+    "winners": [
+     0
+    ]
+   },
+   {
+    "numbers": {
+     "0": 12,
+     "1": 8
+    },
+    "community": 8,
+    "winners": [
+     1
+    ],
+    "pot": 50
+   },
+   {
+    "numbers": {
+     "0": 6,
+     "1": 6
+    },
+    "community": 8,
+    "winners": [
+     0,
+     1
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 7,
+     "1": 6
+    },
+    "community": 8,
+    "winners": [
+     0
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 9,
+     "1": 6
+    },
+    "community": 8,
+    "winners": [
+     0
+    ]
+   },
+   {
+    "numbers": {
+     "0": 10,
+     "1": 7
+    },
+    "community": 9,
+    "winners": [
+     0
+    ]
+   },
+   {
+    "numbers": {
+     "0": 13,
+     "1": 13
+    },
+    "community": 9,
+    "winners": [
+     0,
+     1
+    ],
+    "pot": 400
+   },
+   {
+    "numbers": {
+     "0": 13,
+     "1": 7
+    },
+    "community": 9,
+    "winners": [
+     0
+    ],
+    "pot": 12
+   },
+   {
+    "numbers": {
+     "0": 9,
+     "1": 6
+    },
+    "community": 9,
+    "winners": [
+     0
+    ],
+    "pot": 12
+   },
+   {
+    "numbers": {
+     "0": 9,
+     "1": 9
+    },
+    "community": 9,
+    "winners": [
+     0,
+     1
+    ],
+    "pot": 176
+   }
+  ],
+  "amaranth": [
+   {
+    "numbers": {
+     "0": 11,
+     "1": 1
+    },
+    "community": 1,
+    "winners": [
+     1
+    ],
+    "pot": 10
+   },
+   {
+    "numbers": {
+     "0": 13,
+     "1": 12
+    },
+    "community": 1,
+    "winners": [
+     0,
+     1
+    ]
+   },
+   {
+    "numbers": {
+     "0": 3,
+     "1": 12
+    },
+    "community": 1,
+    "winners": [
+     1
+    ],
+    "pot": 58
+   },
+   {
+    "numbers": {
+     "0": 12,
+     "1": 6
+    },
+    "community": 10,
+    "winners": [
+     0
+    ],
+    "pot": 18
+   },
+   {
+    "numbers": {
+     "0": 13,
+     "1": 12
+    },
+    "community": 10,
+    "winners": [
+     0,
+     1
+    ],
+    "pot": 45
+   },
+   {
+    "numbers": {
+     "0": 6,
+     "1": 2
+    },
+    "community": 10,
+    "winners": [
+     0
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 8,
+     "1": 6
+    },
+    "community": 10,
+    "winners": [
+     0
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 10,
+     "1": 6
+    },
+    "community": 11,
+    "winners": [
+     0
+    ],
+    "pot": 8
+   },
+   {
+    "numbers": {
+     "0": 11,
+     "1": 12
+    },
+    "community": 11,
+    "winners": [
+     0
+    ],
+    "pot": 72
+   },
+   {
+    "numbers": {
+     "0": 12,
+     "1": 6
+    },
+    "community": 11,
+    "winners": [
+     0
+    ],
+    "pot": 18
+   },
+   {
+    "numbers": {
+     "0": 8,
+     "1": 11
+    },
+    "community": 11,
+    "winners": [
+     1
+    ],
+    "pot": 24
+   },
+   {
+    "numbers": {
+     "0": 8,
+     "1": 2
+    },
+    "community": 11,
+    "winners": [
+     0
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 11,
+     "1": 6
+    },
+    "community": 12,
+    "winners": [
+     0
+    ],
+    "pot": 8
+   },
+   {
+    "numbers": {
+     "0": 12,
+     "1": 9
+    },
+    "community": 12,
+    "winners": [
+     0
+    ],
+    "pot": 10
+   },
+   {
+    "numbers": {
+     "0": 2,
+     "1": 8
+    },
+    "community": 12,
+    "winners": [
+     1
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 9,
+     "1": 5
+    },
+    "community": 12,
+    "winners": [
+     0
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 10,
+     "1": 8
+    },
+    "community": 13,
+    "winners": [
+     0
+    ],
+    "pot": 8
+   },
+   {
+    "numbers": {
+     "0": 11,
+     "1": 6
+    },
+    "community": 13,
+    "winners": [
+     0
+    ],
+    "pot": 8
+   },
+   {
+    "numbers": {
+     "0": 13,
+     "1": 13
+    },
+    "community": 13,
+    "winners": [
+     0,
+     1
+    ],
+    "pot": 400
+   },
+   {
+    "numbers": {
+     "0": 2,
+     "1": 11
+    },
+    "community": 13,
+    "winners": [
+     1
+    ],
+    "pot": 24
+   },
+   {
+    "numbers": {
+     "0": 3,
+     "1": 8
+    },
+    "community": 13,
+    "winners": [
+     1
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 4,
+     "1": 8
+    },
+    "community": 13,
+    "winners": [
+     1
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 7,
+     "1": 8
+    },
+    "community": 13,
+    "winners": [
+     0
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 10,
+     "1": 8
+    },
+    "community": 2,
+    "winners": [
+     0
+    ],
+    "pot": 8
+   },
+   {
+    "numbers": {
+     "0": 11,
+     "1": 9
+    },
+    "community": 2,
+    "winners": [
+     0
+    ],
+    "pot": 14
+   },
+   {
+    "numbers": {
+     "0": 13,
+     "1": 12
+    },
+    "community": 2,
+    "winners": [
+     0
+    ],
+    "pot": 46
+   },
+   {
+    "numbers": {
+     "0": 13,
+     "1": 7
+    },
+    "community": 2,
+    "winners": [
+     1
+    ],
+    "pot": 24
+   },
+   {
+    "numbers": {
+     "0": 7,
+     "1": 8
+    },
+    "community": 2,
+    "winners": [
+     0
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 9,
+     "1": 3
+    },
+    "community": 2,
+    "winners": [
+     0
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 10,
+     "1": 12
+    },
+    "community": 3,
+    "winners": [
+     1
+    ],
+    "pot": 24
+   },
+   {
+    "numbers": {
+     "0": 11,
+     "1": 9
+    },
+    "community": 3,
+    "winners": [
+     0
+    ],
+    "pot": 18
+   },
+   {
+    "numbers": {
+     "0": 6,
+     "1": 6
+    },
+    "community": 3,
+    "winners": [
+     0,
+     1
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 8,
+     "1": 8
+    },
+    "community": 3,
+    "winners": [
+     0,
+     1
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 10,
+     "1": 10
+    },
+    "community": 4,
+    "winners": [
+     0,
+     1
+    ],
+    "pot": 18
+   },
+   {
+    "numbers": {
+     "0": 12,
+     "1": 10
+    },
+    "community": 4,
+    "winners": [
+     0
+    ],
+    "pot": 8
+   },
+   {
+    "numbers": {
+     "0": 3,
+     "1": 6
+    },
+    "community": 4,
+    "winners": [
+     1
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 8,
+     "1": 3
+    },
+    "community": 5,
+    "winners": [
+     0
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 8,
+     "1": 6
+    },
+    "community": 5,
+    "winners": [
+     0
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 9,
+     "1": 8
+    },
+    "community": 5,
+    "winners": [
+     0
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 5,
+     "1": 9
+    },
+    "community": 6,
+    "winners": [
+     1
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 7,
+     "1": 7
+    },
+    "community": 6,
+    "winners": [
+     0,
+     1
+    ],
+    "pot": 400
+   },
+   {
+    "numbers": {
+     "0": 8,
+     "1": 10
+    },
+    "community": 6,
+    "winners": [
+     1
+    ],
+    "pot": 8
+   },
+   {
+    "numbers": {
+     "0": 8,
+     "1": 1
+    },
+    "community": 6,
+    "winners": [
+     0
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 5,
+     "1": 8
+    },
+    "community": 7,
+    "winners": [
+     1
+    ]
+   },
+   {
+    "numbers": {
+     "0": 8,
+     "1": 1
+    },
+    "community": 7,
+    "winners": [
+     0
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 11,
+     "1": 6
+    },
+    "community": 8,
+    "winners": [
+     0
+    ],
+    "pot": 8
+   },
+   {
+    "numbers": {
+     "0": 13,
+     "1": 8
+    },
+    "community": 8,
+    "winners": [
+     1
+    ],
+    "pot": 20
+   },
+   {
+    "numbers": {
+     "0": 7,
+     "1": 8
+    },
+    "community": 8,
+    "winners": [
+     0,
+     1
+    ],
+    "pot": 400
+   },
+   {
+    "numbers": {
+     "0": 12,
+     "1": 12
+    },
+    "community": 9,
+    "winners": [
+     0,
+     1
+    ],
+    "pot": 338
+   },
+   {
+    "numbers": {
+     "0": 13,
+     "1": 10
+    },
+    "community": 9,
+    "winners": [
+     0
+    ],
+    "pot": 24
+   },
+   {
+    "numbers": {
+     "0": 4,
+     "1": 2
+    },
+    "community": 9,
+    "winners": [
+     0
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 9,
+     "1": 11
+    },
+    "community": 9,
+    "winners": [
+     0
+    ],
+    "pot": 54
+   }
+  ],
   "obsidian": [
    {
     "numbers": {
@@ -12,7 +1923,30 @@
     "winners": [
      0,
      1
-    ]
+    ],
+    "pot": 302
+   },
+   {
+    "numbers": {
+     "0": 7,
+     "1": 13
+    },
+    "community": 1,
+    "winners": [
+     0
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 7,
+     "1": 8
+    },
+    "community": 1,
+    "winners": [
+     0
+    ],
+    "pot": 4
    },
    {
     "numbers": {
@@ -22,6 +1956,28 @@
     "community": 10,
     "winners": [
      0
+    ]
+   },
+   {
+    "numbers": {
+     "0": 7,
+     "1": 13
+    },
+    "community": 10,
+    "winners": [
+     0
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 1,
+     "1": 4
+    },
+    "community": 11,
+    "winners": [
+     0,
+     1
     ]
    },
    {
@@ -42,7 +1998,8 @@
     "community": 11,
     "winners": [
      1
-    ]
+    ],
+    "pot": 8
    },
    {
     "numbers": {
@@ -52,7 +2009,19 @@
     "community": 11,
     "winners": [
      1
-    ]
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 5,
+     "1": 3
+    },
+    "community": 11,
+    "winners": [
+     1
+    ],
+    "pot": 46
    },
    {
     "numbers": {
@@ -73,7 +2042,8 @@
     "community": 11,
     "winners": [
      0
-    ]
+    ],
+    "pot": 4
    },
    {
     "numbers": {
@@ -94,7 +2064,8 @@
     "winners": [
      0,
      1
-    ]
+    ],
+    "pot": 24
    },
    {
     "numbers": {
@@ -108,13 +2079,59 @@
    },
    {
     "numbers": {
+     "0": 5,
+     "1": 6
+    },
+    "community": 12,
+    "winners": [
+     0
+    ],
+    "pot": 24
+   },
+   {
+    "numbers": {
+     "0": 2,
+     "1": 8
+    },
+    "community": 13,
+    "winners": [
+     0
+    ],
+    "pot": 22
+   },
+   {
+    "numbers": {
      "0": 7,
      "1": 9
     },
     "community": 13,
     "winners": [
      0
-    ]
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 9,
+     "1": 9
+    },
+    "community": 13,
+    "winners": [
+     0,
+     1
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
+     "0": 3,
+     "1": 1
+    },
+    "community": 2,
+    "winners": [
+     1
+    ],
+    "pot": 270
    },
    {
     "numbers": {
@@ -124,7 +2141,8 @@
     "community": 2,
     "winners": [
      0
-    ]
+    ],
+    "pot": 84
    },
    {
     "numbers": {
@@ -134,7 +2152,8 @@
     "community": 2,
     "winners": [
      1
-    ]
+    ],
+    "pot": 10
    },
    {
     "numbers": {
@@ -144,7 +2163,8 @@
     "community": 3,
     "winners": [
      0
-    ]
+    ],
+    "pot": 8
    },
    {
     "numbers": {
@@ -164,7 +2184,19 @@
     "community": 3,
     "winners": [
      0
-    ]
+    ],
+    "pot": 8
+   },
+   {
+    "numbers": {
+     "0": 2,
+     "1": 8
+    },
+    "community": 4,
+    "winners": [
+     0
+    ],
+    "pot": 22
    },
    {
     "numbers": {
@@ -175,7 +2207,19 @@
     "winners": [
      0,
      1
-    ]
+    ],
+    "pot": 24
+   },
+   {
+    "numbers": {
+     "0": 7,
+     "1": 6
+    },
+    "community": 4,
+    "winners": [
+     1
+    ],
+    "pot": 8
    },
    {
     "numbers": {
@@ -195,7 +2239,8 @@
     "community": 5,
     "winners": [
      0
-    ]
+    ],
+    "pot": 46
    },
    {
     "numbers": {
@@ -216,6 +2261,17 @@
     "winners": [
      0
     ]
+   },
+   {
+    "numbers": {
+     "0": 8,
+     "1": 13
+    },
+    "community": 5,
+    "winners": [
+     0
+    ],
+    "pot": 4
    },
    {
     "numbers": {
@@ -245,7 +2301,8 @@
     "community": 6,
     "winners": [
      0
-    ]
+    ],
+    "pot": 4
    },
    {
     "numbers": {
@@ -266,7 +2323,8 @@
     "winners": [
      0,
      1
-    ]
+    ],
+    "pot": 24
    },
    {
     "numbers": {
@@ -287,7 +2345,8 @@
     "winners": [
      0,
      1
-    ]
+    ],
+    "pot": 400
    },
    {
     "numbers": {
@@ -307,7 +2366,8 @@
     "community": 7,
     "winners": [
      0
-    ]
+    ],
+    "pot": 20
    },
    {
     "numbers": {
@@ -321,13 +2381,36 @@
    },
    {
     "numbers": {
+     "0": 6,
+     "1": 3
+    },
+    "community": 7,
+    "winners": [
+     1
+    ],
+    "pot": 24
+   },
+   {
+    "numbers": {
+     "0": 8,
+     "1": 12
+    },
+    "community": 7,
+    "winners": [
+     0
+    ],
+    "pot": 4
+   },
+   {
+    "numbers": {
      "0": 8,
      "1": 5
     },
     "community": 7,
     "winners": [
      1
-    ]
+    ],
+    "pot": 8
    },
    {
     "numbers": {
@@ -347,7 +2430,8 @@
     "community": 8,
     "winners": [
      0
-    ]
+    ],
+    "pot": 8
    },
    {
     "numbers": {
@@ -377,7 +2461,8 @@
     "community": 9,
     "winners": [
      0
-    ]
+    ],
+    "pot": 78
    },
    {
     "numbers": {
@@ -397,7 +2482,8 @@
     "community": 9,
     "winners": [
      1
-    ]
+    ],
+    "pot": 4
    },
    {
     "numbers": {
@@ -407,1276 +2493,8 @@
     "community": 9,
     "winners": [
      1
-    ]
-   }
-  ],
-  "verdigris": [
-   {
-    "numbers": {
-     "0": 9,
-     "1": 4
-    },
-    "community": 1,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 12,
-     "1": 7
-    },
-    "community": 10,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 2,
-     "1": 6
-    },
-    "community": 10,
-    "winners": [
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 8,
-     "1": 7
-    },
-    "community": 10,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 8,
-     "1": 8
-    },
-    "community": 10,
-    "winners": [
-     0,
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 10,
-     "1": 8
-    },
-    "community": 11,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 11,
-     "1": 11
-    },
-    "community": 11,
-    "winners": [
-     0,
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 12,
-     "1": 12
-    },
-    "community": 11,
-    "winners": [
-     0,
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 13,
-     "1": 10
-    },
-    "community": 11,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 3,
-     "1": 6
-    },
-    "community": 11,
-    "winners": [
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 5,
-     "1": 3
-    },
-    "community": 11,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 6,
-     "1": 4
-    },
-    "community": 11,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 13,
-     "1": 7
-    },
-    "community": 12,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 2,
-     "1": 7
-    },
-    "community": 13,
-    "winners": [
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 6,
-     "1": 3
-    },
-    "community": 13,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 1,
-     "1": 7
-    },
-    "community": 2,
-    "winners": [
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 1,
-     "1": 8
-    },
-    "community": 2,
-    "winners": [
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 10,
-     "1": 8
-    },
-    "community": 2,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 11,
-     "1": 9
-    },
-    "community": 2,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 12,
-     "1": 13
-    },
-    "community": 2,
-    "winners": [
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 5,
-     "1": 7
-    },
-    "community": 2,
-    "winners": [
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 6,
-     "1": 8
-    },
-    "community": 2,
-    "winners": [
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 10,
-     "1": 10
-    },
-    "community": 3,
-    "winners": [
-     0,
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 10,
-     "1": 12
-    },
-    "community": 3,
-    "winners": [
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 10,
-     "1": 7
-    },
-    "community": 3,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 2,
-     "1": 6
-    },
-    "community": 3,
-    "winners": [
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 8,
-     "1": 6
-    },
-    "community": 3,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 8,
-     "1": 9
-    },
-    "community": 3,
-    "winners": [
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 9,
-     "1": 8
-    },
-    "community": 3,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 10,
-     "1": 4
-    },
-    "community": 4,
-    "winners": [
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 12,
-     "1": 9
-    },
-    "community": 4,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 6,
-     "1": 8
-    },
-    "community": 4,
-    "winners": [
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 2,
-     "1": 7
-    },
-    "community": 5,
-    "winners": [
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 11,
-     "1": 12
-    },
-    "community": 6,
-    "winners": [
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 12,
-     "1": 9
-    },
-    "community": 6,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 13,
-     "1": 8
-    },
-    "community": 6,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 5,
-     "1": 3
-    },
-    "community": 6,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 7,
-     "1": 1
-    },
-    "community": 6,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 9,
-     "1": 10
-    },
-    "community": 6,
-    "winners": [
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 9,
-     "1": 7
-    },
-    "community": 6,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 10,
-     "1": 12
-    },
-    "community": 7,
-    "winners": [
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 11,
-     "1": 10
-    },
-    "community": 7,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 11,
-     "1": 12
-    },
-    "community": 7,
-    "winners": [
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 11,
-     "1": 7
-    },
-    "community": 7,
-    "winners": [
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 12,
-     "1": 10
-    },
-    "community": 7,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 11,
-     "1": 11
-    },
-    "community": 8,
-    "winners": [
-     0,
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 11,
-     "1": 12
-    },
-    "community": 8,
-    "winners": [
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 6,
-     "1": 7
-    },
-    "community": 8,
-    "winners": [
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 7,
-     "1": 2
-    },
-    "community": 8,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 13,
-     "1": 6
-    },
-    "community": 9,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 4,
-     "1": 4
-    },
-    "community": 9,
-    "winners": [
-     0,
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 7,
-     "1": 5
-    },
-    "community": 9,
-    "winners": [
-     0
-    ]
-   }
-  ],
-  "cinnabar": [
-   {
-    "numbers": {
-     "0": 13,
-     "1": 7
-    },
-    "community": 1,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 13,
-     "1": 9
-    },
-    "community": 1,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 5,
-     "1": 4
-    },
-    "community": 1,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 5,
-     "1": 6
-    },
-    "community": 1,
-    "winners": [
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 8,
-     "1": 4
-    },
-    "community": 1,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 11,
-     "1": 6
-    },
-    "community": 10,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 5,
-     "1": 7
-    },
-    "community": 10,
-    "winners": [
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 8,
-     "1": 9
-    },
-    "community": 10,
-    "winners": [
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 10,
-     "1": 11
-    },
-    "community": 11,
-    "winners": [
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 13,
-     "1": 1
-    },
-    "community": 11,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 12,
-     "1": 7
-    },
-    "community": 12,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 4,
-     "1": 7
-    },
-    "community": 12,
-    "winners": [
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 10,
-     "1": 11
-    },
-    "community": 13,
-    "winners": [
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 12,
-     "1": 9
-    },
-    "community": 13,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 4,
-     "1": 6
-    },
-    "community": 13,
-    "winners": [
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 10,
-     "1": 12
-    },
-    "community": 2,
-    "winners": [
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 10,
-     "1": 9
-    },
-    "community": 2,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 10,
-     "1": 8
-    },
-    "community": 3,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 12,
-     "1": 10
-    },
-    "community": 3,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 12,
-     "1": 7
-    },
-    "community": 3,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 6,
-     "1": 5
-    },
-    "community": 3,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 8,
-     "1": 7
-    },
-    "community": 3,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 11,
-     "1": 7
-    },
-    "community": 4,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 13,
-     "1": 7
-    },
-    "community": 4,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 6,
-     "1": 8
-    },
-    "community": 4,
-    "winners": [
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 13,
-     "1": 10
-    },
-    "community": 5,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 13,
-     "1": 11
-    },
-    "community": 6,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 13,
-     "1": 13
-    },
-    "community": 6,
-    "winners": [
-     0,
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 10,
-     "1": 12
-    },
-    "community": 7,
-    "winners": [
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 13,
-     "1": 8
-    },
-    "community": 7,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 10,
-     "1": 6
-    },
-    "community": 8,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 12,
-     "1": 8
-    },
-    "community": 8,
-    "winners": [
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 6,
-     "1": 6
-    },
-    "community": 8,
-    "winners": [
-     0,
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 9,
-     "1": 6
-    },
-    "community": 8,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 10,
-     "1": 7
-    },
-    "community": 9,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 13,
-     "1": 7
-    },
-    "community": 9,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 9,
-     "1": 9
-    },
-    "community": 9,
-    "winners": [
-     0,
-     1
-    ]
-   }
-  ],
-  "amaranth": [
-   {
-    "numbers": {
-     "0": 3,
-     "1": 12
-    },
-    "community": 1,
-    "winners": [
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 12,
-     "1": 6
-    },
-    "community": 10,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 6,
-     "1": 2
-    },
-    "community": 10,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 10,
-     "1": 6
-    },
-    "community": 11,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 11,
-     "1": 12
-    },
-    "community": 11,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 8,
-     "1": 11
-    },
-    "community": 11,
-    "winners": [
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 12,
-     "1": 9
-    },
-    "community": 12,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 9,
-     "1": 5
-    },
-    "community": 12,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 10,
-     "1": 8
-    },
-    "community": 13,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 11,
-     "1": 6
-    },
-    "community": 13,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 13,
-     "1": 13
-    },
-    "community": 13,
-    "winners": [
-     0,
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 2,
-     "1": 11
-    },
-    "community": 13,
-    "winners": [
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 3,
-     "1": 8
-    },
-    "community": 13,
-    "winners": [
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 4,
-     "1": 8
-    },
-    "community": 13,
-    "winners": [
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 7,
-     "1": 8
-    },
-    "community": 13,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 10,
-     "1": 8
-    },
-    "community": 2,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 11,
-     "1": 9
-    },
-    "community": 2,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 13,
-     "1": 12
-    },
-    "community": 2,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 13,
-     "1": 7
-    },
-    "community": 2,
-    "winners": [
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 7,
-     "1": 8
-    },
-    "community": 2,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 10,
-     "1": 12
-    },
-    "community": 3,
-    "winners": [
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 8,
-     "1": 8
-    },
-    "community": 3,
-    "winners": [
-     0,
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 10,
-     "1": 10
-    },
-    "community": 4,
-    "winners": [
-     0,
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 12,
-     "1": 10
-    },
-    "community": 4,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 3,
-     "1": 6
-    },
-    "community": 4,
-    "winners": [
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 8,
-     "1": 3
-    },
-    "community": 5,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 8,
-     "1": 6
-    },
-    "community": 5,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 9,
-     "1": 8
-    },
-    "community": 5,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 5,
-     "1": 9
-    },
-    "community": 6,
-    "winners": [
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 8,
-     "1": 1
-    },
-    "community": 6,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 5,
-     "1": 8
-    },
-    "community": 7,
-    "winners": [
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 8,
-     "1": 1
-    },
-    "community": 7,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 12,
-     "1": 12
-    },
-    "community": 9,
-    "winners": [
-     0,
-     1
-    ]
-   },
-   {
-    "numbers": {
-     "0": 13,
-     "1": 10
-    },
-    "community": 9,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 4,
-     "1": 2
-    },
-    "community": 9,
-    "winners": [
-     0
-    ]
-   },
-   {
-    "numbers": {
-     "0": 9,
-     "1": 11
-    },
-    "community": 9,
-    "winners": [
-     0
-    ]
+    ],
+    "pot": 24
    }
   ]
  }
