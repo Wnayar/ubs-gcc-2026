@@ -41,9 +41,16 @@ W_CROSS = 0.55  # the same identity turns up in unrelated components
 W_SHIFT = 0.15  # the leg that fed the sender carried a *different* value
 # Absence is evidence only in proportion to how strongly the surrounding flow was
 # carrying the identifier ("weigh absence against the surrounding structure"), and
-# always ranks below a flow that keeps it: the statement calls agreement a "stronger
+# always ranks below a flow that keeps it: Phase 2 calls agreement a "stronger
 # combined signal" outright, while absence merely "can be a signal".
-DROP_SHARE = 0.75
+#
+# Phase 3 promotes it. Its Core Principle singles the case out -- "an identity
+# attribute that vanishes mid-flow on a connected path ... is a distinct evasion
+# pattern -- treat the absence as an observable state, not merely a missing value" --
+# so the share rises from the 0.75 Phase 2 shipped. It stays below 1.0 because
+# DROP_INHERITED alone is not enough to keep a dropped trail under a flow that keeps
+# its identifier once the sender was initiating with it itself.
+DROP_SHARE = 0.90
 DROP_OWN_USE = 1.0  # the sender itself used to initiate with it, and stopped
 DROP_INHERITED = 0.85  # only the incoming leg carried it
 

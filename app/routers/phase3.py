@@ -14,8 +14,15 @@ Phase 2 ("Identity Signal") extends the same three endpoints: `ipAddress` and
 lives in `app/ghost_identity.py` and is applied as a lift on top of the structural
 score, which is left exactly as the leaderboard-tuned build computed it.
 
-The full derivation and every assumption are in docs/phases/phase-3/notes.md and
-docs/phases/ghost-chains/phase-2/notes.md.
+Phase 3 ("Value Signal") does the same again for `amount`: the trail of amounts along
+the flow segment feeding a transaction either confirms or contradicts the layering
+pattern the structure looks like. That model lives in `app/ghost_value.py`. Both
+lifts are shares of the headroom above the structural score and are combined as
+independent dimensions, so a stream that carries neither identity fields nor varying
+amounts scores exactly what Phase 1 returned.
+
+The full derivation and every assumption are in docs/phases/phase-3/notes.md,
+docs/phases/ghost-chains/phase-2/notes.md and docs/phases/ghost-chains/phase-3/notes.md.
 """
 from __future__ import annotations
 
@@ -29,6 +36,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel, field_validator
 
 from app.ghost_identity import ATTRIBUTES, IdentityIndex, clean
+from app.ghost_value import ValueTrail
 
 router = APIRouter(prefix="/ghost-chains", tags=["ghost-chains-phase-1"])
 
@@ -83,6 +91,16 @@ K_TRAIL, K_FAN, K_ROUTES = 3.0, 3.0, 1.0
 # own", while the same evidence on a transfer that closes a loop is corroborated.
 LIFT = 0.45
 CORROB_FLOOR = 0.35
+
+# --- phase 3: how far value evidence may move a structural score -------------
+# Value evidence gets no corroboration factor and a larger share than identity,
+# because unlike a shared address it cannot exist without structure: a retention
+# ratio needs a leg feeding this sender, so anything the value signal has to say is
+# already about a connected flow. The statement requires this to outweigh a band
+# step -- its Example 3 (a plain onward hop whose amount reverses) must outrank its
+# Example 4 (a structural convergence whose amounts are consistent) -- and no lift
+# that scaled with the structural band could do that.
+VALUE_LIFT = 0.65
 
 
 class Transaction(BaseModel):
@@ -176,6 +194,7 @@ class GhostGraph:
         self.scores: dict[str, float] = {}
         self.clock: float | None = None
         self.identity = IdentityIndex()  # phase 2, expiring on the same window
+        self.value = ValueTrail()  # phase 3, same window again
 
     # --- graph maintenance ------------------------------------------------
 
@@ -207,6 +226,7 @@ class GhostGraph:
         """
         cutoff = now - WINDOW
         self.identity.expire(cutoff)
+        self.value.expire(cutoff)
         while self.expiry and self.expiry[0][0] <= cutoff:
             when, _, sender, receiver = heappop(self.expiry)
             self._unlink(self.out, sender, receiver, when)
@@ -398,19 +418,26 @@ class GhostGraph:
 
         return 0.0  # nothing has connected to either end yet
 
-    def identity_score(
+    def signal_score(
         self, structural: float, transaction: "Transaction", when: float, context
     ) -> float:
-        """Phase 2: fold identity evidence into a structural score.
+        """Phases 2 and 3: fold identity and value evidence into a structural score.
 
-        The lift is a share of the headroom above the structural score, weighted by
-        how far the graph corroborates it. Identity therefore amplifies structure and
-        never contradicts it: agreement adds, disagreement adds less, and nothing
-        identity can say pulls a transaction below what Phase 1 gave it.
+        Each lift is a share of the headroom above the structural score, and the two
+        are combined as independent dimensions — the same form Phase 2 uses for its
+        two attributes, and the reason the result does not depend on which is applied
+        first. Both therefore amplify structure rather than contradicting it:
+        agreement adds, disagreement adds less, and nothing either signal can say
+        pulls a transaction below what Phase 1 gave it.
+
+        Identity is weighted by how far the graph corroborates it, because a shared
+        address across disconnected components is "not automatic proof of risk on its
+        own". Value needs no such weighting: a retention ratio only exists where a
+        leg already feeds this sender, so the evidence is structural to begin with.
         """
         upstream, feeding_receiver, onward = context[0], context[1], context[2]
         related = set(upstream) | set(feeding_receiver) | set(onward)
-        evidence = self.identity.evidence(
+        identity = self.identity.evidence(
             transaction.fromUserId,
             transaction.toUserId,
             when,
@@ -418,12 +445,14 @@ class GhostGraph:
             related,
             self._neighbours,
         )
-        if evidence <= 0.0:
+        value = self.value.evidence(transaction.fromUserId, transaction.amount, when)
+        if identity <= 0.0 and value <= 0.0:
             return structural
         corroboration = CORROB_FLOOR + (1.0 - CORROB_FLOOR) * min(
             1.0, structural / TIER_RETURN
         )
-        lifted = structural + (1.0 - structural) * LIFT * evidence * corroboration
+        lift = 1.0 - (1.0 - LIFT * identity * corroboration) * (1.0 - VALUE_LIFT * value)
+        lifted = structural + (1.0 - structural) * lift
         return round(min(1.0, lifted), 6)
 
     # --- streaming --------------------------------------------------------
@@ -450,13 +479,14 @@ class GhostGraph:
         else:
             context = self._context(sender, receiver, when)
             risk = self.structural_score(sender, receiver, when, context)
-            risk = self.identity_score(risk, transaction, when, context)
+            risk = self.signal_score(risk, transaction, when, context)
 
         if when > self.clock - WINDOW:  # inside the window: it joins the graph
             self._link(self.out, sender, receiver, when)
             self._link(self.inn, receiver, sender, when)
             heappush(self.expiry, (when, transaction.txId, sender, receiver))
             self.identity.record(sender, receiver, when, transaction.identities())
+            self.value.record(sender, receiver, when, transaction.amount)
 
         self.scores[transaction.txId] = risk
         while len(self.scores) > MAX_REMEMBERED_SCORES:
