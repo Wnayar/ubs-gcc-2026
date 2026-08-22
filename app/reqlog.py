@@ -13,7 +13,10 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 
 RECENT = deque(maxlen=500)
-MAX_BODY = 4096
+# Phase 2 bodies carry up to 20 completed hands in `recent_hands` and run past
+# 4 KB — the old cap silently clipped 161 of 241 bodies in the first attempt and
+# destroyed a quarter of the showdown evidence needed to work a table out.
+MAX_BODY = 32768
 
 
 def _clip(raw: bytes) -> str:

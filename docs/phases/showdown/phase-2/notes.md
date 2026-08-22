@@ -5,8 +5,8 @@
   **not** changed, and it never mentions legs, so `leg_number`/`total_legs` are new
   fields added for this phase)
 - **Endpoints required:** `POST /move` — same endpoint as phase 1, no new route
-- **Submitted to controller:** no
-- **Score:** — (400 pts max)
+- **Submitted to controller:** yes — attempt 1, 2026-08-22 02:55Z
+- **Score:** **100** (1 of 4 legs cleared). Root-caused below; fixes not yet re-submitted.
 
 ## What phase 2 adds
 
@@ -174,4 +174,70 @@ Worth raising with the challenge developers:
 
 ## Failed test cases and what fixed them
 
-- *(not yet submitted)*
+**Attempt 1 scored 100/400** — one leg of four. Legs were `verdigris`, `cinnabar`,
+`amaranth`, `obsidian`, 40 hands each. Raw logs are in `../logs/`.
+
+| leg | table | final chip delta | cleared (+25)? |
+|---|---|---|---|
+| 1 | verdigris | +16 (peak +16) | no |
+| 2 | cinnabar | **+97** | **yes** |
+| 3 | amaranth | −16 | no |
+| 4 | obsidian | −90 | no |
+
+Protocol was clean: 241 `/move` calls, all 200, max 68 ms, no illegal actions.
+
+### What actually went wrong
+
+**We never saw enough showdowns to identify a table.** Only 33–55% of hands reach a
+showdown, so a 40-hand leg yields 7–16 labelled comparisons — nowhere near enough to
+separate fifteen hypotheses. Our fold rate was only 17%, so this is not us folding the leg
+away; it is the information budget of the format.
+
+**Two of the tables are not expressible in the hypothesis set at all.** Refitting the
+recovered showdowns by hand:
+
+- `cinnabar`: `{13, 12}` split the pot — **12 and 13 are equal strength**. Also `8 beats 12`.
+- `amaranth`: `7 beats 8`.
+
+No "higher/lower/pair" variant can produce either. These rules group numbers into
+equivalence classes or reorder them, and the best any fixed hypothesis managed was 80–92%.
+
+**Every deploy wiped what we had learned.** The learning was in-process only, so the
+redeploy that shipped phase 2 reset it, and each attempt started from nothing.
+
+**Our own request log destroyed the evidence.** `MAX_BODY` was 4096, and phase-2 bodies
+carry up to 20 completed hands in `recent_hands`: **161 of 241 bodies were clipped**,
+losing roughly a quarter of the showdowns we had actually been shown.
+
+### Fixes
+
+1. **`MAX_BODY` 4096 → 32768** so an attempt's evidence survives in the log.
+2. **A committed seed file** (`app/data/showdown_seed.json`, 45 showdowns from attempt 1)
+   replayed at startup, plus `GET /debug/showdown-observations` to harvest an attempt's
+   learning in exactly that shape. The codename mapping is fixed for the whole event, so
+   this is the durable half of a memory the dyno keeps killing. All four tables now start
+   informed instead of blank.
+3. **The prior is no longer flat — it starts at phase 1's rule** (`PRIOR_STANDARD = 0.40`).
+   Three of the four real tables were best explained by the standard rule (verdigris 100%,
+   amaranth 92%, cinnabar 80%); a uniform prior over fifteen hypotheses threw that away and
+   left us near a coin flip for the first dozen hands of every 40-hand leg. Evidence still
+   overrules it — `obsidian` correctly reads `antipair_low`, and the bot now bets a 2 and
+   checks a 13 there from hand 1.
+
+### What was tried and rejected
+
+A Bradley-Terry ranking fit over the 13 numbers — which *can* express "12 == 13" and
+"7 beats 8" — was measured by leave-one-out against the real showdowns and was **worse**
+than the fixed rules at this data volume (67–80% vs 80–100%). It needs far more data than a
+leg provides, so it stays as the low-weight fallback rather than becoming the main model.
+The binding constraint is evidence per table, which is why the seed file matters more than
+any modelling change.
+
+### The loop that should raise the score
+
+After every attempt, harvest and commit, so each run starts from all prior evidence:
+
+```
+curl -s "https://ubs-gcc-2026.onrender.com/debug/showdown-observations?token=$DEBUG_TOKEN" \
+  > app/data/showdown_seed.json.new
+```

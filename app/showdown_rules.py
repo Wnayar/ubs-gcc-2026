@@ -22,7 +22,9 @@ think of, and it is what lets a hypothesis set be scored by plain Bayes.
 """
 from __future__ import annotations
 
+import json
 import threading
+from pathlib import Path
 from dataclasses import dataclass, field
 from typing import Callable, ClassVar
 
@@ -79,6 +81,27 @@ def _rules() -> tuple[Rule, ...]:
         ("pair_near", "a pair beats any non-pair, then closest to the community",
          lambda n, c: (n == c, -abs(n - c))),
     ]
+    # Banded rules: the deck grouped into equal-strength bands, higher band wins.
+    # Not speculation — cinnabar split a pot between a 12 and a 13, and no
+    # ordering by face value can tie two different numbers, so at least one real
+    # table groups the deck. The specific banding is left to the evidence.
+    for width in (2, 3, 4):
+        for offset in (0, 1):
+            spec.append((
+                f"band{width}_{offset}",
+                f"numbers grouped into bands of {width}, higher band wins, same band splits",
+                (lambda w, o: lambda n, c: ((n + o) // w,))(width, offset),
+            ))
+            spec.append((
+                f"pair_band{width}_{offset}",
+                f"a pair beats any non-pair, then bands of {width}, same band splits",
+                (lambda w, o: lambda n, c: (n == c, (n + o) // w))(width, offset),
+            ))
+            spec.append((
+                f"band{width}_{offset}_low",
+                f"numbers grouped into bands of {width}, LOWER band wins",
+                (lambda w, o: lambda n, c: (-((n + o) // w),))(width, offset),
+            ))
     return tuple(Rule(name, desc, key) for name, desc, key in spec)
 
 
@@ -126,6 +149,14 @@ BY_NAME = {rule.name: rule for rule in RULES}
 # Anything we become confident about in play should be added here and committed:
 # GET /debug/showdown-rules dumps what has been learned so far.
 KNOWN_RULES: dict[str, str] = {"standard": "standard"}
+
+# The prior is NOT uniform. Of the four phase-2 tables we have played, three were
+# best explained by the phase-1 rule (verdigris 100%, amaranth 92%, cinnabar 80%)
+# and only obsidian clearly was not. A flat prior over thirty hypotheses throws
+# that away and leaves us near a coin flip for the first dozen hands of every
+# leg — which, over 40 hands, is most of it. So phase 2 starts from phase 1's
+# answer and lets evidence move it, rather than starting from nothing.
+PRIOR_STANDARD = 0.40
 
 
 def showdown_winners(rule: Rule, numbers: dict[int, int], community: int) -> list[int]:
@@ -200,6 +231,16 @@ class RuleBelief:
             self._posterior = self._compute()
         return self._posterior
 
+    @staticmethod
+    def _log_prior() -> dict[str, float]:
+        import math
+
+        names = [r.name for r in RULES] + [LEARNED]
+        rest = (1.0 - PRIOR_STANDARD) / (len(names) - 1)
+        return {
+            name: math.log(PRIOR_STANDARD if name == "standard" else rest) for name in names
+        }
+
     def _compute(self) -> dict[str, float]:
         """Two-fold cross-validated log-likelihood, in log space.
 
@@ -214,11 +255,14 @@ class RuleBelief:
         folds = ([], [])
         for i, key in enumerate(keys):
             folds[i % 2].append(self.seen[key])
+        scores = dict(self._log_prior())
         if not keys:
-            return {name: 1 / (len(RULES) + 1) for name in [r.name for r in RULES] + [LEARNED]}
+            import math
 
-        scores = {rule.name: 0.0 for rule in RULES}
-        scores[LEARNED] = 0.0
+            top = max(scores.values())
+            w = {n: math.exp(v - top) for n, v in scores.items()}
+            total = sum(w.values())
+            return {n: x / total for n, x in w.items()}
         for f, held_out in enumerate(folds):
             trained_on = folds[1 - f]
             order = _fit_order(trained_on) if trained_on else None
@@ -286,6 +330,58 @@ def _order_predicts(scores: dict[int, float], obs: "Observation") -> bool:
     else:
         predicted = (seats[0],) if ka > kb else (seats[1],)
     return tuple(predicted) == obs.winners
+
+
+SEED_PATH = Path(__file__).resolve().parent / "data" / "showdown_seed.json"
+
+
+def load_seed(path=None) -> int:
+    """Replay showdowns harvested from earlier attempts.
+
+    A codename means the same ruleset in every match, attempt and later phase,
+    so a showdown seen in any earlier attempt is still evidence about the same
+    table. In-process memory does not survive a Render restart — and every
+    deploy is a restart — so this file is the half of the memory that lasts.
+    """
+    path = Path(path) if path else SEED_PATH
+    try:
+        blob = json.loads(path.read_text())
+    except (OSError, ValueError):
+        return 0
+    tables = blob.get("tables") if isinstance(blob, dict) else None
+    if not isinstance(tables, dict):
+        return 0
+    added = 0
+    for codename, rows in tables.items():
+        if not isinstance(rows, list):
+            continue
+        for i, row in enumerate(rows):
+            if not isinstance(row, dict):
+                continue
+            numbers = row.get("numbers")
+            if not isinstance(numbers, dict):
+                continue
+            try:
+                numbers = {int(k): int(v) for k, v in numbers.items()}
+            except (TypeError, ValueError):
+                continue
+            added += observe(codename, match_id="seed", leg=None, hand_number=f"seed-{i}",
+                             numbers=numbers, community=row.get("community"),
+                             winners=row.get("winners"))
+    return added
+
+
+def observations_dump() -> dict:
+    """Every showdown we hold, shaped like the seed file so an attempt's
+    learning can be harvested and committed."""
+    tables = {}
+    for codename, belief in RuleBelief.all().items():
+        rows = [{"numbers": {str(k): v for k, v in o.numbers.items()},
+                 "community": o.community, "winners": list(o.winners)}
+                for o in belief.seen.values()]
+        if rows:
+            tables[codename] = rows
+    return {"tables": tables}
 
 
 def forget_all() -> None:
@@ -452,3 +548,6 @@ def unbeatable(belief: dict[str, float], n: int, c: int | None, floor: float = 0
         if all(_key_for(name, m, c) <= ours for m in range(1, DECK + 1)):
             weight += p
     return weight >= floor
+
+
+_SEEDED = load_seed()

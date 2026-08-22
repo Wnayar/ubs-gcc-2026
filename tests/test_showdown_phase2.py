@@ -104,11 +104,59 @@ def teach(codename, rule_name, hands=40, seed=0):
     return rule
 
 
-def test_an_unseen_codename_starts_undecided():
+def test_an_unseen_codename_starts_at_the_phase_one_rule():
+    # deliberately NOT flat. Three of the four real phase-2 tables were best
+    # explained by phase 1's rule, so an unknown table starts there and lets
+    # evidence move it; a flat prior over thirty hypotheses leaves us at a coin
+    # flip for the first dozen hands of a 40-hand leg.
     belief = posterior_for("chalcedony")
-    weights = sorted(belief.values(), reverse=True)
     assert abs(sum(belief.values()) - 1.0) < 1e-9
-    assert weights[0] < 0.25, "with no evidence no rule may dominate"
+    assert max(belief, key=belief.get) == "standard"
+    assert 0.3 < belief["standard"] < 0.6, "a prior, not a conviction"
+
+
+def test_evidence_still_overrules_the_prior():
+    teach("contrary", "low", hands=40, seed=8)
+    belief = posterior_for("contrary")
+    assert belief["standard"] < 0.01
+    assert rule_equity(belief, 1, 5) > 0.8
+
+
+def test_a_banded_rule_is_learnable():
+    # cinnabar split a pot between a 12 and a 13; no ordering by face value can
+    # tie two different numbers, so the deck must be grouped into bands
+    teach("banded", "pair_band3_1", hands=40, seed=2)
+    belief = posterior_for("banded")
+    truth = {"pair_band3_1": 1.0}
+    worst = max(abs(rule_equity(belief, n, c) - rule_equity(truth, n, c))
+                for n in range(1, 14) for c in range(1, 14))
+    assert worst < 0.08, belief
+
+
+def test_the_seed_file_survives_a_restart():
+    from app.showdown_rules import load_seed
+
+    forget_all()
+    assert load_seed() > 0
+    for codename in ("verdigris", "cinnabar", "amaranth", "obsidian"):
+        assert RuleBelief.for_codename(codename).count > 0, codename
+
+
+def test_the_dump_round_trips_through_the_seed_loader():
+    import json as _json
+    import tempfile
+
+    from app.showdown_rules import load_seed, observations_dump
+
+    teach("roundtrip", "near", hands=12, seed=4)
+    dumped = observations_dump()
+    assert dumped["tables"]["roundtrip"]
+    with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as fh:
+        _json.dump(dumped, fh)
+        path = fh.name
+    forget_all()
+    assert load_seed(path) == 12
+    assert RuleBelief.for_codename("roundtrip").count == 12
 
 
 def test_forty_showdowns_teach_us_to_value_hands_correctly():

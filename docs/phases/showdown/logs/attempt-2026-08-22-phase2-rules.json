@@ -1,0 +1,64 @@
+{
+    "chalcedony": {
+        "showdowns_seen": 0,
+        "best_guess": "standard",
+        "confidence": 0.0667,
+        "means": "a pair beats any non-pair, then higher wins",
+        "pinned": false,
+        "runners_up": {
+            "pair_low": 0.0667,
+            "antipair_high": 0.0667,
+            "antipair_low": 0.0667
+        }
+    },
+    "standard": {
+        "showdowns_seen": 0,
+        "best_guess": "standard",
+        "confidence": 1.0,
+        "means": "a pair beats any non-pair, then higher wins",
+        "pinned": true,
+        "runners_up": {}
+    },
+    "verdigris": {
+        "showdowns_seen": 19,
+        "best_guess": "standard",
+        "confidence": 0.9409,
+        "means": "a pair beats any non-pair, then higher wins",
+        "pinned": false,
+        "runners_up": {
+            "antipair_high": 0.0291,
+            "high": 0.0291
+        }
+    },
+    "cinnabar": {
+        "showdowns_seen": 12,
+        "best_guess": "standard",
+        "confidence": 0.999,
+        "means": "a pair beats any non-pair, then higher wins",
+        "pinned": false,
+        "runners_up": {}
+    },
+    "amaranth": {
+        "showdowns_seen": 16,
+        "best_guess": "standard",
+        "confidence": 0.4924,
+        "means": "a pair beats any non-pair, then higher wins",
+        "pinned": false,
+        "runners_up": {
+            "high": 0.4924,
+            "antipair_high": 0.0152
+        }
+    },
+    "obsidian": {
+        "showdowns_seen": 12,
+        "best_guess": "antipair_low",
+        "confidence": 0.8899,
+        "means": "a pair LOSES to any non-pair, then lower wins",
+        "pinned": false,
+        "runners_up": {
+            "low": 0.0275,
+            "wrap_down": 0.0275,
+            "far": 0.0275
+        }
+    }
+}
