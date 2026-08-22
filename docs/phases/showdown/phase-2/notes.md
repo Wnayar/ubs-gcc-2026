@@ -484,3 +484,55 @@ hands people play for stacks. It manufactured the confidence that lost the leg.
 Amaranth now reads `lucky7` at 0.50 rather than 1.00, and a 7 there is **not** treated as
 unbeatable. That is the honest state of the evidence: two hands say a 7 beat an 8, one says
 it did not.
+
+
+## Where the points actually are
+
+Per-table results across every graded attempt:
+
+| table | rule | cleared | deltas |
+|---|---|---|---|
+| cinnabar | standard | **6/6** | +91, +91, +97, +114, +133, +136 |
+| obsidian | antipair_low | 2/6 | −176 … +40 |
+| amaranth | lucky7 | 1/6 | −171 … +63 |
+| verdigris | standard | 1/6 | −52 … +79 |
+
+Overall per-leg clear rate **42%**, so P(all four in one attempt) ≈ **3%** — roughly 33
+attempts for an even chance. Retrying alone will not reach 400.
+
+Cinnabar and verdigris are **the same rule** and produce opposite results, which rules out
+the rule as the explanation. Opponent aggression is 30-44% on every table and we are seat 0
+in all of them, so it is not position or opponent style either. The difference is how much
+we lose in the hands we lose.
+
+## The one measurable leak
+
+Bucketing all 337 hands by the largest share of stack we voluntarily committed:
+
+| commitment | hands | net chips |
+|---|---|---|
+| <20% | 314 | +47 |
+| 20-40% | 3 | −19 |
+| 40-60% | 2 | +244 |
+| **≥60%** | **18** | **−484** |
+
+Within that 18 we **won 2 and lost 16 — an 11% win rate**. Under a fair coin that is about
+a 1-in-1000 result: we are not unlucky in those spots, our equity model badly underrates
+the opponent's big bets. Every disaster this event has that shape — a 13 against a
+community 7, a 2 against a 1, a 12 into a shove, a 7 shoved on a contested rule.
+
+`CALL_RISK` 0.20 → **0.55** and `RAISE_RISK` 0.18 → **0.40**. The term is
+`RISK × (chips in ÷ stack)`, so it is negligible on an ordinary call and heavy on one that
+plays for a stack; a hand that cannot lose stays exempt. Replayed over all 502 real logged
+decisions it changes 23, cutting 7 of the 16 losers for a net **+433 chips**.
+
+**This is shipped against the simulator's advice**, and that deserves recording. The sim
+says the change costs ~50 points; it said the same about a stack ceiling earlier. But the
+sim has been wrong about live results repeatedly — it rated the build that scored 25/400 at
+roughly 300 — because its invented opponents get their chips in far worse than the real one
+does. Against a 42% per-leg baseline that cannot reach 400 anyway, a measured risk backed
+by 337 real hands beats a synthetic estimate.
+
+**How to tell quickly whether it worked:** watch amaranth, verdigris and obsidian. If their
+deltas move from −170 toward break-even, the change is doing its job even if the score has
+not moved yet — those three legs are the entire gap between 100 and 400.
