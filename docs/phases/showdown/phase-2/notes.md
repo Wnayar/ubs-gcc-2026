@@ -379,3 +379,55 @@ Before every submission from now on:
 ```
 ./scripts/warm.sh https://<service>.onrender.com 4e5dc6c
 ```
+
+
+## Attempt 5 — 300/400, and the bug behind all of it
+
+Legs: verdigris **+13 FAILED**, cinnabar +114, amaranth **+63 cleared**, obsidian +40 in
+eight hands. The lucky-7 fix worked — amaranth had been the failing leg and now clears —
+but the failure simply rotated to verdigris, which had cleared comfortably twice before.
+
+Verdigris reads `standard` at 0.97, the rule we know best, so this was not a rule we had
+failed to learn. Its only two unexplained showdowns were **splits between different
+numbers**: `12 vs 11` and, stranger still, `10 vs 12` where the 10 *paired the community
+and still did not win*.
+
+### Two winners with different numbers is not a tie
+
+Checking the pot sizes settled it:
+
+| kind of hand | count | median pot |
+|---|---|---|
+| decided | 73 | **8** |
+| split, identical numbers (genuine tie) | 15 | 24 |
+| split, **different** numbers | 3 | **307** (127, 307, 405) |
+
+Every one is an all-in. When both players are all in, chips nobody could cover go back and
+the hand log lists **both** seats as winners. They are refunds, not ties — and we had been
+feeding them to the rule learner as evidence that two different numbers were equal in
+strength.
+
+That single misreading is the only reason the deck ever looked like it was grouped into
+bands. Discard those three hands and **every table is explained exactly**:
+
+| table | rule | fit |
+|---|---|---|
+| verdigris | a pair beats any non-pair, then higher | **52/52** |
+| cinnabar | a pair beats any non-pair, then higher | **37/37** |
+| amaranth | **a 7 beats everything**, then a pair, then higher | **36/36** |
+| obsidian | a pair *loses* to any non-pair, then lower wins | **40/40** |
+
+Note amaranth is plain `lucky7`, not the banded `lucky7_band2` we shipped last time: the
+banding half was fitting one refund.
+
+### The fix, and the trap inside it
+
+`observe()` now rejects a two-winner hand whose numbers differ **when the pot is at least
+half a starting stack**. The pot is the discriminator, not the numbers — plenty of rules
+tie different numbers honestly (under "closest to the community" a 3 and a 7 both sit two
+away from a 5), so filtering on the numbers alone would throw away real evidence for every
+distance-based rule. A first attempt at this fix did exactly that and a test caught it.
+
+The banded-rule family is removed, since the evidence for it was those refunds. That takes
+the hypothesis set from 58 back to **27**, which also sharpens every other table's read by
+not splitting the posterior between near-identical explanations.

@@ -122,15 +122,37 @@ def test_evidence_still_overrules_the_prior():
     assert rule_equity(belief, 1, 5) > 0.8
 
 
-def test_a_banded_rule_is_learnable():
-    # cinnabar split a pot between a 12 and a 13; no ordering by face value can
-    # tie two different numbers, so the deck must be grouped into bands
-    teach("banded", "pair_band3_1", hands=40, seed=2)
-    belief = posterior_for("banded")
-    truth = {"pair_band3_1": 1.0}
+def test_an_all_in_refund_is_not_treated_as_a_tie():
+    # Two winners holding DIFFERENT numbers is not a split — when both players
+    # are all in, chips nobody could cover go back and the log lists both seats.
+    # Every one we have seen came from a pot of 127-405 against a median of 8
+    # for decided hands. Believing them made three tables look like the deck was
+    # grouped into bands, and cost us a leg.
+    assert not observe("refund", match_id="m", leg=1, hand_number=1,
+                       numbers={0: 12, 1: 13}, community=4, winners=[0, 1],
+                       pot=405, starting_stack=200)
+    assert RuleBelief.for_codename("refund").count == 0
+    # a genuine tie — identical numbers — is still evidence at any pot size
+    assert observe("refund", match_id="m", leg=1, hand_number=2,
+                   numbers={0: 9, 1: 9}, community=4, winners=[0, 1],
+                   pot=405, starting_stack=200)
+    # and so is an honest tie between DIFFERENT numbers in a normal pot: under
+    # "closest to the community" a 3 and a 7 both sit two away from a 5, so the
+    # numbers alone must not condemn it — only an all-in-sized pot does
+    assert observe("refund", match_id="m", leg=1, hand_number=3,
+                   numbers={0: 3, 1: 7}, community=5, winners=[0, 1],
+                   pot=8, starting_stack=200)
+    assert RuleBelief.for_codename("refund").count == 2
+
+
+def test_a_lucky_number_rule_is_learnable():
+    # amaranth: a 7 beat an 8 twice at different community numbers, and never lost
+    teach("lucky", "lucky7", hands=60, seed=2)
+    belief = posterior_for("lucky")
+    truth = {"lucky7": 1.0}
     worst = max(abs(rule_equity(belief, n, c) - rule_equity(truth, n, c))
                 for n in range(1, 14) for c in range(1, 14))
-    assert worst < 0.08, belief
+    assert worst < 0.10, belief
 
 
 def test_the_seed_file_survives_a_restart():

@@ -81,27 +81,12 @@ def _rules() -> tuple[Rule, ...]:
         ("pair_near", "a pair beats any non-pair, then closest to the community",
          lambda n, c: (n == c, -abs(n - c))),
     ]
-    # Banded rules: the deck grouped into equal-strength bands, higher band wins.
-    # Not speculation — cinnabar split a pot between a 12 and a 13, and no
-    # ordering by face value can tie two different numbers, so at least one real
-    # table groups the deck. The specific banding is left to the evidence.
-    for width in (2, 3, 4):
-        for offset in (0, 1):
-            spec.append((
-                f"band{width}_{offset}",
-                f"numbers grouped into bands of {width}, higher band wins, same band splits",
-                (lambda w, o: lambda n, c: ((n + o) // w,))(width, offset),
-            ))
-            spec.append((
-                f"pair_band{width}_{offset}",
-                f"a pair beats any non-pair, then bands of {width}, same band splits",
-                (lambda w, o: lambda n, c: (n == c, (n + o) // w))(width, offset),
-            ))
-            spec.append((
-                f"band{width}_{offset}_low",
-                f"numbers grouped into bands of {width}, LOWER band wins",
-                (lambda w, o: lambda n, c: (-((n + o) // w),))(width, offset),
-            ))
+    # NB: a "banded deck" family used to live here, added because three tables
+    # appeared to split a pot between two different numbers. Those splits turned
+    # out to be all-in refunds (see `observe`), and with them discarded every
+    # table is explained exactly by an unbanded rule. Removed rather than left
+    # to dilute the posterior. If a genuinely banded table ever turns up it will
+    # show different-number splits in SMALL pots, which is real evidence.
     # "One number beats everything." Amaranth showed a 7 beating an 8 twice, at two
     # different community numbers, and a 7 never lost — which no ordering by size
     # explains. Paired with banding (that table also split a 13 against a 12) it
@@ -112,11 +97,6 @@ def _rules() -> tuple[Rule, ...]:
             f"lucky{lucky}",
             f"a {lucky} beats everything, then a pair, then higher wins",
             (lambda k: lambda n, c: (n == k, n == c, n))(lucky),
-        ))
-        spec.append((
-            f"lucky{lucky}_band2",
-            f"a {lucky} beats everything, then a pair, then bands of two",
-            (lambda k: lambda n, c: (n == k, n == c, n // 2))(lucky),
         ))
     return tuple(Rule(name, desc, key) for name, desc, key in spec)
 
@@ -404,6 +384,32 @@ def forget_all() -> None:
     RuleBelief.forget_all()
 
 
+# A pot at least this share of a starting stack means somebody was all in.
+# Ordinary pots are single digits; the refunds we have seen were 127 to 405.
+ALL_IN_POT_SHARE = 0.5
+
+
+def _is_all_in_refund(seats, numbers, pot, starting_stack) -> bool:
+    """Two winners holding DIFFERENT numbers, in a pot only an all-in explains.
+
+    Plenty of rules tie two different numbers honestly — under "closest to the
+    community" a 3 and a 7 both sit two away from a 5 — so the numbers alone
+    prove nothing. What gives it away is the pot. When both players are all in,
+    chips nobody could cover go back and the hand log lists both seats as
+    winners; every one of these we have seen came from a pot of 127 to 405
+    against a median of 8 for decided hands and 24 for genuine ties.
+
+    Believing them cost us three tables: it is the only reason the deck ever
+    looked like it was grouped into bands, and dropping them leaves every table
+    explained exactly by an unbanded rule.
+    """
+    if len(seats) < 2 or len({numbers[s] for s in seats}) < 2:
+        return False
+    if pot is None or starting_stack is None:
+        return False  # no pot to judge by (synthetic data) — take it at face value
+    return pot >= ALL_IN_POT_SHARE * starting_stack
+
+
 def observe(
     codename: str,
     match_id,
@@ -412,6 +418,8 @@ def observe(
     numbers: dict[int, int],
     community: int,
     winners,
+    pot=None,
+    starting_stack=None,
 ) -> bool:
     """Record one completed showdown against a codename. Idempotent per hand."""
     if not isinstance(codename, str) or not codename:
@@ -427,6 +435,8 @@ def observe(
     except (TypeError, ValueError):
         return False
     if not seats or any(s not in numbers for s in seats):
+        return False
+    if _is_all_in_refund(seats, numbers, pot, starting_stack):
         return False
     belief = RuleBelief.for_codename(codename)
     key = (str(match_id), leg, hand_number, tuple(sorted(numbers.items())), community)

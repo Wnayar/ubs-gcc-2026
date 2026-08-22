@@ -445,6 +445,8 @@ def _learn(state: dict) -> None:
             numbers=numbers,
             community=_int(entry.get("community_number")),
             winners=entry.get("winners"),
+            pot=_int(entry.get("pot")),
+            starting_stack=_int(state.get("starting_stack")),
         )
 
 
