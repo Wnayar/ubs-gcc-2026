@@ -239,8 +239,6 @@ def test_every_advertised_tool_is_callable():
             "find_meeting_time",
             "find_meeting_point",
             "plan_outing",
-            "get_day_schedule",
-            "where_is",
         }
 
 

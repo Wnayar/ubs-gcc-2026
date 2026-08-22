@@ -27,9 +27,11 @@ HOST = os.environ.get("TOOLBOX_HOST", "https://tool-box-2591eaa24fa3.herokuapp.c
 OUT = os.path.join(os.path.dirname(__file__), "..", "app", "data", "city.json")
 
 DAYS = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
-# a..i, one name each; probed by asking /schedule for every short name we could
-# think of and keeping the ones that answered 200
-PEOPLE = ("ada", "bram", "cira", "dov", "esme", "fenn", "gita", "hale", "iris")
+# a..j, one name each; probed by asking /schedule for every short name we could
+# think of and keeping the ones that answered 200. `juno` was missed on the
+# first sweep and turned up in three questions of the first graded run — the
+# live feeds answered for it, but the offline fallback had a hole where it sat.
+PEOPLE = ("ada", "bram", "cira", "dov", "esme", "fenn", "gita", "hale", "iris", "juno")
 
 WHEN = re.compile(r"When:\s*([A-Za-z]+)\s+(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})")
 RESPONSE = re.compile(r"Response:\s*([A-Za-z]+)")

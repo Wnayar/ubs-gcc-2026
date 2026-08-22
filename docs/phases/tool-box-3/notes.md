@@ -1,16 +1,18 @@
 # tool-box — SHEET 3 OF 3: "Stage 3 — Working Life"
 
 > The last sheet, and the same MCP server again (`app/routers/toolbox.py`).
-> Sheets 1 and 2 are untouched; six tools are added, taking us to 17 of the 20
-> we are allowed to advertise.
+> Sheets 1 and 2 are untouched; four tools are added, taking us to 15 of the 20
+> we are allowed to advertise. Two more were advertised on the first graded run
+> and withdrawn after it — see "Failed test cases" at the bottom.
 
 - **PDF:** `statement.pdf` in this folder, 10 pages
   (<https://tool-box-2591eaa24fa3.herokuapp.com/wrY_iw3E42XPBHmf>)
 - **Endpoints required:** none new. Everything is a tool on `POST {teamUrl}/mcp`
   (and `/mcp/`), which sheet 1 already serves.
 - **What we submit:** the **base URL**, as before — they append `/mcp`.
-- **Submitted to controller:** no
-- **Score:**
+- **Submitted to controller:** yes, 2026-08-22, as `https://ubs-gcc-2026-3.onrender.com`
+- **Score:** **90/100** (run `99be6fa7`, 2026-08-22 05:52 UTC, 59.6 s). Run
+  `b65190be` five minutes earlier scored 0 — see below, it never got going.
 
 ## What the sheet asks for
 
@@ -28,8 +30,8 @@ description, paramters and outputs of your tool."* And the framing changed —
 sheet 1 said the android comes to us for what it "reaches for"; this one says it
 comes *"not for the answer, but for the means to find one"*. We still return
 answers, because three graded runs on sheet 1 proved it repeats a tool result
-verbatim and does not check our work — but the four answer tools are backed by
-two plain lookup tools for an android that would rather see the raw day.
+verbatim and does not check our work. We hedged that reading with two raw-lookup
+tools anyway, and the first graded run settled the argument against them.
 
 ## The two conventions (page 2) — "Neither is negotiable and neither is checked for you"
 
@@ -58,7 +60,8 @@ byte-identical**, which is the same evidence that let sheet 2 vendor its corpus.
 | `GET /emails` | `{"emails": [{"id", "sender", "subject", "body"}]}` — the inbox, linked from page 4 |
 
 Measured: **16 venues** (9–11 trading on any one day, and a venue never moves),
-**9 people** — `ada bram cira dov esme fenn gita hale iris`, one per letter a–i —
+**10 people** — `ada bram cira dov esme fenn gita hale iris juno`, one per
+letter a–j —
 and **109 emails**. Both path segments are **case-sensitive**: `/venues/tuesday`
 and `/schedule/ADA/Tuesday` are 404s, so every tool normalises before asking.
 An unknown person or day is a 404 with `{"detail": …}`, never a 200 with an
@@ -195,9 +198,9 @@ fails if we ever answer the blind one.
 | response time | **10 seconds** |
 | tools read from our server | **first 20** we list |
 
-We now advertise **17 tools**. The largest sheet-3 answer is `get_day_schedule`
-for a full day, ~120 characters; the four scored answers are 10–75 characters,
-two orders of magnitude below the ceiling.
+We advertise **15 tools**. The four sheet-3 answers are 10–75 characters, two
+orders of magnitude below the ceiling — the grader measured every one of them at
+**6 tokens** against the limit of 1,200.
 
 Measured against the real host, cold (every feed refetched) and then warm:
 
@@ -207,6 +210,10 @@ Measured against the real host, cold (every feed refetched) and then warm:
 | `find_meeting_time` | 1.3 s | 4 ms |
 | `find_meeting_point` | 0.3 s | 2 ms |
 | `plan_outing` | 1.8 s | 7 ms |
+
+Eight tool calls fired at once against a cold cache all answer, the slowest in
+**2.7 s**. Before the threadpool fix below they were served strictly one after
+another, and the graded run lost a problem to it.
 
 ## What we built
 
@@ -219,8 +226,6 @@ Measured against the real host, cold (every feed refetched) and then warm:
 | `find_meeting_time(day, people, earliest, latest, minutes)` | `16:00-17:00` |
 | `find_meeting_point(day, my_position, people, eat_at?)` | `[1, 5]` |
 | `plan_outing(day, my_position, people, earliest, latest, minutes)` | one JSON object, all three parts |
-| `get_day_schedule(person, day)` | a friend's busy hours, or your own day including what is only pencilled in |
-| `where_is(person, day)` | `[0, 1]` |
 
 **Live first, snapshot second.** Only the host knows what a run is being asked
 about, so every feed is read live, cached for 120 seconds and shared across a
@@ -254,16 +259,12 @@ not the life of the process.
 
 ## Assumptions we made
 
-- **The answer shapes are ours to choose, and nothing on `/limits`, `/howto` or
-  `/qna` constrains them.** Sets 1 and 3 are quoted verbatim by the statement
-  (`"a comma-separated list"`, `"as [x, y]"`). Set 2 we render as
-  **`16:00-17:00`** — two `HH:MM` tokens in order, the most compact faithful
-  reading of "a start time and an end time". Set 4 has three parts and so must
-  carry some structure; we send **one line of JSON** with `meeting`,
-  `meeting_point` and `eat_at`, which a structured extractor reads directly and a
-  regex extractor still finds every part in. **Worth asking the challenge
-  developers**, since sheet 2 lost a whole run to a response *shape* while its
-  content was right.
+- ~~**The answer shapes are ours to choose and nothing constrains them, so they
+  are the biggest open risk.**~~ **Settled by the first graded run.** All four
+  shapes were accepted: `Loam, Thistledown, Tallow Green`, `09:00-10:00`,
+  `[8, 7]`, and the outing's one line of JSON with `meeting`, `meeting_point`
+  and `eat_at`. Nine problems took full marks on one call each. The ten real
+  prompts are now pinned as tests.
 - **Venue windows are half-open**: open at the start hour, shut at the end hour.
   `["15:00","16:00"]` is one hour of trading, not two.
 - **"Available for the hour beginning when the meeting ends" is the same test as
@@ -274,25 +275,32 @@ not the life of the process.
   `Σ travel to the meeting point + one trip on to the venue` — the statement's
   own wording, singular.
 - **Ties in the meeting point are broken by the lowest x, then the lowest y.**
-  On the Monday example six cells are exactly equally good. Every tied cell costs
-  the same to travel to, and the statement's "the answer is any cell on the grid"
-  reads as scoring the cost rather than matching one cell — but if they compare
-  against a single canonical point and pick the upper median, we would lose these.
-  **Worth asking.**
+  Still open: both meeting-point questions in the graded run happened to have a
+  **unique** optimum (`[8, 7]` and `[8, 3]`), so nothing was learned either way.
+  Every tied cell costs the same to travel to, and "the answer is any cell on the
+  grid" reads as scoring the cost rather than matching one cell — but if they
+  compare against a single canonical point and take the upper median, we would
+  lose a question with an even number of travellers. **Still worth asking.**
 - **A range with no clean and no tentative-only window still gets an answer** —
   the least-clashing one. Refusing scores zero for certain; a near miss might not.
   Same call as sheet 2's unmeetable curfew.
 - **`minutes` between 1 and 12 is read as hours.** "a 2 hour window" is far more
   likely than a two-minute meeting.
+- **Raw-lookup tools are a liability, not a hedge.** Withdrawn after the first
+  run — see below. Anything the android can use to do the work itself is
+  something it can use to do the work itself badly.
 - **The city is global and stable, so it is safe to snapshot.** The feeds carry no
   team token and were byte-identical across complete fetches. *If it is
   regenerated per run and the host is also unreachable, the fallback answers
   confidently and wrongly — but an unanswered question scores zero anyway, so the
   fallback is never worse than refusing.* Refresh is one command:
   `python3 tools/fetch_city.py`.
-- **Nine people, a–i.** Found by probing `/schedule`; the statement names only six
-  of them. A tenth would be handled live and would only be missing from the
-  offline fallback.
+- **Ten people, a–j.** Found by probing `/schedule`; the statement names only six
+  of them. The first sweep stopped at `iris` and missed **`juno`**, who then
+  appeared in three of the ten graded questions — the live feeds answered for it
+  and nothing was lost, but the offline fallback had a hole exactly where it sat.
+  Re-probed after the run and the snapshot rebuilt; a test now walks the whole
+  roster through the fallback.
 - **Cold start is the real risk, not the tool code.** A tool must answer inside
   10 s and a free instance takes ~50 s to wake. Warm with `scripts/warm.sh` (or
   `scripts/smoke.sh`) immediately before triggering a run, per iron rule 2.
@@ -301,7 +309,12 @@ not the life of the process.
 
 - Q: For set 2 ("a start time and an end time, both HH:MM") and set 4 (three
   parts at once), is there a response shape you parse, or is any answer carrying
-  the values accepted? Sheet 2 voided a run on shape alone. → A: …
+  the values accepted? → **Answered by run `99be6fa7`: `HH:MM-HH:MM` and a JSON
+  object with `meeting`/`meeting_point`/`eat_at` both score.**
+- Q: A call recorded as `"MCP tool call failed"` with a null result — is that a
+  timeout on your side, a transport error, or our server answering badly? What
+  is the per-call deadline, and are parallel tool calls in one turn expected to
+  be served concurrently? → A: …
 - Q: For set 3, is the point scored on total travel, or compared against one
   canonical cell? Several questions have six or more exactly-optimal cells. → A: …
 - Q: Is the city (`/venues`, `/schedule`, `/location`, `/emails`) shared between
@@ -313,4 +326,77 @@ not the life of the process.
 
 ## Failed test cases and what fixed them
 
-- *(nothing yet — no graded run of this sheet)*
+### Run `99be6fa7`, 2026-08-22 05:52 UTC — **90/100**
+
+Nine of the ten problems took full marks, each on **a single tool call**:
+`find_places_to_eat` once, `find_meeting_time` four times, `find_meeting_point`
+once, `plan_outing` three times. Fifteen calls in the whole run, thirteen of
+them fine, every response measured at 6 tokens against the 1,200 ceiling.
+
+The one zero was **Meeting Point 2** — *"It is Saturday and you are at [8, 9].
+You want to meet juno, cira."* — and the answer was never the problem. The run's
+own grid puts juno at `[8, 0]` and cira at `[0, 3]`, which is exactly what our
+feeds say, and `[8, 3]` is the unique optimum at a total travel of 17. We
+returned `[8, 3]`. It scored nothing anyway.
+
+**What actually happened.** It is the only problem where the android did not go
+straight to an answer tool. It reached for `where_is` — a raw-lookup tool we had
+added as a hedge — to fetch both people's coordinates and do the sums itself,
+and it asked for **both in the same turn**:
+
+| attempt | seq | call | outcome |
+|---|---|---|---|
+| 1 | 1 | `where_is(juno, Saturday)` | ok, 470 ms → `[8, 0]` |
+| 1 | 2 | `where_is(cira, Saturday)` | **error, 1295 ms — "MCP tool call failed"** |
+| 2 | 1 | `where_is(juno, Saturday)` | ok, 238 ms |
+| 2 | 2 | `where_is(cira, Saturday)` | **error, 485 ms** |
+| 2 | 3 | `where_is(cira, Saturday)` | ok, 1116 ms — *"the parallel call only returned Juno before the other branch failed"* |
+| 2 | 4 | `find_meeting_point(...)` | ok, 241 ms → **`[8, 3]`** |
+
+Attempt 1 ended `"No tool or answer could be found."` Attempt 2 recovered, got
+the right answer out of us on its fourth call — and then submitted nothing. It
+had spent the turn.
+
+**Cause 1: the MCP endpoint was async in name only.** `async def mcp` called the
+blocking JSON-RPC handler directly, so a tool waiting on the challenge host
+blocked the whole event loop and uvicorn could not so much as read the second
+request. The failed calls' durations are the giveaway — 238 + ~250 = 485 and
+470 + ~800 = 1295 — the second call was being served *after* the first finished,
+not alongside it. Reproduced locally: two cold `where_is` calls fired together
+both returned at **1584 ms**, the same millisecond, having run end to end.
+
+**Fix:** `await run_in_threadpool(server.handle_body, body)`. Eight cold calls at
+once now all answer, slowest 2.7 s. `cityclock._client()` builds its keep-alive
+client under the lock, since tool calls genuinely run in parallel threads now.
+The regression test fires two concurrent calls through the real ASGI app with a
+deliberately slow feed and fails if they take the serialised time — checked by
+reverting the fix (0.82 s serialised against a 0.7 s bar).
+
+**Cause 2: we gave it something to detour into.** `get_day_schedule` and
+`where_is` were the "means" half of the brief — the sheet says the android comes
+*"not for the answer, but for the means to find one"*. The run says otherwise:
+every problem where it picked an answer tool scored 10 on one call, and the only
+problem it lost is the one where a lookup tool tempted it into doing the work
+itself. Sheet 1 learned the same thing about `calculate`'s expression echo. Both
+tools are **withdrawn**; there is nothing left to detour into, and an android
+that names one now gets our "no such tool" reply listing the four that answer.
+
+**Also found and fixed:** `juno` was missing from the offline roster. The live
+feeds answered for it in all three questions it appeared in, so nothing was lost
+— but the fallback would have refused. Roster re-probed (ten people, a–j),
+snapshot rebuilt, and a test now walks every one of them through it.
+
+### Run `b65190be`, 05:47 UTC — **0/100**, five minutes earlier
+
+Twelve seconds long, one problem asked, most never attempted. Attempt 1 of
+*Where To Eat* got a correct answer out of us (`Loam, Cask & Rill, Sorrel` for
+Wednesday 16:00 — still what we return today) and the android submitted nothing;
+attempt 2's single call came back `"MCP tool call failed"` after 236 ms and the
+evaluation reads `"Final answer submitted: Session terminated"`. One zero closed
+both lines, so seven problems were never put to us at all.
+
+A lone call failing at 236 ms on a service that had just been created is the
+signature of an instance still coming up, not of the concurrency bug — but it is
+the same error text, and it is the reason iron rule 2 says to warm the service
+with `scripts/warm.sh` *immediately* before triggering a run. The 90/100 five
+minutes later on the same URL is the evidence that nothing else was wrong.

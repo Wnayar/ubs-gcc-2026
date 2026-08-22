@@ -76,10 +76,17 @@ _CLIENT: httpx.Client | None = None
 
 
 def _client() -> httpx.Client:
-    """One keep-alive client: an outing reads eight feeds and the limit is 10 s."""
+    """One keep-alive client: an outing reads eight feeds and the limit is 10 s.
+
+    Built under the lock because the android calls tools in parallel and the
+    router now answers each one in its own thread.
+    """
     global _CLIENT
     if _CLIENT is None:
-        _CLIENT = httpx.Client(timeout=TIMEOUT, headers={"accept": "application/json"})
+        with _LOCK:
+            if _CLIENT is None:
+                _CLIENT = httpx.Client(
+                    timeout=TIMEOUT, headers={"accept": "application/json"})
     return _CLIENT
 
 

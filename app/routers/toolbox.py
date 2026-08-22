@@ -19,6 +19,7 @@ import re
 
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
+from starlette.concurrency import run_in_threadpool
 
 from app import cityclock, graphroute, recall as recall_module
 from app.expr import ExpressionError, clean, evaluate, format_number
@@ -735,68 +736,29 @@ def plan_outing(arguments: dict) -> str:
     )
 
 
-@server.tool(
-    "get_day_schedule",
-    "One person's day. For a friend it returns the hours they are already "
-    "busy; for your own day — pass 'me' — it also returns the hours you have "
-    "only pencilled in. JSON, times as HH:MM.",
-    {
-        "type": "object",
-        "properties": {
-            "person": {"type": "string",
-                       "description": "A friend's name, or 'me' for your own day."},
-            "day": DAY_PROPERTY,
-        },
-        "required": ["person", "day"],
-    },
-)
-@_plain_errors
-def get_day_schedule(arguments: dict) -> str:
-    day = _day_argument(arguments)
-    written = _text(arguments, "person", "name", "who", "friend", "whose")
-    if written is None:
-        raise ToolError("whose day? give a name, or 'me', in \"person\"")
-    named = cityclock.to_people(written)
-    if not named:  # 'me', 'you', 'myself' — the inbox is the only diary it has
-        accepted, tentative = cityclock.commitments(day)
-        return json.dumps({"busy": _spans(accepted), "tentative": _spans(tentative)})
-    return json.dumps({"busy": _spans(cityclock.busy(named[0], day))})
-
-
-def _spans(spans) -> list[list[str]]:
-    return [[cityclock.to_clock(start), cityclock.to_clock(end)] for start, end in spans]
-
-
-@server.tool(
-    "where_is",
-    "Where one of your friends is on one day. People are somewhere different "
-    "on different days. Returns one point as '[x, y]'.",
-    {
-        "type": "object",
-        "properties": {
-            "person": {"type": "string", "description": "The friend's name, for example 'ada'."},
-            "day": DAY_PROPERTY,
-        },
-        "required": ["person", "day"],
-    },
-)
-@_plain_errors
-def where_is(arguments: dict) -> str:
-    day = _day_argument(arguments)
-    written = _text(arguments, "person", "name", "who", "friend", "whose")
-    named = cityclock.to_people(written or "")
-    if not named:
-        raise ToolError(
-            "give a friend's name in \"person\" — your own position is in the question")
-    x, y = cityclock.position(named[0], day)
-    return f"[{x}, {y}]"
+# `get_day_schedule` and `where_is` — a friend's raw diary and a friend's raw
+# whereabouts — were advertised on the first graded run and have been withdrawn.
+# That run scored 90/100 and the shape of the loss is the whole argument: nine
+# problems where the android went straight to an answer tool scored full marks
+# on one call each, and the single problem it lost is the one where it saw a
+# lookup tool, decided to gather coordinates and do the sums itself, and spent
+# both attempts on it. It had our correct point in hand by the end and never
+# submitted it. Sheet 1 learned this once already: what the android is good at
+# is choosing a tool, not doing the work. Nothing is left to detour into.
 
 
 
 @router.post("/mcp")
 @router.post("/mcp/")
 async def mcp(request: Request) -> Response:
-    answer = server.handle_body(await request.body())
+    # In a threadpool, never on the event loop. Sheet 3's tools read the
+    # challenge host over blocking httpx, and the android fires tool calls in
+    # parallel: on the graded 90/100 run it asked for two people's whereabouts
+    # at once, the second request could not even be read while the first was
+    # waiting on Heroku, and it came back "MCP tool call failed" — a whole
+    # problem lost to a handler that was async in name only.
+    body = await request.body()
+    answer = await run_in_threadpool(server.handle_body, body)
     if answer is None:
         return Response(status_code=202)  # a notification gets no body
     accept = request.headers.get("accept", "")

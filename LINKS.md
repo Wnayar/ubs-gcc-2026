@@ -10,7 +10,9 @@
 ## Branch preview servers (never submit these; delete the service + line when the branch merges)
 
 <!-- one line per active branch service: - <branch-name>: https://... -->
-(none right now)
+- tool-box-3: https://ubs-gcc-2026-3.onrender.com — the URL given to the
+  tool-box controller for stage 3 (runs `b65190be` 0/100 and `99be6fa7` 90/100
+  on 2026-08-22). Delete the service and this line when the branch merges.
 
 <!-- If we ever split into multiple services (one per challenge), list every
      service's URL here, one line each, labelled with its challenge. -->
