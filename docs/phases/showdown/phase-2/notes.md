@@ -536,3 +536,29 @@ by 337 real hands beats a synthetic estimate.
 **How to tell quickly whether it worked:** watch amaranth, verdigris and obsidian. If their
 deltas move from −170 toward break-even, the change is doing its job even if the score has
 not moved yet — those three legs are the entire gap between 100 and 400.
+
+
+## The risk pricing worked — and exposed the next problem
+
+The attempt after shipping the steeper `CALL_RISK`/`RAISE_RISK` moved exactly the legs it
+was aimed at: **amaranth −171 → +200** (busted the opponent) and **obsidian −176 → −8**.
+Score still 200, because verdigris kept failing.
+
+Showdown accounting across every graded match finally explains the pattern:
+
+| table | showdowns | our win rate | avg pot **won** | avg pot **lost** |
+|---|---|---|---|---|
+| cinnabar | 75 | 75% | **29** | 25 |
+| verdigris | 93 | 60% | **10** | 22 |
+| amaranth | 74 | 68% | 12 | 32 |
+| obsidian | 69 | 62% | 16 | 33 |
+
+**We win 60-75% of showdowns on every table** — hand selection was never the problem. But
+outside cinnabar we win 10-16 chip pots and lose 22-33 chip pots. Winning small and losing
+big loses money even at a 60% win rate, and it is why verdigris and cinnabar — the same
+rule, the same action mix (fold 19% vs 18%, call 33% vs 37%) — produce opposite results.
+
+The opponent folds only **15-22%** of the time. They are a caller, and the answer to a
+caller who keeps paying is to charge more. `SIZE_VALUE` 0.62 → **0.85**, `SIZE_STRONG`
+0.90 → **1.15** (an overbet), `SIZE_THIN` 0.38 → 0.45. Replayed over the last attempt's
+real requests: the same 60 bets, median size 0.61 → 0.84 of the pot.
