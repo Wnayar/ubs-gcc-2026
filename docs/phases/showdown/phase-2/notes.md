@@ -342,3 +342,40 @@ will move.
 
 Cost of the larger hypothesis set: 58 rules after dedupe, and a `/move` still answers in
 **10 ms** against a 5-second budget.
+
+
+## Attempt 4 — scored 0, and no hand was played
+
+The controller **never reached our service**. Pulled from the live log afterwards:
+
+- **3 `/move` calls total**, all of them my own smoke tests (`total_hands: 100`, no
+  `table_rule` — phase-1 shaped, not phase-2). No grader traffic, no legs, no codenames.
+- 139 of the 145 `/health` hits came from `10.209.26.167` — Render's internal
+  health-check poller on a 5 second cycle, not the coordinator.
+
+So this was a deployment failure, not a strategy failure, and the 300 from attempt 3
+still stands because only the best attempt counts.
+
+Two ways a branch deployment silently fails, both now fixed on this branch:
+
+1. **A cold service scores exactly 0.** Free dynos spin down after ~15 idle minutes and
+   take ~50 s to wake; the coordinator allows 5 s per `/move` and forfeits a leg after
+   five failures in a row. A service nobody warmed loses every leg without playing a hand.
+   `scripts/warm.sh <url> [expected-commit]` wakes it, waits until `/health` answers in
+   under a second, and **fails loudly if the commit served is not the one expected** —
+   which is exactly the second failure mode:
+2. **A Blueprint takes the branch from `render.yaml`, not from the branch the file is on.**
+   A service created from this repo without an explicit entry builds `main` and serves the
+   old code however many times you push to `showdown-phase-2`. `render.yaml` now declares
+   a second service, `ubs-gcc-2026-showdown`, pinned to `branch: showdown-phase-2`.
+
+Note its `DEBUG_TOKEN` is `sync: false`, not `generateValue: true` — `generateValue` mints
+a *different* token per service, so the value in the local `.env` would not authenticate
+against it and `/debug/requests` would be unreadable exactly when it is needed. Set it by
+hand in the dashboard to match the main service.
+
+Before every submission from now on:
+
+```
+./scripts/warm.sh https://<service>.onrender.com 4e5dc6c
+```
