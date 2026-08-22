@@ -29,6 +29,18 @@ check "ghost-chains transactions (statement example)" \
        "amount": 100.0, "createdAt": "2026-06-08T12:02:00Z"}
     ]
   }'
+check "ghost-chains transactions (phase 2 identity signal)" \
+  -X POST "$BASE/ghost-chains/transactions" -H 'Content-Type: application/json' -d '{
+    "transactions": [
+      {"txId": "smoke_id_1", "fromUserId": "sterling_bridge", "toUserId": "oakridge_imports",
+       "amount": 250.0, "createdAt": "2026-06-08T12:03:00Z", "deviceId": "dev_ios_7f3a91"},
+      {"txId": "smoke_id_2", "fromUserId": "oakridge_imports", "toUserId": "nimbus_trading",
+       "amount": 240.0, "createdAt": "2026-06-08T12:04:00Z", "deviceId": "dev_ios_7f3a91"},
+      {"txId": "smoke_id_3", "fromUserId": "nimbus_trading", "toUserId": "sterling_bridge",
+       "amount": 235.0, "createdAt": "2026-06-08T12:05:00Z"}
+    ]
+  }'
+
 # leave no smoke-test state behind in the graph the grader will use
 check "ghost-chains reset (cleanup)" -X POST "$BASE/ghost-chains/reset" \
   -H 'Content-Type: application/json' -d '{"clearTransactions": true}'

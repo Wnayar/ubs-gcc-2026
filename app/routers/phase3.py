@@ -9,7 +9,13 @@ transaction on paths that ignore time credits round trips that never happened �
 the first version of this router did exactly that, and the evaluator reported
 STRUCTURAL_DEVIATION and TEMPORAL_DEVIATION both High.
 
-The full derivation and every assumption are in docs/phases/phase-3/notes.md.
+Phase 2 ("Identity Signal") extends the same three endpoints: `ipAddress` and
+`deviceId` become evidence about where a transaction sits in this graph. That model
+lives in `app/ghost_identity.py` and is applied as a lift on top of the structural
+score, which is left exactly as the leaderboard-tuned build computed it.
+
+The full derivation and every assumption are in docs/phases/phase-3/notes.md and
+docs/phases/ghost-chains/phase-2/notes.md.
 """
 from __future__ import annotations
 
@@ -21,6 +27,8 @@ from heapq import heappop, heappush
 
 from fastapi import APIRouter
 from pydantic import BaseModel, field_validator
+
+from app.ghost_identity import ATTRIBUTES, IdentityIndex, clean
 
 router = APIRouter(prefix="/ghost-chains", tags=["ghost-chains-phase-1"])
 
@@ -65,6 +73,17 @@ TIER_TOP = 1.0
 
 K_TRAIL, K_FAN, K_ROUTES = 3.0, 3.0, 1.0
 
+# --- phase 2: how far identity evidence may move a structural score ----------
+# Identity amplifies structure rather than replacing it, so the lift is a share of
+# the headroom above the structural score (it can never leave [0, 1], and never
+# *lowers* a score -- under-scoring a reference-hot transaction was measured at ~4x
+# the cost of over-scoring a cold one). `CORROB_FLOOR` is what a transfer with no
+# structure at all keeps of that lift: shared identity across disconnected
+# components is "a distinct coordination hint -- not automatic proof of risk on its
+# own", while the same evidence on a transfer that closes a loop is corroborated.
+LIFT = 0.45
+CORROB_FLOOR = 0.35
+
 
 class Transaction(BaseModel):
     # unknown fields are ignored by default — later phases add optional fields and
@@ -90,6 +109,16 @@ class Transaction(BaseModel):
         if isinstance(value, float) and value.is_integer():
             return str(int(value))
         return value
+
+    @field_validator("ipAddress", "deviceId", mode="before")
+    @classmethod
+    def _tolerate(cls, value: object) -> str | None:
+        # optional fields "must not cause processing to fail": a number is an
+        # identifier we can use, anything blank or structured is simply absent
+        return clean(value)
+
+    def identities(self) -> dict[str, str | None]:
+        return {attr: getattr(self, attr) for attr in ATTRIBUTES}
 
 
 class ScoreResult(BaseModel):
@@ -146,6 +175,7 @@ class GhostGraph:
         self.expiry: list[tuple[float, str, str, str]] = []
         self.scores: dict[str, float] = {}
         self.clock: float | None = None
+        self.identity = IdentityIndex()  # phase 2, expiring on the same window
 
     # --- graph maintenance ------------------------------------------------
 
@@ -176,10 +206,17 @@ class GhostGraph:
         has to be gone, or the two cases are indistinguishable.
         """
         cutoff = now - WINDOW
+        self.identity.expire(cutoff)
         while self.expiry and self.expiry[0][0] <= cutoff:
             when, _, sender, receiver = heappop(self.expiry)
             self._unlink(self.out, sender, receiver, when)
             self._unlink(self.inn, receiver, sender, when)
+
+    def _neighbours(self, entity: str):
+        """Undirected neighbours inside the window — used only to tell whether two
+        entities sharing an identifier sit in the same component."""
+        yield from self.out.get(entity, {})
+        yield from self.inn.get(entity, {})
 
     # --- temporal traversal ------------------------------------------------
 
@@ -232,14 +269,25 @@ class GhostGraph:
 
     # --- scoring ----------------------------------------------------------
 
-    def structural_score(self, sender: str, receiver: str, when: float) -> float:
+    def _context(self, sender: str, receiver: str, when: float):
+        """The three temporal traversals this transfer is scored against. Computed
+        once and shared by the structural and identity halves of the score."""
+        return (
+            self._latest_departure(sender, when),
+            self._latest_departure(receiver, when),
+            *self._earliest_arrival(receiver, when),
+        )
+
+    def structural_score(
+        self, sender: str, receiver: str, when: float, context=None
+    ) -> float:
         """How much does this transfer raise the graph's capacity for recurring flow?"""
         if sender == receiver:
             return 0.0  # a self-transfer connects nothing (notes.md)
 
-        upstream = self._latest_departure(sender, when)
-        feeding_receiver = self._latest_departure(receiver, when)
-        onward, hops, parent = self._earliest_arrival(receiver, when)
+        upstream, feeding_receiver, onward, hops, parent = context or self._context(
+            sender, receiver, when
+        )
 
         # the money trail arriving at the sender: how much traceable flow this
         # transfer carries onward, discounted by how stale each hop is
@@ -350,6 +398,34 @@ class GhostGraph:
 
         return 0.0  # nothing has connected to either end yet
 
+    def identity_score(
+        self, structural: float, transaction: "Transaction", when: float, context
+    ) -> float:
+        """Phase 2: fold identity evidence into a structural score.
+
+        The lift is a share of the headroom above the structural score, weighted by
+        how far the graph corroborates it. Identity therefore amplifies structure and
+        never contradicts it: agreement adds, disagreement adds less, and nothing
+        identity can say pulls a transaction below what Phase 1 gave it.
+        """
+        upstream, feeding_receiver, onward = context[0], context[1], context[2]
+        related = set(upstream) | set(feeding_receiver) | set(onward)
+        evidence = self.identity.evidence(
+            transaction.fromUserId,
+            transaction.toUserId,
+            when,
+            transaction.identities(),
+            related,
+            self._neighbours,
+        )
+        if evidence <= 0.0:
+            return structural
+        corroboration = CORROB_FLOOR + (1.0 - CORROB_FLOOR) * min(
+            1.0, structural / TIER_RETURN
+        )
+        lifted = structural + (1.0 - structural) * LIFT * evidence * corroboration
+        return round(min(1.0, lifted), 6)
+
     # --- streaming --------------------------------------------------------
 
     def process(self, transaction: Transaction) -> float:
@@ -369,12 +445,18 @@ class GhostGraph:
         self._expire(self.clock)
 
         sender, receiver = transaction.fromUserId, transaction.toUserId
-        risk = self.structural_score(sender, receiver, when)
+        if sender == receiver:
+            risk = 0.0  # a self-transfer connects nothing, whatever it carries
+        else:
+            context = self._context(sender, receiver, when)
+            risk = self.structural_score(sender, receiver, when, context)
+            risk = self.identity_score(risk, transaction, when, context)
 
         if when > self.clock - WINDOW:  # inside the window: it joins the graph
             self._link(self.out, sender, receiver, when)
             self._link(self.inn, receiver, sender, when)
             heappush(self.expiry, (when, transaction.txId, sender, receiver))
+            self.identity.record(sender, receiver, when, transaction.identities())
 
         self.scores[transaction.txId] = risk
         while len(self.scores) > MAX_REMEMBERED_SCORES:

@@ -1,8 +1,12 @@
 # Phase 3 (our folder) — Ghost Chains, the challenge's **Phase 1** ("Follow the Money")
 
 > Folder numbering is ours and sequential; this is Ghost Chains **Phase 1 of 3**.
-> Ghost Chains Phases 2 and 3 unlock later in the event and will become our
-> phase-4 / phase-5 folders.
+> Phase 2 ("Identity Signal") shipped on 2026-08-22 and lives in
+> `docs/phases/ghost-chains/phase-2/` — CLAUDE.md now names folders after the
+> challenge, so later Ghost Chains phases go there rather than in a `phase-N`
+> folder. Everything below still applies: a Phase 2 evaluation re-tests all of it,
+> and `tests/test_ghost_chains_phase2.py` pins these scores unchanged for a stream
+> that carries no identity fields.
 
 - **PDF:** `statement.pdf` in this folder (from
   <https://ghost-chains-0fdb9aeda564.herokuapp.com/phase/1>, 10 pages)
