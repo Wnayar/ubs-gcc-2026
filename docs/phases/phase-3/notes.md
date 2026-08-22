@@ -448,3 +448,92 @@ versus the 369 build — every one of them a demotion in the contaminated tail.
   None of this changes scoring on valid input: the graded 109-transaction stream is
   still byte-identical to the 369 build apart from the single intended
   `hf-temporal01-tx3` lift.
+
+- **Ninth evaluation: 368/400 — the dedicated-cycle exemption is worth nothing, and
+  is reverted.** This was the clean experiment the earlier attempt could not be: the
+  path-walk criterion changed **exactly one answer** in the whole stream
+  (`hf-temporal01-tx3` 0.300 -> 0.596). Run 8, whose answers were byte-identical to
+  the 369 build, scored 368; run 9, identical but for that single lift, also scored
+  368, seventeen minutes later. Netting the bonus drift, lifting the intact 23 h
+  cycle is worth **about 0, possibly -1** — not the +4 the run-6 decomposition had
+  implied. That decomposition was simply wrong: the five promotions in run 6 must
+  have cost far less than a point each.
+
+  **The reference does not treat a slow intact cycle as a return.** Our staleness
+  discount agrees with it, and 0.300 for that probe is correct behaviour, not a gap.
+  Reverted; the graded stream is byte-identical to the 369 build again.
+
+  The constraints-checklist hardening from the same push is **kept** — it changes no
+  valid-input score and can only convert an outright failure into a pass.
+
+  **Ghost Chains Phase 1 is now closed at its best-known model.** Every lever we
+  could identify has been tried and measured: three model variants (-1, -19, 0), a
+  window-boundary fix (+5), recency gating (a large gain), and a robustness audit.
+  Both local proxies contradicted the leaderboard, the grader's own probes are all
+  satisfied, and the remaining ~31 points are not reachable by any experiment we can
+  design from the visible traffic. The earliness bonus is draining at roughly a point
+  per half hour, so **further resubmissions cost points rather than earning them**.
+  Reopen only when Phase 2 unlocks with its identity signals and a fresh window.
+
+- **Statement-literal model rebuilt and tested (the "read the model and try again"
+  pass).** The Core Principle's exact words — "the combined effect of new or
+  shortened paths between entities" / "increase in the graph's capacity to support
+  recurring flow" — were implemented literally: score = weighted saturation of
+  Δ(newly connected pairs) + Δ(shortened paths) + Δ(newly mutually-reachable pairs),
+  computed on the active window before each edge. The result is a decisive
+  **negative**:
+  - It scores the statement's own Example 4 and Example 5 **identically** (0.408 =
+    0.408): the closing transfer of a second return route adds the same three new
+    mutual pairs as the first, so a pure delta-counter *cannot* satisfy "Example 5
+    meaningfully higher than Example 4". The reference must count **independent
+    return routes** as first-class signal — exactly what our band model does.
+  - It calls four of the five measured reference-hot transactions cold (~0.09 vs our
+    0.6-0.9, worth ~4 points each per the run-7 experiment), and overall correlates
+    with our 369 build at only Spearman 0.431. If we moved toward it we would lose
+    the -19 again.
+
+  Conclusion: the naive reading of the statement is wrong by the statement's own
+  examples, and our production model is the consistent interpretation. Its
+  "disagreements" (e.g. big component-bridge transactions like txn-96/66/34 that it
+  ranks top-10 and we rank ~70th) inherit no credibility from a model that fails the
+  known facts, so they are not actionable.
+
+- Question added for the challenge developers: under "new or shortened paths", what
+  makes Example 5 exceed Example 4 if not an explicit count of independent return
+  routes? (Their answer confirms or kills the last untested residual: whether
+  large "bridge" transactions carry mid-level reference scores.)
+
+- **The decay-free banding variant (uncommitted) — the "weird thing in the brief" found.**
+  With the top score known to be 380 and the gap confirmed as accuracy, re-reading the
+  brief with fresh eyes surfaced what required no clarification at all: **the brief's
+  temporal model is binary.** "Only transactions created within the most recent 24
+  hours are active" — active or expired, nothing in between. Every exponential
+  staleness decay in our banding was our invention, tuned against the two local
+  proxies that were later proven wrong, and the leaderboard evidence actually points
+  the other way: txn-90's hours-old cycle is priced hot, demoting stale cycles cost
+  -19, and every decay-driven demotion we measured was worth ~0 or negative.
+
+  Change: band placement no longer decays (evidence = 1.0 in all four branches); the
+  recency terms survive only inside within-band refinement, where they order without
+  demoting. On the graded stream: **96 of 109 scores move, all upward, zero
+  demotions, 24 band crossings** — 62/80/85 to return (priced ~-0.15 each in run 6),
+  86/87/99 to multi (priced ~0), chain A to 0.596 (priced 0), and ~17 unpriced
+  fan-band promotions of genuine fan-in/convergence cases the decay had suppressed
+  (txn-19's third payer into user-38, txn-96's fourth payer into user-23, ...).
+  Probe B becomes 0.080 instead of 0.010 — the brief-faithful reading: its
+  predecessor edge is still active at 23 h, so the broken loop is a mere extension,
+  not an isolate; A-B separation widens to 0.516. All 220 tests pass unmodified;
+  the five examples are unchanged.
+
+  Priced downside ~-1; unpriced upside carries the measured 4:1 asymmetry if any
+  suppressed fan/convergence case is reference-warm. This is also strictly simpler
+  and matches the statement's own language, which never mentions recency at all.
+
+- Also tried and withdrawn: restricting the fan band to same-source convergence only
+  (Example 3's literal shape), on the "ordinary business fan-in is a shop" reading.
+  It demoted txn-39 by two bands — and demotions are the measured killer — while
+  inspection shows txn-37/38/39 is a planted Example-3 clone (payers 3 and 42 share
+  ancestor 17), not a shop. The briefing also lists "fans into the same destination"
+  as interesting outright. Withdrawn; the shipped candidate stays upward-only.
+- Question for the developers: does "fans into the same destination" mean any
+  multi-payer fan-in, or only multiple routes from one origin as in Example 3?

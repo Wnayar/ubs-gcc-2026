@@ -334,12 +334,10 @@ def test_grader_probe_loop_inside_window_beats_loop_broken_by_expiry():
     expired = three_chain("hf_B", [0, 60, 24 * 60])
     assert inside > expired, f"23h loop {inside} must outrank 24h-expired {expired}"
     assert inside - expired >= 0.2
-    # the intact chain is a dedicated cycle: its three entities have no edges
-    # outside the loop, so it is exempt from the staleness discount and reads as a
-    # return however slowly it closed. Unlike the traffic-count exemption that cost
-    # a point (369 -> 368), the path-walk criterion provably changes nothing else
-    # in the evaluation stream. See notes.md.
-    assert inside >= 0.55, f"an intact dedicated 23h cycle should read as a return, got {inside}"
+    # NOTE: the intact chain lands at 0.300, below the return band, and that is
+    # deliberate. Lifting it was tried twice — a traffic-count exemption (369 -> 368,
+    # with side effects) and a clean path-walk exemption that provably changed only
+    # this one answer (also 368). The reference does not reward it. See notes.md.
 
 
 def test_grader_probe_self_transfer_scores_zero():
