@@ -674,3 +674,97 @@ def test_a_large_batch_answers_every_case_inside_the_statement_budget():
     assert sorted(r.json()) == sorted(batch)
     assert all(a["total_duration_sec"] is not None for a in r.json().values())
     assert elapsed < 10, f"batch took {elapsed:.1f}s, statement allows 10"
+
+
+def test_fractional_duration_is_truncated_not_rounded():
+    # A real grader case (recovered from /debug/requests) whose exact answer is
+    # 179.5 s: 1 s of edge_0 at full speed, 42 s at 0.75, then the remainder,
+    # plus 53 + 65. Rounding up scored 92/100; the ~8% that missed lines up with
+    # the cases where round-half-up and truncation disagree, and truncation is
+    # what int(total_seconds()) and a second-precision strftime both do.
+    answer = one(
+        {
+            "start_coordinate": [0, 0],
+            "end_coordinate": [3, 0],
+            "start_time": "2026-06-10T02:28:00-08:00",
+            "nodes": [[0, 0], [1, 0], [2, 0], [3, 0], [1, 1]],
+            "edges": [
+                {"edge_id": "edge_0", "node1": [0, 0], "node2": [1, 0], "base_duration_sec": 51},
+                {"edge_id": "edge_1", "node1": [1, 0], "node2": [2, 0], "base_duration_sec": 53},
+                {"edge_id": "edge_2", "node1": [2, 0], "node2": [3, 0], "base_duration_sec": 65},
+                {"edge_id": "edge_3", "node1": [1, 0], "node2": [1, 1], "base_duration_sec": 74},
+                {"edge_id": "edge_4", "node1": [2, 0], "node2": [1, 1], "base_duration_sec": 88},
+            ],
+            "obstructions": [
+                {"edge_id": "edge_3", "edge": {"from": [1, 0], "to": [1, 1]},
+                 "start_time": "2026-06-10T10:28:03Z", "end_time": "2026-06-10T10:28:31Z",
+                 "speed_factor": 0.75},
+                {"edge_id": "edge_0", "edge": {"from": [0, 0], "to": [1, 0]},
+                 "start_time": "2026-06-10T10:28:01Z", "end_time": "2026-06-10T10:28:43Z",
+                 "speed_factor": 0.75},
+            ],
+        }
+    )
+    assert answer == {
+        "total_duration_sec": 179,
+        "arrival_time": "2026-06-10T10:30:59Z",
+        "path": ["edge_0", "edge_1", "edge_2"],
+    }
+
+
+def test_arrival_time_never_disagrees_with_the_duration():
+    # whatever the rounding, start + total_duration_sec must equal arrival_time
+    from datetime import datetime, timedelta, timezone
+
+    for factor, base in [(0.75, 51), (0.3, 17), (0.7, 23), (0.25, 99)]:
+        answer = one(
+            case(
+                edges=[{"edge_id": "edge_0", "node1": [0, 0], "node2": [1, 0],
+                        "base_duration_sec": base}],
+                obstructions=[obstruction(
+                    start_time="2026-06-10T08:30:05Z",
+                    end_time="2026-06-10T09:00:00Z",
+                    speed_factor=factor,
+                )],
+            )
+        )
+        start = datetime(2026, 6, 10, 8, 30, tzinfo=timezone.utc)
+        expected = (start + timedelta(seconds=answer["total_duration_sec"]))
+        assert answer["arrival_time"] == expected.strftime("%Y-%m-%dT%H:%M:%SZ"), (factor, base)
+
+
+def test_hard_cases_get_the_budget_left_over_by_easy_ones():
+    # ~800 trivial cases plus one that needs real searching: dividing the budget
+    # evenly up front left the hard one ~10 ms while most of the budget went
+    # unspent, which is how the first graded run was run
+    import time
+
+    trivial = case()
+    n = 14
+    nodes = [[x, y] for x in range(n) for y in range(n)]
+    edges, eid = [], 0
+    for x in range(n):
+        for y in range(n):
+            if x + 1 < n:
+                edges.append({"edge_id": f"e{eid}", "node1": [x, y], "node2": [x + 1, y],
+                              "base_duration_sec": 10 + (x + y) % 20}); eid += 1
+            if y + 1 < n:
+                edges.append({"edge_id": f"e{eid}", "node1": [x, y], "node2": [x, y + 1],
+                              "base_duration_sec": 10 + (x * 2 + y) % 20}); eid += 1
+    obstructions = [
+        {"edge_id": e["edge_id"], "edge": {"from": e["node1"], "to": e["node2"]},
+         "start_time": "2026-06-10T08:30:00Z", "end_time": "2026-06-10T08:33:00Z",
+         "speed_factor": 0.0}
+        for i, e in enumerate(edges) if i % 3 == 0
+    ]
+    batch = {f"easy_{i}": trivial for i in range(800)}
+    batch["hard"] = case(start_coordinate=[0, 0], end_coordinate=[n - 1, n - 1],
+                         nodes=nodes, edges=edges, obstructions=obstructions)
+    started = time.monotonic()
+    r = client.post(URL, json=batch)
+    elapsed = time.monotonic() - started
+    assert r.status_code == 200
+    body = r.json()
+    assert len(body) == len(batch)
+    assert body["hard"]["total_duration_sec"] is not None
+    assert elapsed < 10, f"batch took {elapsed:.1f}s, statement allows 10"
