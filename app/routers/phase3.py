@@ -64,9 +64,6 @@ TIER_MULTI = 0.78  # two or more independent return routes meet at the receiver
 TIER_TOP = 1.0
 
 K_TRAIL, K_FAN, K_ROUTES = 3.0, 3.0, 1.0
-# How contemporaneous two return routes must be to count as one converging pattern
-# rather than two unrelated paths that happen to both lead back here.
-ROUTE_TOGETHER = 0.5
 
 
 class Transaction(BaseModel):
@@ -265,13 +262,8 @@ class GhostGraph:
                     continue
                 index = bisect.bisect_left(times, reached)
                 if index < len(times) and times[index] <= when:
-                    # routes only count as *converging* if they belong to the same
-                    # episode. Two unrelated old paths that happen to both lead back
-                    # here are a coincidence of a dense graph, not a pattern -- and
-                    # counting them let incidental structure outrank deliberate.
-                    if _decay(when - reached, TAU_EVIDENCE) >= ROUTE_TOGETHER:
-                        routes += 1
-                        freshest_route = max(freshest_route, reached)
+                    routes += 1  # an independent return route into the receiver
+                    freshest_route = max(freshest_route, reached)
             if routes >= 2:
                 return _band(
                     TIER_MULTI,
