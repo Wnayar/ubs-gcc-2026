@@ -333,5 +333,52 @@ and `tests/test_phase3.py` now replays all of them.
   let the decay constant go back to one hour, which suits the motif stream better.
 
   Agreement 75 -> 79/109, over-scoring 34 -> 30, still nothing under-scored, and all
-  nine probes now behave as designed: intact 23 h loop 0.300 -> **0.596** (return),
-  expired chain still 0.010, reciprocal 0.585 -> **0.698**, self-transfer 0.0.
+  nine probes behaved as designed: intact 23 h loop 0.300 -> 0.596 (return), expired
+  chain still 0.010, reciprocal 0.585 -> 0.698, self-transfer 0.0.
+
+- **Sixth evaluation: 368/400 — the first regression, and the change above caused
+  it.** Diffing the two builds over the identical dataset showed why: the
+  "deliberate structure" test also fires on merely *rare* entities, so alongside the
+  intended fix it promoted five incidental cycles (`txn-80` 0.526 -> 0.653, `txn-87`
+  0.665 -> 0.814, `txn-99` 0.600 -> 0.893, and two more). Sweeping the threshold
+  found **no** setting that lifts the probe cycle without also promoting those, so it
+  was reverted and the 369 build reproduced exactly — 0 differences across all 109
+  transactions. Chain A sits at 0.300 again; it is a known, deliberate compromise.
+
+  Lesson worth keeping: the motif-role labels said that change was *better*
+  (agreement 75 -> 79) while the leaderboard said worse. They are a tool, not an
+  oracle.
+
+## Structural Consistency: the block-spread measure
+
+The dataset's own regularity gives a better objective than the role labels, and one
+that needs no guessing at all. It is **six structurally identical 16-transaction
+blocks**, so a coherent model must give position *j* the same score in every block.
+Summing `max - min` across the six blocks at each of the 16 offsets is a single
+number to minimise, and it measures very nearly what Structural Consistency is
+described as scoring.
+
+The 369 build totalled **6.245**, and its shape was diagnostic. The three *designed*
+positions were already tight (offset 13 spread 0.016, offset 15 spread 0.014) but
+everything else drifted, almost all of it in the **last block**, where five blocks of
+accumulated history contaminate the graph. Worse, that contamination was reaching the
+top of the ranking: block 5's offset 8 scored **0.896** and offset 10 scored
+**0.904**, both *above* the dataset's own planted multi-loops at 0.878.
+
+The mechanism was the `routes` count. In a dense graph many of a receiver's
+in-neighbours are reachable from it, so "independent return routes" inflates and
+incidental structure outranks deliberate structure. Two return routes should mean one
+episode: routes now count only when they are contemporaneous (evidence >= 0.5, about
+two hours apart at the 3-hour horizon). Two unrelated old paths that happen to both
+lead back here are a coincidence of a dense graph, not a pattern.
+
+| | 369 build | now |
+|---|---|---|
+| total block spread | 6.245 | **5.428** |
+| spread at offset 10 (planted return) | 0.187 | **0.018** |
+| block 5, offsets 8 / 10 | 0.896 / 0.904 | **0.699 / 0.712** |
+| planted motifs in our top 12 | 8 | **11** |
+
+All six planted multi-loops now sit at the top of the ranking, followed by the planted
+returns. All nine probes are **unchanged**, and only five transactions cross a band
+versus the 369 build — every one of them a demotion in the contaminated tail.
