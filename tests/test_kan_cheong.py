@@ -6,6 +6,8 @@ the values here came from the PDF's own content stream. See notes.md.
 """
 import copy
 
+import pytest
+
 from fastapi.testclient import TestClient
 
 from app.main import app
@@ -737,12 +739,12 @@ def test_a_large_batch_answers_every_case_inside_the_statement_budget():
     assert elapsed < 10, f"batch took {elapsed:.1f}s, statement allows 10"
 
 
-def test_fractional_duration_is_truncated_not_rounded():
+def test_fractional_duration_is_emitted_exactly_not_rounded():
     # A real grader case (recovered from /debug/requests) whose exact answer is
     # 179.5 s: 1 s of edge_0 at full speed, 42 s at 0.75, then the remainder,
-    # plus 53 + 65. Rounding up scored 92/100; the ~8% that missed lines up with
-    # the cases where round-half-up and truncation disagree, and truncation is
-    # what int(total_seconds()) and a second-precision strftime both do.
+    # plus 53 + 65. We floored this for five runs. The cases with a fractional
+    # optimum are 78/83/84 on the three captured batches, which scored 92/92/91
+    # — same order, right size — so the expected value is the exact one.
     answer = one(
         {
             "start_coordinate": [0, 0],
@@ -767,14 +769,14 @@ def test_fractional_duration_is_truncated_not_rounded():
         }
     )
     assert answer == {
-        "total_duration_sec": 179,
-        "arrival_time": "2026-06-10T10:30:59Z",
+        "total_duration_sec": 179.5,
+        "arrival_time": "2026-06-10T10:30:59.500000Z",
         "path": ["edge_0", "edge_1", "edge_2"],
     }
 
 
 def test_arrival_time_never_disagrees_with_the_duration():
-    # whatever the rounding, start + total_duration_sec must equal arrival_time
+    # start + total_duration_sec must equal arrival_time, to the microsecond
     from datetime import datetime, timedelta, timezone
 
     for factor, base in [(0.75, 51), (0.3, 17), (0.7, 23), (0.25, 99)]:
@@ -790,8 +792,41 @@ def test_arrival_time_never_disagrees_with_the_duration():
             )
         )
         start = datetime(2026, 6, 10, 8, 30, tzinfo=timezone.utc)
-        expected = (start + timedelta(seconds=answer["total_duration_sec"]))
-        assert answer["arrival_time"] == expected.strftime("%Y-%m-%dT%H:%M:%SZ"), (factor, base)
+        total = answer["total_duration_sec"]
+        expected = start + timedelta(seconds=total)
+        if isinstance(total, int):
+            assert answer["arrival_time"] == expected.strftime("%Y-%m-%dT%H:%M:%SZ"), (factor, base)
+        else:
+            assert answer["arrival_time"] == expected.strftime("%Y-%m-%dT%H:%M:%S.%f") + "Z", (
+                factor, base)
+
+
+def test_integral_durations_are_untouched_plain_ints():
+    # the ~92% we already score must be byte-identical: a plain int, a
+    # whole-second timestamp, and no float anywhere
+    answer = one(EXAMPLE_1)
+    assert answer == EXAMPLE_1_OUTPUT
+    assert isinstance(answer["total_duration_sec"], int)
+    assert "." not in answer["arrival_time"]
+
+    zero = one(case(edges=[{"edge_id": "e", "node1": [0, 0], "node2": [0, 0],
+                            "base_duration_sec": 0}], end_coordinate=[0, 0]))
+    assert zero["total_duration_sec"] == 0 and isinstance(zero["total_duration_sec"], int)
+
+
+def test_a_fractional_duration_is_a_float_not_a_string():
+    # whatever the grader compares, it must parse as a JSON number
+    answer = one(
+        case(
+            edges=[{"edge_id": "edge_0", "node1": [0, 0], "node2": [1, 0],
+                    "base_duration_sec": 10}],
+            obstructions=[obstruction(start_time="2026-06-10T08:30:00Z",
+                                      end_time="2026-06-10T09:00:00Z", speed_factor=0.75)],
+        )
+    )
+    assert answer["total_duration_sec"] == pytest.approx(40 / 3)
+    assert isinstance(answer["total_duration_sec"], float)
+    assert answer["arrival_time"] == "2026-06-10T08:30:13.333333Z"
 
 
 def test_hard_cases_get_the_budget_left_over_by_easy_ones():

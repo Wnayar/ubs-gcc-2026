@@ -732,3 +732,78 @@ against it. Not recommended without a reason better than "nothing else is left".
 Better next step: **ask the challenge developers for one case id we answer wrongly.**
 That converts an unfalsifiable search into a single worked example. The
 "Clarifications from challenge developers" section above is where the answer goes.
+
+
+## THE ANSWER (probably): the expected duration is not an integer
+
+Found by two agents working blind from opposite ends — one writing a clean-room
+reference from the statement alone, one auditing only the response surface. They
+converged on the same set.
+
+**The cases we get wrong are exactly the cases whose optimum is not a whole number of
+seconds.** We floored them for five graded runs.
+
+| | run 3 | run 5 | run 6 |
+|---|---|---|---|
+| score | 92 | 92 | **91** |
+| cases with a fractional optimum | 78 (7.8%) | 83 (8.3%) | **84 (8.4%)** |
+
+Same order as the scores, right magnitude, and it is the only candidate ever measured
+that is *positively* correlated with the loss.
+
+### It explains the experiment nobody could make sense of
+
+Run 1 shipped round-half-up and scored 91; run 2 shipped truncation and scored 92. That
+1-point move was written off as noise, and it is — but it is *informative* noise:
+
+- If the expected value were an integer under either convention, swapping conventions
+  flips the 5-6% of cases where they disagree, so the score should have moved 5-6
+  points. It moved 1.
+- If the expected value is the exact fraction, **both conventions are wrong on the same
+  cases**, so swapping them changes nothing. Nothing changed.
+
+Every integer convention is refuted by runs 1-6. `ceil` survives runs 2-6 but predicts
+~97 for run 1's round-half-up build; run 1 scored 91.
+
+### Why five investigations missed it
+
+`notes.md`, third graded run: *"rounding: ceil / banker's / exact fraction — 0 cases
+changed, 0.00% weight."* That is arithmetically impossible: 78 run-3 cases have a
+fractional optimum, so ceil must differ from floor on all 78.
+
+The cause is recorded one section later: *"every alternative reading was re-measured
+against final truncated JSON"*. Truncating **both sides** of the comparison erases a
+rounding disagreement by construction. Every later elimination inherited the flaw,
+including the sixth investigation's variant sweep above, which applied `math.floor` to
+both our answers and each variant's. A whole class of hypothesis was invisible.
+
+Lesson worth keeping: never compare a candidate against your own *rendered output*.
+Compare against the exact value, and render last.
+
+### The change
+
+`_answer()` no longer floors. An integral optimum is emitted exactly as before — plain
+`int`, whole-second timestamp — so the ~92% we already score is byte-identical and
+cannot regress. A fractional optimum is emitted exactly, with a matching sub-second
+`arrival_time`:
+
+```
+case_15   was 47   / 08:42:47Z          now 47.75 / 08:42:47.750000Z
+case_5    was 84   / 08:51:24Z          now 84.75 / 08:51:24.750000Z
+```
+
+Replayed on all three captured batches: 78 / 83 / 84 answers change, **0 paths change,
+0 integral answers change**.
+
+### The risk, stated plainly
+
+The output schema shows `"total_duration_sec": 0`, an integer placeholder, and every
+worked example is integral — so nothing in the statement confirms fractional values are
+accepted. If the grader validates types strictly rather than comparing values, a float
+could be rejected. That is the tail: it would cost the whole batch, not 8 points.
+Everything else about the change is bounded — it only touches cases we are already
+losing.
+
+If the next run does not move, the remaining integer convention consistent with runs 2-6
+is `ceil`, and `arrival_time` at whole seconds with a fractional duration is the other
+combination to try.
