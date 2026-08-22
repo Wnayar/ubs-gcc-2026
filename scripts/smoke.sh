@@ -57,3 +57,25 @@ check "showdown /move" -X POST "$BASE/move" -H 'Content-Type: application/json' 
   "current_hand_actions":[],"recent_hands":[]}'
 check "showdown /move garbage body" -X POST "$BASE/move" -H 'Content-Type: application/json' -d 'not json'
 
+# Kan Chiong Delivery Driver: the statement's own batch example. case_1 routes in
+# 60 s; case_2's only road is blocked at departure and waiting is not allowed, so
+# it must come back as the null/no-path answer rather than an error.
+check "kan-cheong batch example" -X POST "$BASE/kan-cheong-delivery-driver" \
+  -H 'Content-Type: application/json' -d '{
+    "case_1": {
+      "start_coordinate": [0, 0], "end_coordinate": [1, 0],
+      "start_time": "2026-06-10T08:30:00Z", "nodes": [[0, 0], [1, 0]],
+      "edges": [{"edge_id": "edge_0", "node1": [0, 0], "node2": [1, 0], "base_duration_sec": 60}],
+      "obstructions": []
+    },
+    "case_2": {
+      "start_coordinate": [0, 0], "end_coordinate": [1, 0],
+      "start_time": "2026-06-10T08:30:00Z", "nodes": [[0, 0], [1, 0]],
+      "edges": [{"edge_id": "edge_0", "node1": [0, 0], "node2": [1, 0], "base_duration_sec": 60}],
+      "obstructions": [{"edge_id": "edge_0", "edge": {"from": [0, 0], "to": [1, 0]},
+        "start_time": "2026-06-10T08:00:00Z", "end_time": "2026-06-10T09:00:00Z",
+        "speed_factor": 0.0}]
+    }
+  }'
+check "kan-cheong bad body" -X POST "$BASE/kan-cheong-delivery-driver" \
+  -H 'Content-Type: application/json' -d '[1, 2, 3]'
