@@ -4,8 +4,8 @@
   and `statement.pdf` in this folder — see "Missing file" below.
 - **Endpoints required:** `POST /move` (and `GET /health`, optional but recommended —
   we already had it)
-- **Submitted to controller:** no
-- **Score:** — (300 pts on clear)
+- **Submitted to controller:** yes — attempt 1 on 2026-08-22, match `phase1-seed1382113882`
+- **Score:** **0** on attempt 1 (chip delta −198). Root-caused and fixed; see "Failed test cases" below.
 
 > **Numbering:** the challenge's own "Phase 1" is *not* this repo's phase 1 (that was
 > the `/square` practice task). SHOWDOWN gets its own folder tree — `docs/phases/showdown/`
@@ -111,17 +111,26 @@ and get stacked by a 13. See `docs/decisions.md`.
 
 ## Simulation results (`tools/simulate.py`, 4000 matches × 100 hands, seats alternated)
 
+Post-fix, on the **corrected** simulator (uncapped `to_call`, plus the `gaston`
+opponent reconstructed from the live log):
+
 | opponent | mean Δ | median | P(Δ ≥ +10) | P(bust) |
 |---|---|---|---|---|
 | station (never folds) | +172.3 | +198 | 100% | 0.0% |
-| rock (tight/aggressive) | +136.7 | +200 | 85% | 1.9% |
-| maniac (bets huge, always) | +193.6 | +200 | 98% | 1.5% |
-| sane (equity + pot odds) | +126.8 | +200 | 84% | 2.4% |
-| random legal moves | +180.5 | +200 | 95% | 4.4% |
+| rock (tight/aggressive) | +142.9 | +200 | 87% | 1.5% |
+| maniac (bets huge, always) | +194.6 | +200 | 99% | 1.1% |
+| sane (equity + pot odds) | +143.5 | +200 | 90% | 0.9% |
+| gaston (jams pairs, bluff-shoves) | +155.8 | +200 | 89% | 8.9% |
+| random legal moves | +178.1 | +200 | 95% | 4.4% |
 
-**Worst case ≈ 84% chance of clearing per attempt**, and retries are free — two attempts
-put us over 97%. Every threshold was chosen by `--sweep` (one knob at a time, ranked on
-worst-case clear rate) and each currently sits at its local optimum.
+**Worst case ≈ 87% chance of clearing per attempt**, and retries are free. Gaston still
+carries the highest bust rate (8.9%) — he is the archetype that beat us, and calling his
+shoves with a high card is the remaining variance.
+
+Thresholds come from `--sweep` (one knob at a time, ranked on worst-case clear rate).
+`PAIR_GAIN`, `PAIR_MAX` and `RANGE_TRUST` all sit on a plateau where the differences are
+inside sim noise at that sample size, so they were left at their principled values rather
+than tuned to the last percent against opponents we invented.
 
 ## Assumptions we made
 
@@ -152,4 +161,54 @@ Worth raising with the challenge developers:
 
 ## Failed test cases and what fixed them
 
-- *(none yet — not submitted)*
+**Attempt 1 (match `phase1-seed1382113882`) scored 0 — chip delta −198.**
+
+The protocol side was clean: 135 `/move` calls, every one HTTP 200 in under 1.5 ms,
+and **zero illegal actions or out-of-range amounts** (re-validated from the live
+`GET /debug/requests` log). We were **+44 up at hand 13**. Three hands took the match,
+and two of them were outright bugs, not variance:
+
+| hand | what happened | cost |
+|---|---|---|
+| 19 | held **13** on community **7** — a high card, *not* a pair — raised to 41, then called a 117 shove with our last 168 | −164 |
+| 55 | held **11** on community **11** — a **pair, 96% to win** — and **folded** it with 24 behind facing `to_call: 202` into a 376 pot | −87 + a ~200 pot forgone |
+| 72 | held **5** on community **5** — again a **pair** — and **folded** again | −34 |
+
+Three defects, all now covered by regression tests transcribed from the live log
+(`test_hand_19_*`, `test_hand_55_*`, `test_hand_72_*`, `test_a_call_never_risks_more_than_our_stack`):
+
+1. **`to_call` is not capped at our stack.** The guide says an opponent may bet more
+   than we can cover and we "can still call for everything you have". The risk term
+   was `CALL_RISK × (to_call / stack)` — with `to_call` 202 and a stack of 24 that is
+   **1.68**, larger than any possible equity, so we folded a hand that cannot lose.
+   Fixed by pricing everything off `risked = min(to_call, stack)`.
+2. **A pair was treated as a risky hand.** "Any pair beats any non-pair" and identical
+   results split, so holding the pair *every* opponent number either loses or ties —
+   there is no downside at all. The stack-risk floor and the raising-war cap both exist
+   to stop us getting stacked and are simply wrong here. `_cannot_lose()` now exempts
+   the pair from both, and never folds it at any price.
+3. **The range read modelled the wrong threat.** `RANGE_LADDER` narrows the opponent to
+   *high numbers*, but post-reveal the only hand that beats a high card is the community
+   number itself. A shove over our raise is overwhelmingly that pair. `_pair_weight()`
+   now moves that mass from its 1/13 prior up to `PAIR_MAX` with the size and count of
+   their raises, which turns hand 19 from a call into a fold.
+
+**Why the simulator missed all of it:** `tools/simulate.py` capped `to_call` at the
+player's stack, so the state that caused defects 1 and 2 *could not occur* in tuning.
+Fixed, and a `gaston` opponent reconstructed from the live log (jams pairs, re-raises
+big, bluff-shoves ~30%) was added — the archetype the original five lacked.
+
+Measured on the corrected simulator, 1500 matches, old code vs new:
+
+| opponent | P(clear) old → new | P(bust) old → new |
+|---|---|---|
+| rock | 81% → **87%** | 6.3% → **1.6%** |
+| sane | 82% → **90%** | 5.3% → **0.9%** |
+| gaston | 81% → **89%** | 17.3% → **9.2%** |
+| random | 90% → **95%** | 6.9% → **4.5%** |
+| **worst case** | **81% → 87%** | |
+
+Honest caveat: at a modelled ~84% clear rate, scoring 0 once is a ~1-in-6 event and
+would not on its own prove anything was broken. The pair folds are what make it a bug
+report rather than a bad beat — folding a 96% hand for 24 chips into a 376 pot is
+indefensible at any variance.

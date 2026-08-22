@@ -55,6 +55,12 @@ RANGE_LADDER = (1, 4, 7, 9, 10)
 # How far to trust that read. The rest stays uniform, which is what stops a
 # bluffer from folding us off every decent number.
 RANGE_TRUST = 0.85
+# Post-reveal, "a high number" is the wrong read: the ONLY hand that beats a high
+# card is the community number itself. So a big commitment is read mostly as the
+# pair, rising from its 1/13 prior with the size and count of their raises.
+PAIR_PRIOR = 1 / DECK
+PAIR_GAIN = 0.18
+PAIR_MAX = 0.55
 # Pot fractions for our own bets, by strength.
 SIZE_STRONG = 0.90  # a pair, or a 13 that missed
 SIZE_VALUE = 0.62
@@ -105,11 +111,28 @@ def equity(your_number: int, community_number: int | None = None) -> float:
     return (lower + 0.5) / DECK
 
 
-def equity_vs_range(your_number: int, community_number: int | None, low: int) -> float:
-    """Same thing against an opponent holding `low`..13 rather than 1..13."""
+def equity_vs_range(
+    your_number: int,
+    community_number: int | None,
+    low: int,
+    pair_weight: float | None = None,
+) -> float:
+    """Equity against an opponent holding `low`..13 rather than the whole deck.
+
+    With `pair_weight` the range stops being flat: that much of it is the
+    community number itself — the only hand that beats a high card — and the
+    rest is spread over the other numbers we credit them with.
+    """
     low = max(1, min(int(low), DECK))
     hands = range(low, DECK + 1)
-    return sum(_showdown_value(your_number, community_number, m) for m in hands) / len(hands)
+    if pair_weight is None or community_number is None:
+        return sum(_showdown_value(your_number, community_number, m) for m in hands) / len(hands)
+    others = [m for m in hands if m != community_number]
+    paired = _showdown_value(your_number, community_number, community_number)
+    if not others:
+        return paired
+    rest = sum(_showdown_value(your_number, community_number, m) for m in others) / len(others)
+    return pair_weight * paired + (1 - pair_weight) * rest
 
 
 # ────────────────────────────── reading the state ──────────────────────────────
@@ -178,6 +201,14 @@ def _aggression(state: dict) -> tuple[int, int]:
     return theirs, ours
 
 
+def _pair_weight(theirs: int, pot: int, to_call: int) -> float:
+    """How much of the opponent's range is the community number itself."""
+    if theirs <= 0:
+        return PAIR_PRIOR
+    size = min(to_call / max(pot - to_call, 1), 2.0) if to_call > 0 else 1.0
+    return min(PAIR_MAX, PAIR_PRIOR + PAIR_GAIN * theirs * (0.5 + 0.5 * size))
+
+
 def _effective_equity(state: dict, n: int, c: int | None, pot: int, to_call: int) -> float:
     """Equity against the range the opponent's betting implies, not vs random."""
     theirs, _ = _aggression(state)
@@ -185,9 +216,10 @@ def _effective_equity(state: dict, n: int, c: int | None, pot: int, to_call: int
     if to_call > 0 and to_call > max(pot - to_call, 1):
         low += 1  # a bet bigger than the pot it was aimed at says more again
     honest = equity(n, c)
-    if low <= 1:
+    if low <= 1 and theirs <= 0:
         return honest
-    return RANGE_TRUST * equity_vs_range(n, c, low) + (1 - RANGE_TRUST) * honest
+    read = equity_vs_range(n, c, low, _pair_weight(theirs, pot, to_call))
+    return RANGE_TRUST * read + (1 - RANGE_TRUST) * honest
 
 
 def _coin(state: dict, salt: str) -> float:
@@ -246,7 +278,9 @@ def _window(state: dict) -> tuple[int, int] | None:
     return low, high
 
 
-def _put_in(state: dict, action: str, total: float, eq: float, floor: float) -> dict | None:
+def _put_in(
+    state: dict, action: str, total: float, eq: float, floor: float, risk_free: bool = False
+) -> dict | None:
     """Bet/raise to `total`, but only if the equity covers the stack risk.
 
     `amount` is the total we will have put in *for this betting round*, and an
@@ -261,9 +295,22 @@ def _put_in(state: dict, action: str, total: float, eq: float, floor: float) -> 
     mine = _int(_me(state).get("bet_this_round"), 0) or 0
     stack = max(_int(state.get("your_stack"), 0) or 0, 1)
     for target in (max(low, min(high, int(round(total)))), low):
-        if eq >= floor + RAISE_RISK * (max(target - mine, 0) / stack):
+        risk = 0.0 if risk_free else RAISE_RISK * (max(target - mine, 0) / stack)
+        if eq >= floor + risk:
             return {"action": action, "amount": target}
     return None
+
+
+def _cannot_lose(n: int, c: int | None) -> bool:
+    """True when we hold the pair, which no hand beats.
+
+    "Any pair beats any non-pair" and "identical results split the pot", so
+    every opponent number either loses to us or ties: there is no distribution
+    of their range under which putting chips in costs us any. That makes the
+    stack-risk floor and the raising-war cap — both of which exist to stop us
+    getting stacked — actively wrong here.
+    """
+    return c is not None and n == c
 
 
 def _size_for(eq: float) -> float:
@@ -296,26 +343,39 @@ def _play(state: dict, legal: list[str]) -> dict:
     to_call = max(_int(state.get("to_call"), 0) or 0, 0)
     stack = max(_int(state.get("your_stack"), 0) or 0, 1)
     eq = _effective_equity(state, number, community, pot, to_call)
+    locked = _cannot_lose(number, community)
     tilt = _tilt(state)
     mine = _int(_me(state).get("bet_this_round"), 0) or 0
     _, our_raises = _aggression(state)
 
     if to_call > 0 and "call" in legal:
-        odds = to_call / (pot + to_call) if pot + to_call > 0 else 1.0
+        # The opponent may bet more than we can cover: "you can still call for
+        # everything you have and play for the part of the pot you matched;
+        # chips you couldn't cover go back to them." So the most we can ever put
+        # in — and lose — is our stack, however large `to_call` reads.
+        risked = min(to_call, stack)
+        odds = risked / (pot + risked) if pot + risked > 0 else 1.0
         # `pot` already includes the bet we are facing, so back it out to size
         # the bet against the pot it was aimed at
-        pressure = min(to_call / max(pot - to_call, 1), 2.0)
-        needed = odds + CALL_MARGIN * pressure + tilt + CALL_RISK * (to_call / stack)
+        pressure = min(risked / max(pot - risked, 1), 2.0)
+        needed = odds + CALL_MARGIN * pressure + tilt + CALL_RISK * (risked / stack)
         if "raise" in legal:
-            # a second raise in one round means the pot is getting away from us
-            floor = (RERAISE_EQ if our_raises else RAISE_EQ) + tilt
+            # a second raise in one round means the pot is getting away from us —
+            # unless the hand cannot lose, in which case there is nothing to fear
+            floor = RAISE_EQ + tilt if locked else (RERAISE_EQ if our_raises else RAISE_EQ) + tilt
             if eq >= floor:
                 raised = _put_in(
-                    state, "raise", mine + to_call + (pot + to_call) * _size_for(eq), eq, floor
+                    state,
+                    "raise",
+                    mine + to_call + (pot + to_call) * _size_for(eq),
+                    eq,
+                    floor,
+                    risk_free=locked,
                 )
                 if raised is not None:
                     return raised
-        return {"action": "call"} if eq >= needed else _passive(legal)
+        # folding a hand that cannot lose is never right at any price
+        return {"action": "call"} if locked or eq >= needed else _passive(legal)
 
     if "bet" in legal:
         # value first, then the smaller "charge them to see a showdown" bet
@@ -324,7 +384,7 @@ def _play(state: dict, legal: list[str]) -> dict:
             (THIN_BET_EQ + tilt, SIZE_THIN),
         ):
             if eq >= floor:
-                opened = _put_in(state, "bet", mine + pot * fraction, eq, floor)
+                opened = _put_in(state, "bet", mine + pot * fraction, eq, floor, risk_free=locked)
                 if opened is not None:
                     return opened
                 break

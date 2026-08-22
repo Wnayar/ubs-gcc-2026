@@ -463,3 +463,149 @@ def test_no_raise_is_ever_larger_than_the_stack_allows():
         body = assert_legal(client.post("/move", json=state), state)
         if body["action"] in ("bet", "raise"):
             assert body["amount"] <= state["max_raise_to"]
+
+
+# ──────────────── hands the grader actually beat us with (2026-08-22) ────────────
+# Attempt 1 on phase1-seed1382113882 scored 0: +44 at hand 13, then these three
+# hands took the match. Every field is transcribed from GET /debug/requests on the
+# live service. See docs/phases/showdown/phase-1/notes.md.
+
+
+def live_state(**over):
+    """A /move body shaped exactly like the coordinator's, seat 0."""
+    state = {
+        "protocol_version": 2,
+        "match_id": "phase1-seed1382113882",
+        "phase": 1,
+        "table_rule": "standard",
+        "small_blind": 1,
+        "big_blind": 2,
+        "starting_stack": 200,
+        "total_hands": 100,
+        "your_seat": 0,
+        "button_seat": 1,
+        "round": "post_reveal",
+        "min_raise_to": None,
+        "max_raise_to": None,
+        "current_hand_actions": [],
+        "recent_hands": [],
+    }
+    state.update(over)
+    state.setdefault(
+        "players",
+        [
+            {
+                "seat": 0,
+                "name": "you",
+                "folded": False,
+                "chip_delta": 0,
+                "bet_this_round": 0,
+                "stack": state["your_stack"],
+                "all_in": False,
+                "busted": False,
+            },
+            {
+                "seat": 1,
+                "name": "Gaston",
+                "folded": False,
+                "chip_delta": 0,
+                "bet_this_round": 0,
+                "stack": 200,
+                "all_in": False,
+                "busted": False,
+            },
+        ],
+    )
+    return state
+
+
+def test_hand_55_never_folds_a_pair_to_a_bet_bigger_than_our_stack():
+    # holding 11 on a community 11 — 96% to win — with 24 chips behind facing
+    # to_call 202. `to_call` is NOT capped at our stack by the coordinator, and
+    # treating it as a fraction of the stack made the risk term 8x any equity.
+    state = live_state(
+        hand_number=55,
+        your_number=11,
+        community_number=11,
+        your_stack=24,
+        pot=376,
+        to_call=202,
+        legal_actions=["fold", "call"],
+        current_hand_actions=[
+            {"round": "pre_reveal", "seat": 0, "action": "raise", "amount": 4},
+            {"round": "pre_reveal", "seat": 1, "action": "raise", "amount": 9},
+            {"round": "pre_reveal", "seat": 0, "action": "call", "amount": 9},
+            {"round": "post_reveal", "seat": 1, "action": "bet", "amount": 22},
+            {"round": "post_reveal", "seat": 0, "action": "raise", "amount": 78},
+            {"round": "post_reveal", "seat": 1, "action": "raise", "amount": 280},
+        ],
+    )
+    body = assert_legal(client.post("/move", json=state), state)
+    assert body["action"] == "call", "folding a pair for 24 into a 376 pot is the leak"
+
+
+def test_hand_72_never_folds_a_pair_to_a_bet_bigger_than_our_stack():
+    state = live_state(
+        hand_number=72,
+        your_number=5,
+        community_number=5,
+        your_stack=18,
+        pot=162,
+        to_call=90,
+        legal_actions=["fold", "call"],
+        current_hand_actions=[
+            {"round": "pre_reveal", "seat": 1, "action": "call", "amount": 2},
+            {"round": "pre_reveal", "seat": 0, "action": "check"},
+            {"round": "post_reveal", "seat": 0, "action": "bet", "amount": 4},
+            {"round": "post_reveal", "seat": 1, "action": "raise", "amount": 19},
+            {"round": "post_reveal", "seat": 0, "action": "raise", "amount": 34},
+            {"round": "post_reveal", "seat": 1, "action": "raise", "amount": 124},
+        ],
+    )
+    body = assert_legal(client.post("/move", json=state), state)
+    assert body["action"] == "call"
+
+
+def test_hand_19_does_not_stack_off_with_a_high_card_into_a_shove():
+    # holding 13 on a community 7 is NOT a pair — it loses to exactly one number,
+    # the 7, and a shove over our raise is overwhelmingly that 7. We called 117
+    # of our 168 and lost 164 chips, the single hand that decided the match.
+    state = live_state(
+        hand_number=19,
+        your_number=13,
+        community_number=7,
+        your_stack=168,
+        pot=211,
+        to_call=117,
+        min_raise_to=209,
+        max_raise_to=209,
+        legal_actions=["fold", "call", "raise"],
+        current_hand_actions=[
+            {"round": "pre_reveal", "seat": 0, "action": "raise", "amount": 6},
+            {"round": "pre_reveal", "seat": 1, "action": "call", "amount": 6},
+            {"round": "post_reveal", "seat": 1, "action": "bet", "amount": 15},
+            {"round": "post_reveal", "seat": 0, "action": "raise", "amount": 41},
+            {"round": "post_reveal", "seat": 1, "action": "raise", "amount": 158},
+        ],
+    )
+    state["players"][0]["bet_this_round"] = 41
+    state["players"][1]["bet_this_round"] = 158
+    body = assert_legal(client.post("/move", json=state), state)
+    assert body["action"] == "fold"
+
+
+def test_a_call_never_risks_more_than_our_stack():
+    # the invariant behind both pair folds: whatever `to_call` says, we can only
+    # ever lose what is in front of us
+    rng = random.Random(55)
+    for _ in range(200):
+        state = random_state(rng)
+        state["to_call"] = state["your_stack"] + rng.randint(1, 300)
+        # the coordinator's `pot` always includes the live bet we are facing
+        state["pot"] = state["to_call"] + rng.randint(2, 50)
+        state["legal_actions"] = ["fold", "call"]
+        state["min_raise_to"] = state["max_raise_to"] = None
+        state["your_number"] = state["community_number"] = 9  # a pair, 96%
+        state["round"] = "post_reveal"
+        body = assert_legal(client.post("/move", json=state), state)
+        assert body["action"] == "call", state

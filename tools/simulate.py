@@ -62,8 +62,13 @@ class Hand:
         return sum(self.contributed)
 
     def to_call(self, seat: int) -> int:
-        owed = max(self.bet_this_round) - self.bet_this_round[seat]
-        return min(owed, self.stack(seat))
+        """Raw chips owed — NOT capped at our stack.
+
+        The live coordinator sends the full amount owed even when it exceeds
+        the stack (observed: your_stack 24, to_call 202). Capping it here is
+        what let a bug through that folded pairs for their whole stack.
+        """
+        return max(self.bet_this_round) - self.bet_this_round[seat]
 
     def all_in(self, seat: int) -> bool:
         return self.stack(seat) == 0
@@ -160,7 +165,7 @@ class Hand:
             if action == "check":
                 self.actions.append({"round": self.round, "seat": seat, "action": "check"})
             elif action == "call":
-                self.put_in(seat, owed)
+                self.put_in(seat, min(owed, self.stack(seat)))
                 self.actions.append(
                     {
                         "round": self.round,
@@ -324,6 +329,37 @@ def bot_sane(state):
     return {"action": "check"} if "check" in legal else {"action": "fold"}
 
 
+def make_gaston(rng):
+    """Reconstructed from the live phase-1 opponent (see the debug log).
+
+    Jams a pair hard post-reveal and re-raises big over our raises, with enough
+    bluff-shoving that folding every high card to him is not free either.
+    """
+
+    def bot(state):
+        legal, eq = state["legal_actions"], _eq(state)
+        pot, to_call = state["pot"], state["to_call"]
+        n, c = state["your_number"], state.get("community_number")
+        pair = c is not None and n == c
+        lo, hi = state["min_raise_to"], state["max_raise_to"]
+        big = rng.random() < 0.30  # bluff-shove frequency
+        if lo is not None and (pair or eq >= 0.80 or big):
+            size = 3.0 if (pair or big) else 1.0
+            amount = min(hi, max(lo, int((pot + to_call) * size)))
+            if "raise" in legal:
+                return {"action": "raise", "amount": amount}
+            if "bet" in legal:
+                return {"action": "bet", "amount": amount}
+        if to_call > 0:
+            odds = to_call / (pot + to_call)
+            return {"action": "call"} if eq >= odds else {"action": "fold"}
+        if "bet" in legal and eq >= 0.60 and lo is not None:
+            return {"action": "bet", "amount": min(hi, max(lo, int(pot * 0.6)))}
+        return {"action": "check"} if "check" in legal else {"action": "fold"}
+
+    return bot
+
+
 def make_random(rng):
     def bot(state):
         legal = state["legal_actions"]
@@ -342,6 +378,7 @@ def opponents(rng):
         "rock": bot_rock,
         "maniac": make_maniac(rng),
         "sane": bot_sane,
+        "gaston": make_gaston(rng),
         "random": make_random(rng),
     }
 
@@ -389,18 +426,18 @@ def report(matches, hands):
 def sweep(matches, hands):
     """One knob at a time, worst-case clear rate across all opponents."""
     knobs = {
-        "VALUE_BET_EQ": [0.60, 0.64, 0.68, 0.72, 0.76],
         "RAISE_EQ": [0.66, 0.70, 0.72, 0.76, 0.82],
         "CALL_MARGIN": [0.0, 0.03, 0.055, 0.09, 0.14],
         "BLUFF_RATE": [0.0, 0.10, 0.18, 0.28, 0.40],
-        "THIN_BET_EQ": [0.50, 0.56, 0.62],
         "RAISE_RISK": [0.0, 0.18, 0.34, 0.50, 0.70],
         "CALL_RISK": [0.0, 0.12, 0.20, 0.32, 0.45],
         "RANGE_TRUST": [0.4, 0.6, 0.75, 0.9, 1.0],
         "RERAISE_EQ": [0.78, 0.82, 0.86, 0.90],
-        "ENDGAME_HANDS": [0, 12, 30, 60, 100],
-        "PROTECT_TILT": [0.0, 0.05, 0.09, 0.16, 0.25],
-        "CHASE_TILT": [0.0, -0.07, -0.15],
+        "PAIR_GAIN": [0.0, 0.10, 0.18, 0.28, 0.40],
+        "PAIR_MAX": [0.25, 0.40, 0.55, 0.70, 0.85],
+        "RANGE_TRUST": [0.6, 0.75, 0.85, 0.95],
+        "CALL_RISK": [0.08, 0.14, 0.20, 0.30],
+        "RAISE_RISK": [0.08, 0.18, 0.30, 0.45],
     }
     for knob, values in knobs.items():
         original = getattr(showdown, knob)
