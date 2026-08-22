@@ -70,9 +70,16 @@ RANGE_TRUST = 0.85
 # attempt at all.
 LEG_TARGET_DELTA = 25
 # Pot fractions for our own bets, by strength.
-SIZE_STRONG = 0.90  # a pair, or a 13 that missed
-SIZE_VALUE = 0.62
-SIZE_THIN = 0.38
+#
+# Sized up deliberately. Across every graded match we win 60-75% of showdowns —
+# hand selection is not the problem — but the pots we WIN average 10 to 16 chips
+# while the pots we LOSE average 22 to 33. We were winning small and losing big,
+# which loses money even at a 60% win rate. The opponent folds only 15-22% of the
+# time, so they are a caller: against a caller the answer to "they keep paying"
+# is to charge more, not to bet less often.
+SIZE_STRONG = 1.15  # overbet — a hand that is way ahead should build the pot
+SIZE_VALUE = 0.85
+SIZE_THIN = 0.45
 SIZE_BLUFF = 0.45
 # How often we fire a bluff at a pot nobody wants. Enough that our bets are not
 # a tell; low enough that it does not become the losing half of the strategy.
