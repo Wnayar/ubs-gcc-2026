@@ -439,3 +439,61 @@ def test_memory_is_bounded_by_the_window():
     send([tx("mb_far", "zz", "yy", minutes=3 * 24 * 60)])
     assert sum(len(t) for row in GRAPH.out.values() for t in row.values()) == 1
 
+
+
+# --- the graded stream is kept so the next disagreement is diagnosable --------
+
+
+def test_capture_keeps_every_transaction_and_the_score_we_gave_it():
+    from app.routers.phase3 import CAPTURE
+
+    CAPTURE.clear()
+    send([tx("cap_1", M, A), tx("cap_2", A, C, minutes=1)])
+    entries = [e for e in CAPTURE if e.get("event") != "reset"]
+    assert [e["txId"] for e in entries] == ["cap_1", "cap_2"]
+    assert entries[1]["fromUserId"] == A and entries[1]["toUserId"] == C
+    assert entries[1]["riskScore"] > 0.0
+
+
+def test_capture_records_identity_fields_and_run_boundaries():
+    from app.routers.phase3 import CAPTURE
+
+    CAPTURE.clear()
+    send([tx("cap_3", M, A, ipAddress="10.0.0.1", deviceId="dev_1")])
+    client.post("/ghost-chains/reset", json={"clearTransactions": True})
+    send([tx("cap_4", M, A)])
+    assert [e.get("event") for e in CAPTURE].count("reset") == 1
+    first = next(e for e in CAPTURE if e.get("txId") == "cap_3")
+    assert (first["ipAddress"], first["deviceId"]) == ("10.0.0.1", "dev_1")
+    assert next(e for e in CAPTURE if e.get("txId") == "cap_4")["ipAddress"] is None
+
+
+def test_capture_endpoint_reports_what_it_holds():
+    from app.routers.phase3 import CAPTURE
+
+    CAPTURE.clear()
+    send([tx("cap_5", M, A)])
+    body = client.get("/ghost-chains/debug/stream").json()
+    assert body["captured"] == len(body["entries"]) >= 1
+    assert body["entries"][-1]["txId"] == "cap_5"
+
+
+def test_capture_never_grows_without_bound():
+    from app.routers import phase3
+
+    assert phase3.CAPTURE.maxlen == (phase3.CAPTURE_LIMIT or 1)
+    send([tx(f"cb_{i}", f"w{i % 10}", f"w{(i + 1) % 10}", minutes=i) for i in range(200)])
+    assert len(phase3.CAPTURE) <= phase3.CAPTURE.maxlen
+
+
+def test_capture_endpoint_is_guarded_when_a_token_is_set(monkeypatch):
+    monkeypatch.setenv("DEBUG_TOKEN", "s3cret")
+    assert client.get("/ghost-chains/debug/stream").status_code == 404
+    assert client.get("/ghost-chains/debug/stream?token=wrong").status_code == 404
+    assert client.get("/ghost-chains/debug/stream?token=s3cret").status_code == 200
+
+
+def test_capture_does_not_shadow_the_graded_endpoints():
+    """A router prefix is shared with the scored routes, so prove they still work."""
+    assert client.get("/ghost-chains/health").json() == {"status": "ok"}
+    assert send([tx("ns_1", M, A)]).status_code == 200

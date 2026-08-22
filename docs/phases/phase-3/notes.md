@@ -541,3 +541,36 @@ versus the 369 build — every one of them a demotion in the contaminated tail.
   as interesting outright. Withdrawn; the shipped candidate stays upward-only.
 - Question for the developers: does "fans into the same destination" mean any
   multi-payer fan-in, or only multiple routes from one origin as in Example 3?
+
+- **Tenth evaluation: below the 369 baseline, and the result was lost.** Phase 1 and
+  Phase 2 were each evaluated and each came back worse than 369/400; the scores and
+  any diagnostics were gone before they could be read, because the shared 500-entry
+  request log had been overwritten by a SHOWDOWN run and then a redeploy. The whole
+  post-mortem method this challenge has relied on — archive the graded stream, diff
+  builds against it, price each change — was unavailable for the first time.
+
+  Two changes, and deliberately only two:
+
+  - **The dedicated-cycle exemption is now actually reverted in code.** Run 9 proved
+    it worth ~0 (368 with, 368 without) and the write-up called it reverted, but the
+    revert only ever existed on the `ghost-chains` branch — `main` shipped it. It
+    changes two of the pinned examples back to their true 369 values
+    (`hf_temporal_A` 0.596019 → 0.300193, `example_5[2]` 0.728354 → 0.725981).
+  - **Band placement still decays.** The decay-free candidate written up above is
+    kept, tested and one line from being live (`DECAY_FREE_BANDS` in
+    `app/routers/phase3.py`), but it stays **off**. It is a second unevaluated lever,
+    and runs 6 and 7 were spent learning that two at once make a result
+    unattributable. The identity change below is the lever this run spends.
+
+  `GET /ghost-chains/debug/stream?token=…` now archives the graded stream itself, so
+  the next result is diagnosable whatever it is. Read it before redeploying.
+
+- **Phase 2's identity lift is now contained inside the structural band** — the
+  Phase 1-facing half of that change. Structure chooses the band, identity orders
+  within it, and nothing identity can say promotes a transaction past a
+  structurally hotter one. On a 96-transaction motif stream the old lift moved 6
+  transactions into a higher band; the contained form moves 0. This matters to
+  Phase 1 and not only to Phase 2: a Phase 2 evaluation re-tests every Phase 1
+  requirement, and if the re-test stream carries `ipAddress`/`deviceId` — which no
+  archived Phase 1 run ever did — then the lift was silently reordering the ranking
+  that earned 369. Full write-up in `docs/phases/ghost-chains/phase-2/notes.md`.
