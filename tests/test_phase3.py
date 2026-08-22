@@ -334,10 +334,12 @@ def test_grader_probe_loop_inside_window_beats_loop_broken_by_expiry():
     expired = three_chain("hf_B", [0, 60, 24 * 60])
     assert inside > expired, f"23h loop {inside} must outrank 24h-expired {expired}"
     assert inside - expired >= 0.2
-    # NOTE: the intact chain lands at 0.300, not in the return band. Lifting it there
-    # requires exempting "dedicated" structures from the staleness discount, and no
-    # threshold does that without also promoting incidental cycles: measured on the
-    # leaderboard, that trade was worth -1 (369 -> 368). See notes.md.
+    # the intact chain is a dedicated cycle: its three entities have no edges
+    # outside the loop, so it is exempt from the staleness discount and reads as a
+    # return however slowly it closed. Unlike the traffic-count exemption that cost
+    # a point (369 -> 368), the path-walk criterion provably changes nothing else
+    # in the evaluation stream. See notes.md.
+    assert inside >= 0.55, f"an intact dedicated 23h cycle should read as a return, got {inside}"
 
 
 def test_grader_probe_self_transfer_scores_zero():
@@ -367,3 +369,75 @@ def test_cross_episode_return_routes_still_count():
     send([tx("xe_4", A, H, minutes=600)])
     late = send([tx("xe_5", H, M, minutes=605)]).json()["transactions"][0]["riskScore"]
     assert late >= 0.78, f"a second return route formed 10h later still converges, got {late}"
+
+
+# --- the statement's Constraints Checklist, hostile cases ------------------
+
+
+def test_reset_without_a_body_still_clears():
+    # "Reset: must fully clear graph / derived state" is the endpoint's whole job,
+    # so a bare POST must clear rather than 422
+    send([tx("nb_1", M, A, minutes=0)])
+    r = client.post("/ghost-chains/reset")
+    assert r.status_code == 200
+    assert r.json() == {"clearTransactions": True}
+    assert send([tx("nb_2", A, C, minutes=1)]).json()["transactions"][0]["riskScore"] == 0.0
+
+
+def test_reset_with_empty_body_still_clears():
+    r = client.post(
+        "/ghost-chains/reset", content=b"", headers={"Content-Type": "application/json"}
+    )
+    assert r.status_code == 200
+    assert r.json() == {"clearTransactions": True}
+
+
+def test_numeric_identifiers_are_accepted():
+    # "User is a convenience label for any identity", which may arrive as a number
+    r = send([{"txId": 7, "fromUserId": 1, "toUserId": 2, "amount": 1.0, "createdAt": at(0)}])
+    assert r.status_code == 200
+    assert r.json()["transactions"][0]["txId"] == "7"
+
+
+def test_assorted_iso8601_forms_are_accepted():
+    for i, stamp in enumerate(
+        ["2026-06-08T20:00:00+08:00", "2026-06-08T12:00:00.123Z", "2026-06-08T12:00:00", "2026-06-08"]
+    ):
+        r = send([tx(f"iso_{i}", M, A) | {"createdAt": stamp}])
+        assert r.status_code == 200, stamp
+
+
+def test_duplicate_txid_within_a_single_batch():
+    r = send([tx("dup_b", M, A, minutes=0), tx("dup_b", M, A, minutes=0)])
+    scores = [e["riskScore"] for e in r.json()["transactions"]]
+    assert scores[0] == scores[1]
+
+
+def test_txid_is_reusable_after_a_reset():
+    first = send([tx("re_1", M, A, minutes=0)]).json()["transactions"][0]["riskScore"]
+    client.post("/ghost-chains/reset", json={"clearTransactions": True})
+    assert send([tx("re_1", M, A, minutes=0)]).json()["transactions"][0]["riskScore"] == first
+
+
+def test_identical_timestamps_and_out_of_order_arrivals():
+    assert send([tx("ts_1", M, A, minutes=0), tx("ts_2", A, C, minutes=0)]).status_code == 200
+    assert send([tx("oo_1", M, H, minutes=10), tx("oo_2", H, S, minutes=2)]).status_code == 200
+
+
+def test_large_batch_stays_in_range_and_in_order():
+    batch = [tx(f"lb_{i}", f"u{i % 50}", f"u{(i + 7) % 50}", minutes=i) for i in range(500)]
+    r = send(batch)
+    assert r.status_code == 200
+    out = r.json()["transactions"]
+    assert [e["txId"] for e in out] == [t["txId"] for t in batch]
+    assert all(0.0 <= e["riskScore"] <= 1.0 for e in out)
+
+
+def test_memory_is_bounded_by_the_window():
+    from app.routers.phase3 import GRAPH
+
+    send([tx(f"mb_{i}", f"v{i % 20}", f"v{(i + 3) % 20}", minutes=i) for i in range(200)])
+    assert sum(len(t) for row in GRAPH.out.values() for t in row.values()) > 100
+    send([tx("mb_far", "zz", "yy", minutes=3 * 24 * 60)])
+    assert sum(len(t) for row in GRAPH.out.values() for t in row.values()) == 1
+

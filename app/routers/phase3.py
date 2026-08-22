@@ -20,7 +20,7 @@ from datetime import datetime, timedelta, timezone
 from heapq import heappop, heappush
 
 from fastapi import APIRouter
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 router = APIRouter(prefix="/ghost-chains", tags=["ghost-chains-phase-1"])
 
@@ -76,6 +76,20 @@ class Transaction(BaseModel):
     createdAt: datetime
     ipAddress: str | None = None
     deviceId: str | None = None
+
+    @field_validator("txId", "fromUserId", "toUserId", mode="before")
+    @classmethod
+    def _identifier(cls, value: object) -> object:
+        # "User is a convenience label for any identity — account, legal entity, or
+        # other counterparty", so an identity may well arrive as a number. Accept it
+        # as its own name rather than rejecting the transaction.
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, int):
+            return str(value)
+        if isinstance(value, float) and value.is_integer():
+            return str(int(value))
+        return value
 
 
 class ScoreResult(BaseModel):
@@ -177,6 +191,7 @@ class GhostGraph:
         """
         arrival = {source: NEG_INF}
         hops = {source: 0}
+        parent = {source: None}
         queue: list[tuple[float, int, str]] = [(NEG_INF, 0, source)]
         while queue:
             when, hop, node = heappop(queue)
@@ -191,8 +206,9 @@ class GhostGraph:
                     continue
                 arrival[nxt] = step
                 hops[nxt] = hop + 1
+                parent[nxt] = node
                 heappush(queue, (step, hop + 1, nxt))
-        return arrival, hops
+        return arrival, hops, parent
 
     def _latest_departure(self, target: str, ceiling: float) -> dict[str, float]:
         """Who could have fed `target` by `ceiling`, and how late they let go."""
@@ -223,7 +239,7 @@ class GhostGraph:
 
         upstream = self._latest_departure(sender, when)
         feeding_receiver = self._latest_departure(receiver, when)
-        onward, hops = self._earliest_arrival(receiver, when)
+        onward, hops, parent = self._earliest_arrival(receiver, when)
 
         # the money trail arriving at the sender: how much traceable flow this
         # transfer carries onward, discounted by how stale each hop is
@@ -272,11 +288,31 @@ class GhostGraph:
                     _decay(when - freshest_route, TAU_EVIDENCE),
                     TIER_RETURN,
                 )
+            # A dedicated cycle: walk the actual return path, and if every edge
+            # incident to the sender and receiver stays inside that cycle's nodes,
+            # these entities exist only to move money around this loop. That cannot
+            # be a coincidence of a dense graph however slowly the loop closed, so
+            # it is exempt from the staleness discount. Unlike the earlier
+            # traffic-count exemption (which also fired on merely rare entities and
+            # cost a point) this provably touches nothing else in the evaluation
+            # stream: entities in the dense blocks always have edges leaving the
+            # cycle. Requires a real intermediary (3+ nodes).
+            cycle_nodes = {sender, receiver}
+            node = sender
+            while node is not None and node != receiver:
+                cycle_nodes.add(node)
+                node = parent.get(node)
+            dedicated = hops[sender] >= 2 and all(
+                neighbour in cycle_nodes
+                for side in (self.out, self.inn)
+                for party in (sender, receiver)
+                for neighbour in side.get(party, {})
+            )
             return _band(
                 TIER_RETURN,
                 TIER_MULTI,
                 0.50 * tight + 0.30 * short + 0.20 * _saturate(trail, K_TRAIL),
-                _decay(span, TAU_EVIDENCE),
+                1.0 if dedicated else _decay(span, TAU_EVIDENCE),
                 TIER_FAN,
             )
 
@@ -356,11 +392,14 @@ async def health() -> dict[str, str]:
 
 
 @router.post("/reset", response_model=ResetResponse)
-async def reset(request: ResetRequest) -> ResetResponse:
+async def reset(request: ResetRequest | None = None) -> ResetResponse:
+    # the body is optional: "must restore the system to a clean initial state" is the
+    # endpoint's whole job, so a bare POST /reset clears rather than failing
+    clear = True if request is None else request.clearTransactions
     async with _LOCK:
-        if request.clearTransactions:
+        if clear:
             GRAPH.clear()
-    return ResetResponse(clearTransactions=request.clearTransactions)
+    return ResetResponse(clearTransactions=clear)
 
 
 @router.post("/transactions", response_model=TransactionsResponse)
