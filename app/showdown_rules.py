@@ -190,6 +190,30 @@ CONSISTENT = 0.97
 INCONSISTENT = 0.03
 
 
+def agrees_with(rule: Rule, observation: "Observation") -> bool:
+    """Is this rule consistent with how that showdown actually paid out?
+
+    Two players: the predicted winners must be exactly the reported winners.
+    That is phase 2's test, and it stays untouched — every one of the seeded
+    observations is two-player, and phase 2 learned the hard way what happens
+    when this is loosened (a filter on odd two-winner hands removed exactly the
+    evidence that discriminated between rules, and the false confidence that
+    produced cost a leg).
+
+    Phase 3 seats six. Once three or more players reach a showdown, two winners
+    with *different* numbers is ordinary rather than odd: with all-ins there are
+    side pots, and the seat that takes one need not have the best number at the
+    table. What holds under every rule is that the best key wins the MAIN pot,
+    because everybody contests it. So the predicted winners must appear among
+    the reported ones — extra names are explained by side pots, while a
+    predicted winner who did not win at all is still a real contradiction.
+    """
+    predicted = showdown_winners(rule, observation.numbers, observation.community)
+    if len(observation.numbers) <= 2:
+        return tuple(predicted) == observation.winners
+    return set(predicted) <= set(observation.winners)
+
+
 @dataclass
 class Observation:
     numbers: dict[int, int]
@@ -284,7 +308,7 @@ class RuleBelief:
             order = _fit_order(trained_on) if trained_on else None
             for obs in held_out:
                 for rule in RULES:
-                    agrees = tuple(showdown_winners(rule, obs.numbers, obs.community)) == obs.winners
+                    agrees = agrees_with(rule, obs)
                     scores[rule.name] += math.log(CONSISTENT if agrees else INCONSISTENT)
                 if order is None:
                     scores[LEARNED] += math.log(0.5)  # nothing to fit on yet
@@ -319,20 +343,36 @@ def _fit_order(observations) -> dict[int, float]:
     games: dict[int, float] = {}
     for obs in observations:
         seats = sorted(obs.numbers)
-        if len(seats) != 2:
+        if len(seats) == 2:
+            a, b = obs.numbers[seats[0]], obs.numbers[seats[1]]
+            if a == b:
+                continue
+            if len(obs.winners) == 2:
+                sa = sb = 0.5
+            else:
+                sa = 1.0 if obs.winners[0] == seats[0] else 0.0
+                sb = 1.0 - sa
+            wins[a] = wins.get(a, 0.0) + sa
+            wins[b] = wins.get(b, 0.0) + sb
+            games[a] = games.get(a, 0.0) + 1
+            games[b] = games.get(b, 0.0) + 1
             continue
-        a, b = obs.numbers[seats[0]], obs.numbers[seats[1]]
-        if a == b:
+        if len(seats) < 2:
             continue
-        if len(obs.winners) == 2:
-            sa = sb = 0.5
-        else:
-            sa = 1.0 if obs.winners[0] == seats[0] else 0.0
-            sb = 1.0 - sa
-        wins[a] = wins.get(a, 0.0) + sa
-        wins[b] = wins.get(b, 0.0) + sb
-        games[a] = games.get(a, 0.0) + 1
-        games[b] = games.get(b, 0.0) + 1
+        # A crowded showdown is a whole round-robin: every winner beat every
+        # seat that did not win. Side-pot winners make that slightly generous —
+        # one of them only beat the seats in their own pot — which is another
+        # reason this stays the low-weight fallback rather than the main model.
+        winners = set(obs.winners)
+        losers = [s for s in seats if s not in winners]
+        for w in winners:
+            for loser in losers:
+                a, b = obs.numbers[w], obs.numbers[loser]
+                if a == b:
+                    continue
+                wins[a] = wins.get(a, 0.0) + 1.0
+                games[a] = games.get(a, 0.0) + 1
+                games[b] = games.get(b, 0.0) + 1
     return {
         n: (wins.get(n, 0.0) + 1.0) / (games.get(n, 0.0) + 2.0) for n in range(1, DECK + 1)
     }
@@ -340,12 +380,12 @@ def _fit_order(observations) -> dict[int, float]:
 
 def _order_predicts(scores: dict[int, float], obs: "Observation") -> bool:
     seats = sorted(obs.numbers)
-    ka, kb = scores[obs.numbers[seats[0]]], scores[obs.numbers[seats[1]]]
-    if abs(ka - kb) < 1e-9:
-        predicted = (seats[0], seats[1])
-    else:
-        predicted = (seats[0],) if ka > kb else (seats[1],)
-    return tuple(predicted) == obs.winners
+    keyed = {seat: scores[obs.numbers[seat]] for seat in seats}
+    best = max(keyed.values())
+    predicted = tuple(seat for seat in seats if abs(keyed[seat] - best) < 1e-9)
+    if len(seats) <= 2:
+        return predicted == obs.winners
+    return set(predicted) <= set(obs.winners)  # side pots, as in agrees_with
 
 
 SEED_PATH = Path(__file__).resolve().parent / "data" / "showdown_seed.json"
@@ -478,6 +518,28 @@ def _key_for(name: str, n: int, c: int):
     return BY_NAME[name].key(n, c)
 
 
+_KEY_VECTORS: dict[tuple[str, int], tuple] = {}
+
+
+def _key_vector(name: str, c: int) -> tuple:
+    """Every number's key under one rule at one community number, 1..13.
+
+    Phase 3 asks for this hundreds of times per decision — 58 hypotheses by 13
+    possible community numbers by five opponents — and the keys of a fixed rule
+    never change, so they are worth computing once. `learned_order` is refitted
+    as evidence arrives and is deliberately not cached.
+    """
+    if name == LEARNED:
+        order = ORDERS.get("current", {})
+        return tuple((round(order.get(n, 0.5), 9),) for n in range(1, DECK + 1))
+    vector = _KEY_VECTORS.get((name, c))
+    if vector is None:
+        key = BY_NAME[name].key
+        vector = tuple(key(n, c) for n in range(1, DECK + 1))
+        _KEY_VECTORS[(name, c)] = vector
+    return vector
+
+
 def _value(rule: Rule, n: int, m: int, c: int) -> float:
     """Our share of the pot holding `n` against `m`, community `c`."""
     ours, theirs = rule.key(n, c), rule.key(m, c)
@@ -518,6 +580,92 @@ def rule_equity(
         scale = sum(weights.values())
         return total / scale if scale else 0.5
     return total / DECK
+
+
+# Hypotheses this far out of the running cannot move a decision, and skipping
+# them is what keeps a six-way pre-reveal call inside the time budget.
+NEGLIGIBLE = 1e-4
+
+
+def rule_equity_multiway(
+    belief: dict[str, float],
+    n: int,
+    c: int | None,
+    ranges: "list[dict[int, float] | None]",
+) -> float:
+    """Posterior-averaged share of the pot against several opponents at once.
+
+    Phase 3 seats six: "a bet now has to get through everyone still in the hand,
+    not just one player", so our number has to beat *all* of them. One entry in
+    `ranges` per live opponent, each a distribution over 1..13 (None for the
+    whole deck) — they are kept separate because a seat that has raised twice
+    and a seat that has just called are not the same threat, and averaging them
+    away is most of the read.
+
+    Opponents draw independently, so for one rule and one community number the
+    exact answer is a small dynamic program. Walking the opponents while
+    tracking P(nobody has beaten us yet, `j` of them tied) gives
+
+        share = sum_j P(j) / (1 + j)
+
+    which prices a three-way tie at a third of the pot rather than at nothing —
+    it matters here because several candidate rules (`near`, the banded ones)
+    tie numbers far more often than the standard rule does.
+    """
+    k = len(ranges)
+    if k == 0:
+        return 1.0  # everyone folded; the pot is already ours
+    communities = range(1, DECK + 1) if c is None else (c,)
+    total = 0.0
+    mass = 0.0
+    for name, p in belief.items():
+        if p <= NEGLIGIBLE or (name != LEARNED and name not in BY_NAME):
+            continue
+        mass += p
+        acc = 0.0
+        for cc in communities:
+            keys = _key_vector(name, cc)
+            ours = keys[n - 1]
+            distribution = [1.0] + [0.0] * k
+            for weights in ranges:
+                below = tied = 0.0
+                if weights is None:
+                    for key in keys:
+                        if key < ours:
+                            below += 1.0
+                        elif key == ours:
+                            tied += 1.0
+                    below /= DECK
+                    tied /= DECK
+                else:
+                    scale = 0.0
+                    for m, key in enumerate(keys, start=1):
+                        w = weights.get(m, 0.0)
+                        if not w:
+                            continue
+                        scale += w
+                        if key < ours:
+                            below += w
+                        elif key == ours:
+                            tied += w
+                    if scale > 0:
+                        below /= scale
+                        tied /= scale
+                    else:  # an empty range says nothing; fall back on the deck
+                        below = sum(1 for key in keys if key < ours) / DECK
+                        tied = sum(1 for key in keys if key == ours) / DECK
+                nxt = [0.0] * (k + 1)
+                for j in range(k):
+                    weight = distribution[j]
+                    if weight:
+                        nxt[j] += weight * below
+                        nxt[j + 1] += weight * tied
+                distribution = nxt
+            acc += sum(w / (1 + j) for j, w in enumerate(distribution) if w)
+        total += p * acc / len(communities)
+    if mass <= 0:
+        return 1.0 / (k + 1)  # believing nothing, expect a fair share
+    return total / mass
 
 
 def range_weights(belief: dict[str, float], c: int | None, sharpness: float) -> dict[int, float]:

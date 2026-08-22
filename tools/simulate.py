@@ -299,22 +299,73 @@ class Table:
 # ───────────────────────────────── opponents ──────────────────────────────────
 
 
+def _live_count(state) -> int:
+    """How many opponents can still take this pot, from the wire."""
+    players = state.get("players")
+    if not isinstance(players, list):
+        return 1
+    return max(
+        1,
+        sum(
+            1
+            for p in players
+            if isinstance(p, dict)
+            and p.get("name") != "you"
+            and not p.get("folded")
+            and not p.get("busted")
+        ),
+    )
+
+
 def _eq(state) -> float:
-    """Opponent-side equity, computed under the table's ACTUAL rule."""
-    return rule_equity({TABLE["rule"].name: 1.0}, state["your_number"],
-                       state.get("community_number")) \
-        if TABLE["rule"].name in BY_NAME else _eq_exotic(state)
+    """Opponent-side equity, computed under the table's ACTUAL rule.
+
+    The house bots know their own table, and phase 3 says "every opponent here
+    plays the rule correctly". They also price against the whole field: a house
+    bot that valued its number heads-up while five players were live would be a
+    strawman, and beating a strawman tells us nothing.
+    """
+    return _share_vs_field(
+        TABLE["rule"], state["your_number"], state.get("community_number"),
+        _live_count(state),
+    )
 
 
-def _eq_exotic(state) -> float:
-    rule, n, c = TABLE["rule"], state["your_number"], state.get("community_number")
+def _share_vs_field(rule, n, c, k: int) -> float:
+    """Expected share of the pot holding `n` against `k` uniform opponents.
+
+    The same dynamic program as app.showdown_rules.rule_equity_multiway, written
+    out here so it also works for the EXOTIC rules, which are deliberately not in
+    the app's hypothesis set.
+    """
     cs = range(1, DECK + 1) if c is None else (c,)
     total = 0.0
     for cc in cs:
+        ours = rule.key(n, cc)
+        below = tied = 0.0
         for m in range(1, DECK + 1):
-            ka, kb = rule.key(n, cc), rule.key(m, cc)
-            total += 1.0 if ka > kb else (0.5 if ka == kb else 0.0)
-    return total / (DECK * len(cs))
+            theirs = rule.key(m, cc)
+            if theirs < ours:
+                below += 1.0
+            elif theirs == ours:
+                tied += 1.0
+        below /= DECK
+        tied /= DECK
+        dist = [1.0] + [0.0] * k
+        for _ in range(k):
+            nxt = [0.0] * (k + 1)
+            for j in range(k):
+                w = dist[j]
+                if w:
+                    nxt[j] += w * below
+                    nxt[j + 1] += w * tied
+            dist = nxt
+        total += sum(w / (1 + j) for j, w in enumerate(dist) if w)
+    return total / len(cs)
+
+
+def _eq_exotic(state) -> float:
+    return _eq(state)
 
 
 def bot_station(state):
@@ -546,15 +597,332 @@ def phase2_report(attempts, opponent_name, rule_names, hands=40):
         print(f"  {label:<14}{rates} {statistics.mean(points):>8.0f}")
 
 
+# ─────────────────────── phase 3: six seats, side pots ──────────────────────────
+#
+# The heads-up engine above cannot be stretched to six: forced bets move from
+# "the two of you" to "the two seats past the button", the acting order opens in
+# two different places depending on the round, busted seats have to be skipped by
+# both the button and the deal, and an all-in has to build side pots instead of
+# refunding the difference. So phase 3 gets its own table, following the phase-3
+# statement's position diagram exactly.
+
+SEATS = 6
+
+
+class CrowdedHand:
+    """One six-seat hand: blinds, deal, two betting rounds, layered showdown."""
+
+    def __init__(self, table, button: int, rng: random.Random):
+        self.table = table
+        self.rng = rng
+        self.seats = [s for s in range(table.seats) if table.stacks[s] > 0]
+        self.button = button
+        self.numbers = {s: rng.randint(1, DECK) for s in self.seats}
+        self.community = rng.randint(1, DECK)
+        self.contributed = {s: 0 for s in self.seats}
+        self.bet_this_round = {s: 0 for s in self.seats}
+        self.folded = {s: False for s in self.seats}
+        self.actions: list[dict] = []
+        self.round = "pre_reveal"
+
+    # -- seating ---------------------------------------------------------------
+
+    def after(self, seat: int, steps: int = 1) -> int:
+        """`steps` live seats clockwise of `seat` — busted seats do not exist."""
+        i = self.seats.index(seat)
+        return self.seats[(i + steps) % len(self.seats)]
+
+    def contenders(self) -> list[int]:
+        return [s for s in self.seats if not self.folded[s]]
+
+    def stack(self, seat: int) -> int:
+        return self.table.stacks[seat] - self.contributed[seat]
+
+    def all_in(self, seat: int) -> bool:
+        return self.stack(seat) == 0
+
+    def put_in(self, seat: int, chips: int) -> None:
+        chips = max(0, min(chips, self.stack(seat)))
+        self.contributed[seat] += chips
+        self.bet_this_round[seat] += chips
+
+    @property
+    def pot(self) -> int:
+        return sum(self.contributed.values())
+
+    def to_call(self, seat: int) -> int:
+        return max(self.bet_this_round.values()) - self.bet_this_round[seat]
+
+    # -- the request we hand a bot --------------------------------------------
+
+    def state_for(self, seat, min_raise_to, max_raise_to, legal) -> dict:
+        return {
+            "protocol_version": 2,
+            "match_id": self.table.match_id,
+            "phase": 3,
+            "table_rule": TABLE["codename"],
+            "small_blind": SMALL_BLIND,
+            "big_blind": BIG_BLIND,
+            "starting_stack": STARTING_STACK,
+            "your_stack": self.stack(seat),
+            "hand_number": self.table.hand_number,
+            "total_hands": self.table.total_hands,
+            "round": self.round,
+            "your_number": self.numbers[seat],
+            "community_number": self.community if self.round == "post_reveal" else None,
+            "leg_number": self.table.leg_number,
+            "total_legs": self.table.total_legs,
+            "your_seat": seat,
+            "button_seat": self.button,
+            "pot": self.pot,
+            "to_call": self.to_call(seat),
+            "min_raise_to": min_raise_to,
+            "max_raise_to": max_raise_to,
+            "legal_actions": legal,
+            "players": [
+                {
+                    "seat": s,
+                    "name": "you" if s == seat else self.table.names[s],
+                    "folded": bool(self.folded.get(s)),
+                    "chip_delta": self.table.stacks[s] - STARTING_STACK,
+                    "bet_this_round": self.bet_this_round.get(s, 0),
+                    "stack": self.stack(s) if s in self.seats else 0,
+                    "all_in": s in self.seats and self.all_in(s),
+                    "busted": s not in self.seats,
+                }
+                for s in range(self.table.seats)
+            ],
+            "current_hand_actions": list(self.actions),
+            "recent_hands": self.table.recent_hands[-20:],
+        }
+
+    # -- betting ---------------------------------------------------------------
+
+    def betting_round(self, first: int) -> None:
+        last_raise = BIG_BLIND
+        acted = {s: False for s in self.seats}
+        seat = first
+        while True:
+            if len(self.contenders()) <= 1:
+                return
+            can_act = [s for s in self.contenders() if not self.all_in(s)]
+            if not can_act:
+                return
+            if all(acted[s] and self.to_call(s) == 0 for s in can_act):
+                return
+            if self.folded[seat] or self.all_in(seat) or (acted[seat] and self.to_call(seat) == 0):
+                seat = self.after(seat)
+                continue
+
+            owed = self.to_call(seat)
+            high = max(self.bet_this_round.values())
+            if owed > 0:
+                legal, opener = ["fold", "call"], "raise"
+            else:
+                legal, opener = ["check"], "bet"
+            min_raise_to = max_raise_to = None
+            # someone has to be left who could still respond to a raise
+            respondable = [s for s in self.contenders() if s != seat and not self.all_in(s)]
+            if self.stack(seat) > owed and respondable:
+                legal.append(opener)
+                max_raise_to = self.bet_this_round[seat] + self.stack(seat)
+                min_raise_to = min(high + last_raise, max_raise_to)
+
+            reply = self.table.bots[seat](self.state_for(seat, min_raise_to, max_raise_to, legal))
+            action = reply.get("action")
+            if action not in legal:
+                action = "check" if "check" in legal else "fold"
+
+            if action == "fold":
+                self.folded[seat] = True
+                self.actions.append({"round": self.round, "seat": seat, "action": "fold"})
+            elif action == "check":
+                self.actions.append({"round": self.round, "seat": seat, "action": "check"})
+            elif action == "call":
+                self.put_in(seat, min(owed, self.stack(seat)))
+                self.actions.append({"round": self.round, "seat": seat, "action": "call",
+                                     "amount": self.bet_this_round[seat]})
+            else:
+                target = reply.get("amount")
+                if not isinstance(target, int) or not (min_raise_to <= target <= max_raise_to):
+                    target = min_raise_to
+                size = target - high
+                self.put_in(seat, target - self.bet_this_round[seat])
+                if size > 0:
+                    last_raise = max(last_raise, size)
+                    acted = {s: False for s in self.seats}  # the round reopens
+                self.actions.append({"round": self.round, "seat": seat, "action": action,
+                                     "amount": self.bet_this_round[seat]})
+            acted[seat] = True
+            seat = self.after(seat)
+
+    # -- resolution ------------------------------------------------------------
+
+    def best_of(self, seats: list[int]) -> list[int]:
+        rule = TABLE["rule"]
+        keyed = {s: rule.key(self.numbers[s], self.community) for s in seats}
+        best = max(keyed.values())
+        return [s for s in seats if keyed[s] == best]
+
+    def payout(self) -> dict[int, int]:
+        """Split the pot into main and side pots and award each one.
+
+        Everyone contests the main pot; a seat that could only cover part of the
+        betting is simply not eligible for the layers above what it paid in.
+        """
+        won = {s: 0 for s in self.seats}
+        live = self.contenders()
+        if len(live) == 1:
+            won[live[0]] = self.pot
+            return won
+        levels = sorted({self.contributed[s] for s in self.seats if self.contributed[s] > 0})
+        floor = 0
+        for level in levels:
+            chips = sum(min(self.contributed[s], level) - floor
+                        for s in self.seats if self.contributed[s] > floor)
+            eligible = [s for s in live if self.contributed[s] >= level]
+            if chips <= 0:
+                floor = level
+                continue
+            if not eligible:  # everyone eligible for this layer folded
+                eligible = live
+            winners = self.best_of(eligible)
+            share, odd = divmod(chips, len(winners))
+            for s in winners:
+                won[s] += share
+            won[winners[0]] += odd
+            floor = level
+        return won
+
+    def play(self) -> None:
+        # "Forced bets start just past the button: seat 1 pays 1, seat 2 pays 2."
+        small, big = self.after(self.button), self.after(self.button, 2)
+        if len(self.seats) == 2:  # heads-up rump: the button pays the small blind
+            small, big = self.button, self.after(self.button)
+        self.put_in(small, SMALL_BLIND)
+        self.put_in(big, BIG_BLIND)
+
+        # "the order opens just past the seat that paid 2, so that seat acts last"
+        self.betting_round(first=self.after(big))
+
+        if len(self.contenders()) > 1:
+            self.round = "post_reveal"
+            self.bet_this_round = {s: 0 for s in self.seats}
+            if sum(1 for s in self.contenders() if not self.all_in(s)) > 1:
+                # "the order opens just past the button, so the button acts last"
+                self.betting_round(first=self.after(self.button))
+
+        won = self.payout()
+        for s in self.seats:
+            self.table.stacks[s] += won[s] - self.contributed[s]
+
+        live = self.contenders()
+        showdown = len(live) > 1
+        self.table.recent_hands.append({
+            "hand_number": self.table.hand_number,
+            "community_number": self.community if showdown else None,
+            "winners": sorted(s for s in self.seats if won[s] > self.contributed[s]),
+            "pot": self.pot,
+            "shown_numbers": {str(s): self.numbers[s] for s in live} if showdown else {},
+            "actions": list(self.actions),
+        })
+
+
+class CrowdedTable:
+    def __init__(self, bots, names, total_hands, seed, leg_number, total_legs, seats=SEATS):
+        self.bots = bots
+        self.names = names
+        self.seats = seats
+        self.leg_number = leg_number
+        self.total_legs = total_legs
+        self.total_hands = total_hands
+        self.stacks = [STARTING_STACK] * seats
+        self.recent_hands: list[dict] = []
+        self.hand_number = 0
+        self.match_id = f"sim6-seed{seed}"
+
+    def play(self, rng) -> list[int]:
+        button = 0
+        for hand in range(1, self.total_hands + 1):
+            live = [s for s in range(self.seats) if self.stacks[s] > 0]
+            if len(live) <= 1:
+                break  # "the match only ends early if just one player still has chips"
+            self.hand_number = hand
+            while button not in live:  # the button skips anyone who has busted
+                button = (button + 1) % self.seats
+            CrowdedHand(self, button, rng).play()
+            button = (button + 1) % self.seats
+        return [s - STARTING_STACK for s in self.stacks]
+
+
+def phase3_leg(seat_of_ours, rule, codename, hands, seed, leg_number, total_legs):
+    """One six-seat leg. Returns every seat's chip delta, and which seat is ours."""
+    TABLE["rule"], TABLE["codename"] = rule, codename
+    rng = random.Random(seed)
+    house = opponents(random.Random(seed + 1))
+    others = ["station", "rock", "maniac", "sane", "gaston"]
+    bots, names = [], []
+    pool = iter(others)
+    for s in range(SEATS):
+        if s == seat_of_ours:
+            bots.append(decide)
+            names.append("you")
+        else:
+            who = next(pool)
+            bots.append(house[who])
+            names.append(who)
+    table = CrowdedTable(bots, names, hands, seed, leg_number, total_legs)
+    return table.play(rng)
+
+
+def phase3_attempt(rules, seed, hands=60):
+    """Four legs back to back, our seat rotated so position cannot flatter us."""
+    out = []
+    for i, rule in enumerate(rules, start=1):
+        ours = (i - 1) % SEATS
+        deltas = phase3_leg(ours, rule, f"codename-{rule.name}", hands,
+                            seed * 10 + i, i, len(rules))
+        out.append((deltas[ours], max(d for s, d in enumerate(deltas) if s != ours)))
+    return out
+
+
+def phase3_report(attempts, rule_names, hands=60):
+    """Scored the way the statement scores it: +10 AND strictly top the table."""
+    rules = [BY_NAME.get(n) or next(r for r in EXOTIC if r.name == n) for n in rule_names]
+    print(f"\nsix seats, {hands} hands x {len(rules)} legs: {', '.join(rule_names)}"
+          f"   ({attempts} attempts)")
+    print(f"  {'':14} {'leg1':>6} {'leg2':>6} {'leg3':>6} {'leg4':>6} {'points':>8} {'mean Δ':>8}")
+    for label in ("cold", "warm"):
+        cleared = [0] * len(rules)
+        points, deltas = [], []
+        for a in range(attempts):
+            forget_all()
+            if label == "warm":
+                phase3_attempt(rules, seed=9000 + a, hands=hands)
+            got = 0
+            for i, (ours, best_other) in enumerate(phase3_attempt(rules, seed=a, hands=hands)):
+                deltas.append(ours)
+                if ours >= 10 and ours > best_other:
+                    cleared[i] += 1
+                    got += 150
+            points.append(got)
+        rates = "".join(f"{c / attempts:>6.0%}" for c in cleared)
+        print(f"  {label:<14}{rates} {statistics.mean(points):>8.0f} "
+              f"{statistics.mean(deltas):>8.1f}")
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--matches", type=int, default=1000)
     parser.add_argument("--hands", type=int, default=100)
     parser.add_argument("--sweep", action="store_true")
     parser.add_argument("--phase2", action="store_true")
+    parser.add_argument("--phase3", action="store_true")
     parser.add_argument("--legs", default="low,near,wrap_up,antipair_high")
     args = parser.parse_args()
-    if args.sweep:
+    if args.phase3:
+        phase3_report(max(args.matches // 25, 20), args.legs.split(","))
+    elif args.sweep:
         sweep(max(args.matches // 4, 150), args.hands)
     elif args.phase2:
         names = args.legs.split(",")
