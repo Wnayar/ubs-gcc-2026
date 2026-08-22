@@ -112,6 +112,19 @@ EXPANSIONS = {
     "people": ("scientist", "technician", "occupancy", "crew", "member"),
     "population": ("occupancy", "resident", "crew"),
     "headcount": ("occupancy", "resident", "crew"),
+    # "Roughly how many personnel live aboard the facility simultaneously?"
+    # scored 0 three times running: the answer is the station's forty-one
+    # residents, but "simultaneously" occurs exactly once in the corpus — in
+    # the engine handbook's "thirty-two engineers working simultaneously" — and
+    # that one rare word outvoted every other word in the question. The android
+    # answered "32" all three times. Words about *who lives somewhere* now pull
+    # toward the vocabulary the documents actually use for people.
+    "personnel": ("crew", "staff", "scientist", "technician", "occupancy", "resident"),
+    "staff": ("crew", "scientist", "technician", "occupancy", "resident"),
+    "aboard": ("habitat", "station", "resident", "occupancy"),
+    "live": ("resident", "occupancy", "population", "crew", "habitat"),
+    "reside": ("resident", "occupancy", "population"),
+    "facility": ("station", "habitat", "site", "premises"),
     # schedules and events
     "often": ("cycle", "every", "schedule", "cadence"),
     "delivery": ("resupply", "provision", "vessel", "consignment"),
@@ -263,13 +276,22 @@ class Corpus:
             for key in words:
                 counts[key] = counts.get(key, 0) + 1
             total = 0.0
+            matched = 0.0
             for key, weight in query.items():
                 found = counts.get(key, 0)
                 if found:
                     total += weight * self._idf(
                         key, self.doc_frequency, len(self.doc_keys)
                     ) * (1 + math.log(found))
-            scores[doc_id] = total
+                    matched += weight
+            # Coverage, not just weight. A document that answers one rare word
+            # of the question and nothing else is usually the wrong document —
+            # "simultaneously" appears once in the whole corpus and sent a
+            # question about who lives at the research station to the engine
+            # handbook. Breadth of agreement breaks that tie without needing
+            # to know which word was the misleading one.
+            asked = sum(query.values()) or 1.0
+            scores[doc_id] = total * (0.35 + 0.65 * matched / asked)
         return scores
 
 

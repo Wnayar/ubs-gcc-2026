@@ -41,6 +41,25 @@ _MAPS: dict[str, dict] = {}
 _MAP_ORDER: list[str] = []
 MAX_MAPS = 32
 
+# The per-hop `go` tool is called with {from, to, moves_left} and no map_id, so
+# the only way it can price a hop is to remember which map the journey is on.
+_LAST_MAP_ID: str | None = None
+
+
+def remember_map_id(map_id: str) -> None:
+    global _LAST_MAP_ID
+    if isinstance(map_id, str) and map_id.strip():
+        _LAST_MAP_ID = map_id.strip()
+
+
+def last_map_id() -> str | None:
+    return _LAST_MAP_ID
+
+
+def forget_map_id() -> None:
+    global _LAST_MAP_ID
+    _LAST_MAP_ID = None
+
 
 def remember(map_id: str, graph: dict) -> dict:
     """Cache a parsed map. A journey re-reads the same map on every hop, and
@@ -92,6 +111,7 @@ def parse_graph(payload: object) -> dict:
 
 
 def load_graph(map_id: str) -> dict:
+    remember_map_id(map_id)
     if map_id in _MAPS:
         return _MAPS[map_id]
     url = f"{HOST}/graph"

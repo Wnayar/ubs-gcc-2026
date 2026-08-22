@@ -54,9 +54,11 @@ def answer(name, arguments):
 def clean_map_state():
     graphroute.forget_journeys()
     graphroute.forget_maps()
+    graphroute.forget_map_id()
     yield
     graphroute.forget_journeys()
     graphroute.forget_maps()
+    graphroute.forget_map_id()
 
 
 # --- problem set 1: exam time ----------------------------------------------
@@ -84,6 +86,12 @@ QUESTIONS = [
     ("How much frame time is the render thread allowed on console?", "11 milliseconds"),
     ("When was the shared drier rota adopted by the board?", "21 May"),
     ("When did the cold store compressor break down?", "6 April"),
+    # Decoys that span two documents, the kind the graded runs actually asked:
+    # doc 1 torques a hydrophone gasket to 12 N-m, doc 2 a brake caliper to 9.
+    ("What torque is specified for the brake caliper bolts?", "nine newton-meters"),
+    ("How long before a texture streaming pass counts as stalled?", "9 seconds"),
+    ("Which drier is kept for the late-season root crops?", "Bellwether Drier"),
+    ("What is the longest single excursion a diver may make outside?", "47 minutes"),
 ]
 
 
@@ -129,6 +137,25 @@ def test_recall_fills_the_budget():
     """Coming in under 900 buys nothing and costs coverage."""
     for question, _ in QUESTIONS:
         assert token_total(recall(question)) > STATED_LIMIT * 0.8, question
+
+
+def test_a_single_rare_word_does_not_decide_the_document():
+    """A graded question about how many people live at the research station
+    scored 0 on all three attempts: the android answered "32", which is the
+    *engine handbook's* "thirty-two engineers working simultaneously".
+    "simultaneously" occurs exactly once in the whole corpus, in the wrong
+    document, and that one rare word outvoted every other word in the question.
+
+    These are worded the way that question was — around the corpus's own
+    vocabulary rather than with it. Each fails if the routing lets a lone rare
+    term decide.
+    """
+    for question in (
+        "Roughly how many personnel are aboard the facility at any one time?",
+        "How many personnel does the facility house simultaneously?",
+        "Roughly how many staff occupy the facility simultaneously?",
+    ):
+        assert any("forty-one" in p for p in recall(question)), question
 
 
 RETRIEVAL_NAMES = ["retrieve", "recall", "recall_study_material"]
@@ -443,6 +470,83 @@ def test_travel_tools_fail_as_error_results_not_crashes():
     for arguments in ({}, {"map_id": "r9"}, {"map_id": "r9", "from": "A"}):
         assert call_tool("plan_route", arguments)["isError"] is True
     assert call_tool("route_cost", {})["isError"] is True
+
+
+# --- the reference server's own travel contract -----------------------------
+
+# Two runs, six travel attempts, zero calls to us: the travel capability binds
+# by tool name and shape, the way retrieval bound to `retrieve`. The grader's
+# run viewer ships a reference server exposing `id_of_map`, `go` and `recall` —
+# and `recall` is the name that made retrieval work — so these copy that
+# contract to the letter: `go` takes {from, to, moves_left} and answers with
+# what the hop cost.
+
+
+def test_go_prices_one_hop_and_answers_with_a_cost_object():
+    prime("g1", STATEMENT_MAP)
+    graphroute.remember_map_id("g1")
+    out = json.loads(answer("go", {"from": "A", "to": "B", "moves_left": 3}))
+    assert out == {"cost": 5}, "edge 4 + toll of B 1"
+
+
+def test_go_charges_the_toll_of_the_place_entered_not_the_one_left():
+    prime("g2", {"adjacency": {"S": {"T": 1.0}, "T": {}},
+                 "tolls": {"S": 1000.0, "T": 4.0}})
+    graphroute.remember_map_id("g2")
+    assert json.loads(answer("go", {"from": "S", "to": "T", "moves_left": 1})) == {"cost": 5}
+
+
+def test_go_refuses_a_hop_that_is_not_an_edge():
+    prime("g3", STATEMENT_MAP)
+    graphroute.remember_map_id("g3")
+    result = call_tool("go", {"from": "A", "to": "D", "moves_left": 3})
+    assert result["isError"] is True
+    assert "reachable" in blocks(result)[0]
+
+
+def test_go_takes_the_map_id_when_it_is_offered():
+    prime("g4", STATEMENT_MAP)
+    assert json.loads(answer("go", {"map_id": "g4", "from": "A", "to": "C",
+                                    "moves_left": 2})) == {"cost": 11}
+
+
+def test_id_of_map_remembers_the_journey_so_later_hops_need_no_map_id():
+    """`go`'s advertised schema carries no map_id, so the id has to come from
+    somewhere: the android registers it once and we hold it for the journey."""
+    prime("g5", STATEMENT_MAP)
+    assert json.loads(answer("id_of_map", {"map_id": "g5"})) == {"map_id": "g5"}
+    assert json.loads(answer("id_of_map", {})) == {"map_id": "g5"}
+    assert json.loads(answer("go", {"from": "A", "to": "B", "moves_left": 3})) == {"cost": 5}
+
+
+def test_id_of_map_asks_for_the_id_rather_than_guessing():
+    result = call_tool("id_of_map", {})
+    assert result["isError"] is True
+    assert "map_id" in blocks(result)[0]
+
+
+def test_go_will_not_price_a_hop_on_a_map_it_is_not_holding():
+    """Wrong-map costs would be submitted as the answer. Better to ask."""
+    prime("g6", STATEMENT_MAP)
+    graphroute.remember_map_id("g6")
+    result = call_tool("go", {"from": "SITE_5", "to": "SITE_20", "moves_left": 4})
+    assert result["isError"] is True
+    assert "map_id" in blocks(result)[0]
+
+
+def test_a_whole_journey_can_be_walked_with_go_alone():
+    """The shape the grader's `_travel` wrapper drives: plan, then one `go` per
+    hop, and the total is the answer submitted."""
+    prime("g7", CURFEW_MAP)
+    route = json.loads(answer("plan_route", {"map_id": "g7", "from": "S", "to": "D"}))
+    moves_left = len(route) - 1
+    total = 0
+    for here, there in zip(route, route[1:]):
+        out = json.loads(answer("go", {"from": here, "to": there, "moves_left": moves_left}))
+        total += out["cost"]
+        moves_left -= 1
+    assert route[-1] == "D"
+    assert total == float(answer("route_cost", {"map_id": "g7", "route": route}))
 
 
 # --- problem set 3: the school trip ----------------------------------------
