@@ -33,18 +33,25 @@ M, A, C, H, S, O, N = (
 IOS, ANDROID = "dev_ios_7f3a91", "dev_android_c2e4b8"
 IP = "10.0.0.1"
 
-# Phase 1 scores of the 369-point build, captured before Phase 2 was written. A
-# stream carrying no identity fields must still produce exactly these.
+# What Phase 1 scores on its own. A stream carrying no identity fields must produce
+# exactly these -- the point of the pin is that Phase 2 leaks nothing into a stream
+# that has no identity in it, which is what a Phase 2 evaluation re-tests.
+#
+# These are the DECAY_FREE_BANDS build. The 369-point build's numbers, one flag
+# away, were: example_2 0.11774, example_3 [_, _, 0.116985, 0.360534], example_4
+# [_, 0.11774, 0.140565, 0.73052], example_5 [_, 0.11774, 0.725981, 0.116235,
+# 0.887572], hf_temporal_A [_, 0.081431, 0.300193], hf_temporal_B [_, 0.081431,
+# 0.010033], hf_struct_recip [_, 0.584907].
 PHASE_1_BASELINE = {
     "example_1": [0.0],
-    "example_2": [0.0, 0.11774],
-    "example_3": [0.0, 0.0, 0.116985, 0.360534],
-    "example_4": [0.0, 0.11774, 0.140565, 0.73052],
-    "example_5": [0.0, 0.11774, 0.728354, 0.116235, 0.887572],
-    "hf_temporal_A": [0.0, 0.081431, 0.596019],
-    "hf_temporal_B": [0.0, 0.081431, 0.010033],
+    "example_2": [0.0, 0.11834],
+    "example_3": [0.0, 0.0, 0.11818, 0.362097],
+    "example_4": [0.0, 0.11834, 0.141292, 0.732918],
+    "example_5": [0.0, 0.11834, 0.728354, 0.118021, 0.889452],
+    "hf_temporal_A": [0.0, 0.109691, 0.596019],
+    "hf_temporal_B": [0.0, 0.109691, 0.080024],
     "hf_struct_self": [0.0],
-    "hf_struct_recip": [0.0, 0.584907],
+    "hf_struct_recip": [0.0, 0.69762],
 }
 
 
@@ -258,6 +265,45 @@ def test_identity_lift_is_bounded_by_the_structural_band():
         [(M, A, 0), (A, C, 1), (C, M, 2), (A, N, 3), (N, M, 4)], "b2"
     )
     assert onward < multi_loop
+
+
+def test_identity_can_never_move_a_transaction_out_of_its_band():
+    """The strong form, and the reason Phase 1 survives a Phase 2 evaluation: a
+    fully corroborated identity signal on the weakest member of a band still ranks
+    below the weakest member of the band above, whatever the graph looks like.
+
+    A lift that could cross a band would demote every structurally hotter transfer
+    that carries no identifier -- and Phase 1 measured under-scoring a hot
+    transaction at ~4x the cost of over-scoring a cold one.
+    """
+    from app.routers.phase3 import BANDS, _band_ceiling
+
+    structures = {
+        "isolated": [(O, S, 0)],
+        "onward": [(M, A, 0), (A, C, 1)],
+        "convergence": [(M, A, 0), (M, H, 1), (A, S, 2), (H, S, 3)],
+        "return": [(M, A, 0), (A, C, 1), (C, O, 2), (O, A, 3)],
+        "multi_loop": [(M, A, 0), (A, C, 1), (C, M, 2), (A, N, 3), (N, M, 4)],
+    }
+    for name, steps in structures.items():
+        bare = last(steps, f"c{name}")
+        tagged = last(
+            [(s[0], s[1], s[2], {"deviceId": IOS, "ipAddress": IP}) for s in steps],
+            f"cid{name}",
+        )
+        assert bare <= tagged < _band_ceiling(bare), name
+        assert _band_ceiling(bare) in BANDS, name
+
+
+def test_identity_only_evidence_ranks_below_every_real_flow():
+    """"Shared identity across disconnected components ... does not independently
+    establish risk": with no structure at all it gets the band below onward flow,
+    above a genuinely isolated pair and below the weakest real chain."""
+    from app.routers.phase3 import TIER_ONWARD
+
+    cross_component = stream(EXAMPLE_4, "z1")[-1]
+    weakest_flow = last(strip_identity([(M, A, 0), (A, C, 1)]), "z2")
+    assert 0.0 < cross_component < TIER_ONWARD <= weakest_flow
 
 
 # --- identity state follows the lookback window ----------------------------

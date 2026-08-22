@@ -15,7 +15,9 @@ from datetime import datetime, timedelta
 import pytest
 from fastapi.testclient import TestClient
 
+from app.ghost_value import ValueTrail
 from app.main import app
+from app.routers import phase3
 
 client = TestClient(app)
 
@@ -292,15 +294,20 @@ def test_cross_signal_identity_and_value_combine_at_a_convergence():
 
 
 def test_a_stream_of_identical_amounts_scores_exactly_as_phase_1_did():
-    """A Phase 3 evaluation re-tests every Phase 1 and Phase 2 requirement. The
-    369-point Phase 1 build ignored `amount` entirely, so a stream whose amounts
-    carry no progression must still produce its scores bit-for-bit."""
+    """A Phase 3 evaluation re-tests every Phase 1 and Phase 2 requirement. Phases 1
+    and 2 ignored `amount` entirely, so a stream whose amounts carry no progression
+    must still produce their scores bit-for-bit.
+
+    These are the current model's numbers (decay-free band placement, identity
+    contained inside its band), shared with
+    `tests/test_ghost_chains_phase2.py::PHASE_1_BASELINE`.
+    """
     baseline = {
-        "example_3": [0.0, 0.0, 0.116985, 0.360534],
-        "example_4": [0.0, 0.11774, 0.140565, 0.73052],
-        "example_5": [0.0, 0.11774, 0.728354, 0.116235, 0.887572],
-        "hf_temporal_A": [0.0, 0.081431, 0.596019],
-        "hf_struct_recip": [0.0, 0.584907],
+        "example_3": [0.0, 0.0, 0.11818, 0.362097],
+        "example_4": [0.0, 0.11834, 0.141292, 0.732918],
+        "example_5": [0.0, 0.11834, 0.728354, 0.118021, 0.889452],
+        "hf_temporal_A": [0.0, 0.109691, 0.596019],
+        "hf_struct_recip": [0.0, 0.69762],
     }
     runs = {
         "example_3": [(M, A, 100, 0), (M, H, 100, 1), (A, S, 100, 2), (H, S, 100, 3)],
@@ -316,6 +323,18 @@ def test_a_stream_of_identical_amounts_scores_exactly_as_phase_1_did():
     }
     for name, steps in runs.items():
         assert stream(steps, name) == baseline[name], name
+
+
+def test_flat_amounts_produce_no_value_evidence_at_all():
+    """The drift-proof half of the guarantee above: whatever the structural model is
+    tuned to, a trail whose amounts never change has nothing to confirm or contradict,
+    so `ValueTrail` must stay silent on every shape the earlier phases are scored on."""
+    trail = ValueTrail()
+    when = 0.0
+    for sender, receiver in [(M, A), (A, C), (C, H), (H, N), (M, H), (H, S)]:
+        assert trail.evidence(sender, 100.0, when) == (0.0, 0.0)
+        trail.record(sender, receiver, when, 100.0)
+        when += 60.0
 
 
 def test_value_evidence_never_lowers_a_structural_score():
@@ -460,3 +479,31 @@ def test_the_required_ordering_survives_the_sequences_being_spread_out(gap):
     four = spaced(EXAMPLE_4, f"q{gap}d")
     assert one == min(one, two, three, four)
     assert three == max(one, two, three, four)
+
+
+@pytest.mark.parametrize("decay_free", [True, False])
+@pytest.mark.parametrize("gap", [0, 1, 5, 15, 30])
+def test_the_required_ordering_holds_whichever_way_the_decay_flag_is_set(decay_free, gap):
+    """`DECAY_FREE_BANDS` is Phase 1's open lever, and the graded feedback
+    `TEMPORAL_DEVIATION: High` may yet send it back to False. Phase 3 must not be
+    what stops that: the statement's required ordering holds under both settings.
+
+    The spacings it survives do differ — decay-free holds out to 240 minutes, the
+    decaying build to 30, because decay erodes Example 2's already-shorter trail
+    fastest. Only the range common to both is pinned here; the wider decay-free range
+    is pinned by `test_the_required_ordering_survives_the_sequences_being_spread_out`.
+    """
+    original = phase3.DECAY_FREE_BANDS
+    phase3.DECAY_FREE_BANDS = decay_free
+    try:
+        def spaced(steps, prefix):
+            return last([(s[0], s[1], s[2], i * gap) for i, s in enumerate(steps)], prefix)
+
+        one = spaced(EXAMPLE_1, f"f{decay_free}{gap}a")
+        two = spaced(EXAMPLE_2, f"f{decay_free}{gap}b")
+        three = spaced(EXAMPLE_3, f"f{decay_free}{gap}c")
+        four = spaced(EXAMPLE_4, f"f{decay_free}{gap}d")
+        assert one == min(one, two, three, four)
+        assert three == max(one, two, three, four)
+    finally:
+        phase3.DECAY_FREE_BANDS = original

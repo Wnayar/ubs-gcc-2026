@@ -8,8 +8,9 @@
   <https://ghost-chains-0fdb9aeda564.herokuapp.com/phase/2>, 10 pages)
 - **Endpoints required:** unchanged — `GET /ghost-chains/health`,
   `POST /ghost-chains/reset`, `POST /ghost-chains/transactions`
-- **Submitted to controller:** no
-- **Score:**
+- **Submitted to controller:** yes
+- **Score:** ~368/400, same as Phase 1. Graded stream archived at
+  `docs/phases/ghost-chains/logs/2026-08-22-graded-runs.json`.
 
 ## What is new in Phase 2 (pages 7–8)
 
@@ -120,37 +121,44 @@ this phase — **`IDENTITY_DEVIATION`** ("disagreement detected in the evaluatio
 identity signals"). Severity is relative magnitude of disagreement and is computed
 dynamically; no absolute scores are ever disclosed.
 
-## Our model — identity as a lift on top of the Phase 1 structural score
+## Our model — structure picks the band, identity orders within it
 
 `app/ghost_identity.py` holds the whole of Phase 2; `app/routers/phase3.py` calls it
 after `structural_score` and combines the two. The structural function is
 **unchanged**, and with no identity fields anywhere in the stream every score is
 bit-for-bit what Phase 1 returns on its own — the five worked examples and all nine
 `hf-` grader probes are pinned by
-`test_identity_free_stream_matches_phase_1_baseline`, including the dedicated-cycle
-exemption's 0.596 on the intact 23 h probe.
+`test_identity_free_stream_matches_phase_1_baseline`.
 
 For each attribute *k* ∈ {`ipAddress`, `deviceId`} we derive an evidence value
 `E_k ∈ [0,1]` from where the transaction sits in the active graph, then:
 
 ```
-identity   = 1 - (1 - E_ip) * (1 - E_device)      # independent dimensions
-corroboration = CORROB_FLOOR + (1 - CORROB_FLOOR) * min(1, structural / TIER_RETURN)
-score      = structural + (1 - structural) * LIFT * identity * corroboration
+identity = 1 - (1 - E_ip) * (1 - E_device)        # independent dimensions
+ceiling  = top of the structural band this score is already in
+score    = structural + (ceiling - structural) * BAND_SHARE * identity
 ```
 
 - **`1 - (1-a)(1-b)`** is the statement's "independent dimensions": two attributes
   agreeing is more than either alone, but neither can saturate the other.
-- **Headroom form `s + (1-s)·x`** can never leave [0,1] and never *lowers* a
-  structural score. Deliberate: the Phase 1 post-mortems measured that under-scoring
-  a reference-hot transaction costs ~4× what over-scoring a cold one does, so
-  identity only ever adds.
-- **`corroboration`** is why identity is a *combined* signal. Without it the headroom
-  form would hand its biggest absolute lift to the transactions with no structure at
-  all — the exact opposite of "not automatic proof of risk on its own". At
-  `CORROB_FLOOR = 0.35`, a pure cross-component coincidence keeps about a third of
-  its lift, and a return-band transaction with the same identity evidence gets all
-  of it.
+- **The lift is a share of the band, not of the headroom to 1.0.** Phase 1 is a
+  ladder of structural bands (`nothing < onward < fan/convergence < return <
+  multi-loop`) with continuous signals refining *within* each band, and that
+  discipline is the whole reason Structural Consistency holds up in a busy graph.
+  Identity is now held to the same rule: at `BAND_SHARE = 0.9` it can claim most of
+  the room left in its own band and never the boundary itself, so a fully
+  corroborated identity signal on the weakest onward transfer still ranks below the
+  weakest convergence that carries no identifier at all. Pinned by
+  `test_identity_can_never_move_a_transaction_out_of_its_band`.
+- **It still never *lowers* a score** — the Phase 1 post-mortems measured
+  under-scoring a reference-hot transaction at ~4× the cost of over-scoring a cold
+  one, so disagreement adds less rather than subtracting.
+- **A structural 0.0 gets the band below onward flow.** Cross-component reuse with
+  no structure behind it is "a distinct coordination hint — not automatic proof of
+  risk on its own": it lands strictly above a genuinely isolated pair and strictly
+  below the weakest real chain, which is exactly the ordering the statement's
+  Example 4 describes. This replaces the old `corroboration` factor, which was
+  doing the same job with a second tunable knob.
 
 ### The five identity signals
 
@@ -188,21 +196,21 @@ sender *later in event time* than the transaction being scored is invisible to i
 
 | example | structural | with identity |
 |---|---|---|
-| 1 — consistent device along a chain | 0.141 | **0.185** |
-| 2 — new device on a branch | 0.140 | **0.169** |
-| 3 — device shifts mid-flow | 0.156 | **0.186** |
-| 4 — same IP, three disconnected components | 0.000 | **0.043** |
+| 1 — consistent device along a chain | 0.141 | **0.173** |
+| 2 — new device on a branch | 0.140 | **0.161** |
+| 3 — device shifts mid-flow | 0.156 | **0.175** |
+| 4 — same IP, three disconnected components | 0.000 | **0.020** |
 | a 4-leg return, no identity | 0.731 | 0.731 |
-| the same return, one device throughout | 0.731 | **0.763** |
+| the same return, one device throughout | 0.731 | **0.743** |
 
 Holding the structure fixed (`M→A→C` tagged `dev_ios_7f3a91`, then a third leg
 `C→H`), the identity ladder is:
 
 | third leg | score |
 |---|---|
-| keeps the device | **0.185** |
-| switches to another device | 0.170 |
-| drops the device | 0.169 |
+| keeps the device | **0.173** |
+| switches to another device | 0.162 |
+| drops the device | 0.161 |
 | no identity anywhere in the chain | 0.141 |
 
 Switching and dropping land close together *here* by arithmetic, not by design: a
@@ -212,7 +220,32 @@ one-leg chain it falls behind (pinned by
 `test_a_dropped_identifier_weighs_the_trail_it_broke`).
 
 Example 4 sits above a structurally isolated pair (0.0) and below ordinary onward
-flow — a hint, not proof.
+flow — a hint, not proof. Under band containment that is now true *by construction*
+rather than by arithmetic: with no structure at all, the ceiling is `TIER_ONWARD`,
+so Example 4 cannot reach 0.08 however many components share the address
+(`test_identity_only_evidence_ranks_below_every_real_flow`).
+
+### What replacing the headroom lift actually changed
+
+Measured on a 96-transaction motif stream shaped like the graded dataset (six blocks
+of 16 with onward chains, fan-ins, convergences, returns and multi-loops planted at
+fixed offsets), 60 of them carrying at least one identity field:
+
+| | old headroom lift | band-contained |
+|---|---|---|
+| transactions moved into a higher band | 6 | **0** |
+| largest band jump | 1 | **0** |
+| Spearman vs the pure structural score | 0.9578 | 0.9559 |
+| largest single lift | 0.1577 | 0.1357 |
+
+So the shipped model was **not** wildly mis-scoring — it is a tighter change than it
+looks, and honesty about that matters when the next result comes back. But six
+band crossings on a stream this size is not nothing: run 7 priced a demotion at
+~4 points, and a promotion across a band demotes every structurally hotter
+transaction that happens to carry no identifier. The old model reached **0.2993** on
+a long consistently-tagged chain — one thousandth under the 0.30 fan boundary, which
+is a coincidence of the constants rather than a property of the design. The
+contained form cannot get there by construction.
 
 ## Measured cost
 
@@ -225,6 +258,11 @@ case — costs 0.019 ms.
 
 ## Assumptions we made
 
+0. **Identity never changes which structural band a transaction is in.** The
+   statement asks us to "combine identity scoring with structural scoring", and a
+   Phase 2 evaluation re-tests every Phase 1 requirement — the structural ranking is
+   still being scored underneath. Identity that could jump a band would be
+   overwriting the model that scored 369/400 rather than combining with it.
 1. **Identity never lowers a score.** Ex. 2 and 3 describe identity *disagreement*
    as weakening the single-cluster hypothesis, not as exonerating; the statement only
    ever says "assign a higher risk score when identity evidence increases combined
@@ -265,6 +303,37 @@ case — costs 0.019 ms.
 11. **Amounts are still ignored.** The statement mentions "value-flow evidence" once,
    as something that *may* be required to interpret Ex. 4; it defines no amount
    semantics, and Phase 1 deliberately has none. Left for Phase 3.
+
+## What the captured graded stream says
+
+The capture worked. `GET /ghost-chains/debug/stream` on the branch service held
+**both** evaluations whole — 220 entries, split on the `/reset` markers into two
+runs of 109 — and they are archived at
+`docs/phases/ghost-chains/logs/2026-08-22-graded-runs.json`. Replaying either run
+through `app/routers/phase3.py` reproduces all 109 answers exactly, so the archive
+is a faithful offline copy of the evaluator and every question below was settled by
+measurement rather than argument.
+
+**The Phase 1 stream carries no identity fields. The Phase 2 stream does.** Run 1:
+zero `ipAddress`, zero `deviceId`, in all 109. Run 2: the same 109 txIds over
+freshly generated entities, with `ipAddress` on 55 and `deviceId` on 67. Two things
+follow:
+
+- Phase 1's score is **purely the structural model**. No identity change can move
+  it — the whole Phase 2 model never fires on a single graded Phase 1 transaction.
+  So the two phases need two different levers, and this was worth knowing before
+  spending another run.
+- The identity model *is* live in Phase 2, on 67 of 109 transactions.
+
+**Containment was doing real work.** On this exact stream the headroom lift it
+replaced promoted **7** transactions out of their structural band — `txn-68`
+0.230 → 0.344 and `txn-80` 0.035 → 0.100 among them — while the band-contained form
+promotes **0**, at a Spearman against the pure structural score of 0.9869 versus
+0.9840. Pinned against the archive by
+`test_identity_never_moves_a_graded_transaction_out_of_its_band`.
+
+That said: both runs scored ~368, the same as runs 8 and 9 before any of this. The
+identity work has not yet been shown to be worth points — only to be better behaved.
 
 ## Clarifications from challenge developers
 

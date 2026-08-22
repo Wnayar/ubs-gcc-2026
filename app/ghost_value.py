@@ -46,11 +46,31 @@ W_REVERSAL = 0.85
 REVERSAL_FLOOR = 0.55
 K_EXCESS = 0.05
 
+# ...but only in proportion to how much "prior reduction along the same path" there
+# actually was to reverse. A chain that has been shedding value at every hop and then
+# grows is the statement's Example 3; a trail that was already erratic has no
+# established reduction for this hop to contradict. On the real graded stream this is
+# the difference between a signal that fires on 39% of transactions (a coin flip, on
+# amounts that are essentially random) and one that concentrates on the layering
+# shape the statement actually describes.
+#
+# With no prior ratio at all there is nothing established either way, and the
+# statement still calls a single step up a value observation (its Phase 2 + Phase 3
+# cross-signal example is exactly that shape), so it counts at half strength.
+NO_PRIOR_ESTABLISHED = 0.5
+
 # The trail failing to confirm a single progression is the weaker half of the signal:
 # it is what separates the statement's branching examples (a hop keeping half, then a
 # hop keeping 98%) from its single consistent chain, without ever approaching what an
-# outright reversal is worth.
-W_INCOHERENCE = 0.22
+# outright reversal is worth. Unlike a reversal it never changes a transaction's band.
+#
+# Sized against the band architecture, not guessed: Example 2's structural score sits
+# 0.016 *below* Example 1's (its trail is a hop shorter), and the statement requires
+# Example 1 lowest of the four, so this has to buy more than that gap inside the
+# onward band. A within-band share of 0.9 across the room left to TIER_FAN makes the
+# break-even 0.223 -- which is why the 0.22 tuned against the old headroom lift, where
+# the same evidence bought four times as much, no longer clears it.
+W_INCOHERENCE = 0.45
 
 # What counts as "exceeds the preceding step". Amounts carry fees and rounding, and a
 # hop that comes back a hundredth of a percent higher is an artefact, not a reversed
@@ -154,19 +174,25 @@ class ValueTrail:
 
     # --- evidence ----------------------------------------------------------
 
-    def evidence(self, sender: str, amount: float, when: float) -> float:
+    def evidence(self, sender: str, amount: float, when: float) -> tuple[float, float]:
         """How far this transfer's amount contradicts the flow segment it extends.
 
-        Zero whenever there is nothing to contradict: no inferred segment feeding
-        the sender, or a trail whose retention is uniform and not reversed. A
+        Returns `(reversal, incoherence)` **separately**, because the statement ranks
+        them differently and the router spends them differently. A reversal is "a
+        direct contradiction" that has to outrank a structural convergence, so it is
+        band-worthy evidence; an incoherent trail is the divergence/convergence case
+        the statement explicitly declines to rank, so it only orders within a band.
+
+        Both are zero whenever there is nothing to contradict: no inferred segment
+        feeding the sender, or a trail whose retention is uniform and not reversed. A
         stream in which every amount is the same therefore produces no value signal
         at all, and Phases 1 and 2 score exactly as they did.
         """
         if not usable(amount):
-            return 0.0  # nothing that can be read as value carried onward
+            return 0.0, 0.0  # nothing that can be read as value carried onward
         trail = self.segment(sender, when)
         if not trail:
-            return 0.0
+            return 0.0, 0.0
 
         amounts = trail + [amount]
         ratios = [amounts[i] / amounts[i - 1] for i in range(1, len(amounts))]
@@ -177,9 +203,18 @@ class ValueTrail:
         final = ratios[-1]
         reversal = 0.0
         if final > 1.0 + REVERSAL_TOLERANCE:
-            reversal = W_REVERSAL * (
-                REVERSAL_FLOOR
-                + (1.0 - REVERSAL_FLOOR) * saturate(final - 1.0, K_EXCESS)
+            prior = ratios[:-1]
+            if prior:
+                established = sum(1 for r in prior if r <= 1.0) / len(prior)
+            else:
+                established = NO_PRIOR_ESTABLISHED
+            reversal = (
+                W_REVERSAL
+                * established
+                * (
+                    REVERSAL_FLOOR
+                    + (1.0 - REVERSAL_FLOOR) * saturate(final - 1.0, K_EXCESS)
+                )
             )
 
         # ...and whether the trail confirms a single progression at all. One hop
@@ -190,6 +225,4 @@ class ValueTrail:
             widest, tightest = max(ratios), min(ratios)
             incoherence = W_INCOHERENCE * ((widest - tightest) / widest)
 
-        # independent dimensions, as Phase 2 combines its two attributes: a reversal
-        # and an incoherent trail say different things, and neither saturates the other
-        return min(1.0, 1.0 - (1.0 - reversal) * (1.0 - incoherence))
+        return min(1.0, reversal), min(1.0, incoherence)

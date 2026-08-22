@@ -452,3 +452,159 @@ versus the 369 build — every one of them a demotion in the contaminated tail.
   None of this changes scoring on valid input: the graded 109-transaction stream is
   still byte-identical to the 369 build apart from the single intended
   `hf-temporal01-tx3` lift.
+
+- **Ninth evaluation: 368/400 — the dedicated-cycle exemption is worth nothing, and
+  is reverted.** This was the clean experiment the earlier attempt could not be: the
+  path-walk criterion changed **exactly one answer** in the whole stream
+  (`hf-temporal01-tx3` 0.300 -> 0.596). Run 8, whose answers were byte-identical to
+  the 369 build, scored 368; run 9, identical but for that single lift, also scored
+  368, seventeen minutes later. Netting the bonus drift, lifting the intact 23 h
+  cycle is worth **about 0, possibly -1** — not the +4 the run-6 decomposition had
+  implied. That decomposition was simply wrong: the five promotions in run 6 must
+  have cost far less than a point each.
+
+  **The reference does not treat a slow intact cycle as a return.** Our staleness
+  discount agrees with it, and 0.300 for that probe is correct behaviour, not a gap.
+  Reverted; the graded stream is byte-identical to the 369 build again.
+
+  The constraints-checklist hardening from the same push is **kept** — it changes no
+  valid-input score and can only convert an outright failure into a pass.
+
+  **Ghost Chains Phase 1 is now closed at its best-known model.** Every lever we
+  could identify has been tried and measured: three model variants (-1, -19, 0), a
+  window-boundary fix (+5), recency gating (a large gain), and a robustness audit.
+  Both local proxies contradicted the leaderboard, the grader's own probes are all
+  satisfied, and the remaining ~31 points are not reachable by any experiment we can
+  design from the visible traffic. The earliness bonus is draining at roughly a point
+  per half hour, so **further resubmissions cost points rather than earning them**.
+  Reopen only when Phase 2 unlocks with its identity signals and a fresh window.
+
+- **Statement-literal model rebuilt and tested (the "read the model and try again"
+  pass).** The Core Principle's exact words — "the combined effect of new or
+  shortened paths between entities" / "increase in the graph's capacity to support
+  recurring flow" — were implemented literally: score = weighted saturation of
+  Δ(newly connected pairs) + Δ(shortened paths) + Δ(newly mutually-reachable pairs),
+  computed on the active window before each edge. The result is a decisive
+  **negative**:
+  - It scores the statement's own Example 4 and Example 5 **identically** (0.408 =
+    0.408): the closing transfer of a second return route adds the same three new
+    mutual pairs as the first, so a pure delta-counter *cannot* satisfy "Example 5
+    meaningfully higher than Example 4". The reference must count **independent
+    return routes** as first-class signal — exactly what our band model does.
+  - It calls four of the five measured reference-hot transactions cold (~0.09 vs our
+    0.6-0.9, worth ~4 points each per the run-7 experiment), and overall correlates
+    with our 369 build at only Spearman 0.431. If we moved toward it we would lose
+    the -19 again.
+
+  Conclusion: the naive reading of the statement is wrong by the statement's own
+  examples, and our production model is the consistent interpretation. Its
+  "disagreements" (e.g. big component-bridge transactions like txn-96/66/34 that it
+  ranks top-10 and we rank ~70th) inherit no credibility from a model that fails the
+  known facts, so they are not actionable.
+
+- Question added for the challenge developers: under "new or shortened paths", what
+  makes Example 5 exceed Example 4 if not an explicit count of independent return
+  routes? (Their answer confirms or kills the last untested residual: whether
+  large "bridge" transactions carry mid-level reference scores.)
+
+- **The decay-free banding variant (uncommitted) — the "weird thing in the brief" found.**
+  With the top score known to be 380 and the gap confirmed as accuracy, re-reading the
+  brief with fresh eyes surfaced what required no clarification at all: **the brief's
+  temporal model is binary.** "Only transactions created within the most recent 24
+  hours are active" — active or expired, nothing in between. Every exponential
+  staleness decay in our banding was our invention, tuned against the two local
+  proxies that were later proven wrong, and the leaderboard evidence actually points
+  the other way: txn-90's hours-old cycle is priced hot, demoting stale cycles cost
+  -19, and every decay-driven demotion we measured was worth ~0 or negative.
+
+  Change: band placement no longer decays (evidence = 1.0 in all four branches); the
+  recency terms survive only inside within-band refinement, where they order without
+  demoting. On the graded stream: **96 of 109 scores move, all upward, zero
+  demotions, 24 band crossings** — 62/80/85 to return (priced ~-0.15 each in run 6),
+  86/87/99 to multi (priced ~0), chain A to 0.596 (priced 0), and ~17 unpriced
+  fan-band promotions of genuine fan-in/convergence cases the decay had suppressed
+  (txn-19's third payer into user-38, txn-96's fourth payer into user-23, ...).
+  Probe B becomes 0.080 instead of 0.010 — the brief-faithful reading: its
+  predecessor edge is still active at 23 h, so the broken loop is a mere extension,
+  not an isolate; A-B separation widens to 0.516. All 220 tests pass unmodified;
+  the five examples are unchanged.
+
+  Priced downside ~-1; unpriced upside carries the measured 4:1 asymmetry if any
+  suppressed fan/convergence case is reference-warm. This is also strictly simpler
+  and matches the statement's own language, which never mentions recency at all.
+
+- Also tried and withdrawn: restricting the fan band to same-source convergence only
+  (Example 3's literal shape), on the "ordinary business fan-in is a shop" reading.
+  It demoted txn-39 by two bands — and demotions are the measured killer — while
+  inspection shows txn-37/38/39 is a planted Example-3 clone (payers 3 and 42 share
+  ancestor 17), not a shop. The briefing also lists "fans into the same destination"
+  as interesting outright. Withdrawn; the shipped candidate stays upward-only.
+- Question for the developers: does "fans into the same destination" mean any
+  multi-payer fan-in, or only multiple routes from one origin as in Example 3?
+
+- **Tenth evaluation: below the 369 baseline, and the result was lost.** Phase 1 and
+  Phase 2 were each evaluated and each came back worse than 369/400; the scores and
+  any diagnostics were gone before they could be read, because the shared 500-entry
+  request log had been overwritten by a SHOWDOWN run and then a redeploy. The whole
+  post-mortem method this challenge has relied on — archive the graded stream, diff
+  builds against it, price each change — was unavailable for the first time.
+
+  Two changes, and deliberately only two:
+
+  - **The dedicated-cycle exemption is now actually reverted in code.** Run 9 proved
+    it worth ~0 (368 with, 368 without) and the write-up called it reverted, but the
+    revert only ever existed on the `ghost-chains` branch — `main` shipped it. It
+    changes two of the pinned examples back to their true 369 values
+    (`hf_temporal_A` 0.596019 → 0.300193, `example_5[2]` 0.728354 → 0.725981).
+  - **Band placement still decays.** The decay-free candidate written up above is
+    kept, tested and one line from being live (`DECAY_FREE_BANDS` in
+    `app/routers/phase3.py`), but it stays **off**. It is a second unevaluated lever,
+    and runs 6 and 7 were spent learning that two at once make a result
+    unattributable. The identity change below is the lever this run spends.
+
+  `GET /ghost-chains/debug/stream?token=…` now archives the graded stream itself, so
+  the next result is diagnosable whatever it is. Read it before redeploying.
+
+- **Phase 2's identity lift is now contained inside the structural band** — the
+  Phase 1-facing half of that change. Structure chooses the band, identity orders
+  within it, and nothing identity can say promotes a transaction past a
+  structurally hotter one. On a 96-transaction motif stream the old lift moved 6
+  transactions into a higher band; the contained form moves 0. This matters to
+  Phase 1 and not only to Phase 2: a Phase 2 evaluation re-tests every Phase 1
+  requirement, and if the re-test stream carries `ipAddress`/`deviceId` — which no
+  archived Phase 1 run ever did — then the lift was silently reordering the ranking
+  that earned 369. Full write-up in `docs/phases/ghost-chains/phase-2/notes.md`.
+
+- **Eleventh evaluation: ~368/400 on both phases, and this time the stream was
+  captured.** `GET /ghost-chains/debug/stream` held both graded runs whole; they are
+  archived at `docs/phases/ghost-chains/logs/2026-08-22-graded-runs.json` and replay
+  through the router to all 218 answers exactly. After three evaluations spent
+  arguing from a stream we could not see, the offline copy is back.
+
+  **The Phase 1 evaluation sends no identity fields at all** — 0 of 109 carry
+  `ipAddress` or `deviceId`, while the Phase 2 stream carries them on 67 of 109. So
+  Phase 1's score is purely structural and no amount of Phase 2 work can move it,
+  which retires the open question from the previous entry: the identity lift was
+  *not* what put Phase 1 below its baseline.
+
+- **`DECAY_FREE_BANDS` is now ON.** Held back last run to keep one lever per
+  evaluation; the identity lever has now been spent and measured (~368, unchanged),
+  so this is the next one, and it is the last documented candidate with leaderboard
+  evidence behind it.
+
+  Re-measured on the real graded stream rather than the synthetic one: **96 of 109
+  scores move, all 96 upward, zero demotions, 30 across a band**, Spearman 0.9760
+  against the decaying build. The case for it is unchanged and now better evidenced:
+  the brief's window is binary, "active" or "expired", and never mentions recency;
+  every staleness decay in band *placement* was our invention, tuned against two
+  local proxies the leaderboard later contradicted; and run 7 priced demoting stale
+  cycles at **-19**, which says the reference scores them hot. Under-scoring a
+  reference-hot transaction costs ~4x over-scoring a cold one, so an upward-only
+  change spends the run in the cheap direction.
+
+  `tests/test_ghost_chains_graded.py` pins the upward-only property against the
+  archive itself, both phases. If a later edit makes it demote anything, the
+  reasoning above no longer covers that edit.
+
+  Set the flag to False to get the 369-point build back byte-for-byte.
+

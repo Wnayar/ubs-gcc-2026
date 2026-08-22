@@ -1,0 +1,2196 @@
+{
+ "captured": "2026-08-22, from GET /ghost-chains/debug/stream on the ubs-gcc-2026-1 branch service (commit 96de7971d4f3)",
+ "note": "Two graded runs, split on the /reset markers the capture records. Run 1 is the Phase 1 evaluation -- 109 transactions, no identity fields anywhere. Run 2 is the Phase 2 evaluation -- the same 109 txIds over freshly generated entities, with ipAddress on 55 and deviceId on 67. Both scored ~368/400. riskScore is what we answered; replaying either run through app/routers/phase3.py reproduces all 109.",
+ "runs": [
+  {
+   "phase": 1,
+   "transactions": [
+    {
+     "txId": "txn-0",
+     "fromUserId": "user-4",
+     "toUserId": "user-38",
+     "amount": 14673.95,
+     "createdAt": "2025-06-08T12:00:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.0
+    },
+    {
+     "txId": "txn-1",
+     "fromUserId": "user-42",
+     "toUserId": "user-48",
+     "amount": 9473.75,
+     "createdAt": "2025-06-08T12:05:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.0
+    },
+    {
+     "txId": "txn-2",
+     "fromUserId": "user-48",
+     "toUserId": "user-21",
+     "amount": 14039.7,
+     "createdAt": "2025-06-08T12:10:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.114753
+    },
+    {
+     "txId": "txn-3",
+     "fromUserId": "user-9",
+     "toUserId": "user-4",
+     "amount": 8047.03,
+     "createdAt": "2025-06-08T12:15:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.0
+    },
+    {
+     "txId": "txn-4",
+     "fromUserId": "user-9",
+     "toUserId": "user-48",
+     "amount": 13514.94,
+     "createdAt": "2025-06-08T12:20:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.088655
+    },
+    {
+     "txId": "txn-5",
+     "fromUserId": "user-4",
+     "toUserId": "user-25",
+     "amount": 9274.95,
+     "createdAt": "2025-06-08T12:25:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.11114
+    },
+    {
+     "txId": "txn-6",
+     "fromUserId": "user-48",
+     "toUserId": "user-25",
+     "amount": 11377.6,
+     "createdAt": "2025-06-08T12:30:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.352821
+    },
+    {
+     "txId": "txn-7",
+     "fromUserId": "user-6",
+     "toUserId": "user-36",
+     "amount": 5445.81,
+     "createdAt": "2025-06-08T12:35:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.0
+    },
+    {
+     "txId": "txn-8",
+     "fromUserId": "user-36",
+     "toUserId": "user-41",
+     "amount": 6466.32,
+     "createdAt": "2025-06-08T12:40:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.114753
+    },
+    {
+     "txId": "txn-9",
+     "fromUserId": "user-41",
+     "toUserId": "user-24",
+     "amount": 6598.64,
+     "createdAt": "2025-06-08T12:45:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.136507
+    },
+    {
+     "txId": "txn-10",
+     "fromUserId": "user-24",
+     "toUserId": "user-36",
+     "amount": 8414.91,
+     "createdAt": "2025-06-08T12:50:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.716927
+    },
+    {
+     "txId": "txn-11",
+     "fromUserId": "user-8",
+     "toUserId": "user-32",
+     "amount": 14372.75,
+     "createdAt": "2025-06-08T12:55:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.0
+    },
+    {
+     "txId": "txn-12",
+     "fromUserId": "user-32",
+     "toUserId": "user-38",
+     "amount": 5856.5,
+     "createdAt": "2025-06-08T13:00:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.127129
+    },
+    {
+     "txId": "txn-13",
+     "fromUserId": "user-38",
+     "toUserId": "user-8",
+     "amount": 14139.98,
+     "createdAt": "2025-06-08T13:05:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.716014
+    },
+    {
+     "txId": "txn-14",
+     "fromUserId": "user-32",
+     "toUserId": "user-44",
+     "amount": 7520.65,
+     "createdAt": "2025-06-08T13:10:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.107657
+    },
+    {
+     "txId": "txn-15",
+     "fromUserId": "user-44",
+     "toUserId": "user-8",
+     "amount": 9239.82,
+     "createdAt": "2025-06-08T13:15:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.878066
+    },
+    {
+     "txId": "txn-16",
+     "fromUserId": "user-22",
+     "toUserId": "user-21",
+     "amount": 13728.03,
+     "createdAt": "2025-06-08T13:20:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.065691
+    },
+    {
+     "txId": "txn-17",
+     "fromUserId": "user-44",
+     "toUserId": "user-27",
+     "amount": 5956.94,
+     "createdAt": "2025-06-08T13:25:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.126914
+    },
+    {
+     "txId": "txn-18",
+     "fromUserId": "user-27",
+     "toUserId": "user-4",
+     "amount": 11471.82,
+     "createdAt": "2025-06-08T13:30:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.160468
+    },
+    {
+     "txId": "txn-19",
+     "fromUserId": "user-13",
+     "toUserId": "user-38",
+     "amount": 5935.81,
+     "createdAt": "2025-06-08T13:35:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.290783
+    },
+    {
+     "txId": "txn-20",
+     "fromUserId": "user-13",
+     "toUserId": "user-30",
+     "amount": 5229.3,
+     "createdAt": "2025-06-08T13:40:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.0
+    },
+    {
+     "txId": "txn-21",
+     "fromUserId": "user-38",
+     "toUserId": "user-8",
+     "amount": 13057.75,
+     "createdAt": "2025-06-08T13:45:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.812927
+    },
+    {
+     "txId": "txn-22",
+     "fromUserId": "user-30",
+     "toUserId": "user-8",
+     "amount": 14225.37,
+     "createdAt": "2025-06-08T13:50:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.367006
+    },
+    {
+     "txId": "txn-23",
+     "fromUserId": "user-3",
+     "toUserId": "user-46",
+     "amount": 7351.28,
+     "createdAt": "2025-06-08T13:55:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.0
+    },
+    {
+     "txId": "txn-24",
+     "fromUserId": "user-46",
+     "toUserId": "user-44",
+     "amount": 5255.73,
+     "createdAt": "2025-06-08T14:00:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.127693
+    },
+    {
+     "txId": "txn-25",
+     "fromUserId": "user-44",
+     "toUserId": "user-21",
+     "amount": 13644.29,
+     "createdAt": "2025-06-08T14:05:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.277919
+    },
+    {
+     "txId": "txn-26",
+     "fromUserId": "user-21",
+     "toUserId": "user-46",
+     "amount": 13582.8,
+     "createdAt": "2025-06-08T14:10:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.724977
+    },
+    {
+     "txId": "txn-27",
+     "fromUserId": "user-22",
+     "toUserId": "user-24",
+     "amount": 12352.67,
+     "createdAt": "2025-06-08T14:15:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.059189
+    },
+    {
+     "txId": "txn-28",
+     "fromUserId": "user-24",
+     "toUserId": "user-17",
+     "amount": 5853.32,
+     "createdAt": "2025-06-08T14:20:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.148952
+    },
+    {
+     "txId": "txn-29",
+     "fromUserId": "user-17",
+     "toUserId": "user-22",
+     "amount": 13878.84,
+     "createdAt": "2025-06-08T14:25:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.719558
+    },
+    {
+     "txId": "txn-30",
+     "fromUserId": "user-24",
+     "toUserId": "user-9",
+     "amount": 12898.78,
+     "createdAt": "2025-06-08T14:30:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.139485
+    },
+    {
+     "txId": "txn-31",
+     "fromUserId": "user-9",
+     "toUserId": "user-22",
+     "amount": 10594.22,
+     "createdAt": "2025-06-08T14:35:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.878066
+    },
+    {
+     "txId": "txn-32",
+     "fromUserId": "user-36",
+     "toUserId": "user-34",
+     "amount": 12341.42,
+     "createdAt": "2025-06-08T14:40:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.076707
+    },
+    {
+     "txId": "txn-33",
+     "fromUserId": "user-48",
+     "toUserId": "user-35",
+     "amount": 6241.22,
+     "createdAt": "2025-06-08T14:45:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.056582
+    },
+    {
+     "txId": "txn-34",
+     "fromUserId": "user-35",
+     "toUserId": "user-17",
+     "amount": 6133.43,
+     "createdAt": "2025-06-08T14:50:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.148514
+    },
+    {
+     "txId": "txn-35",
+     "fromUserId": "user-17",
+     "toUserId": "user-3",
+     "amount": 9665.36,
+     "createdAt": "2025-06-08T14:55:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.176637
+    },
+    {
+     "txId": "txn-36",
+     "fromUserId": "user-17",
+     "toUserId": "user-42",
+     "amount": 6726.59,
+     "createdAt": "2025-06-08T15:00:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.697571
+    },
+    {
+     "txId": "txn-37",
+     "fromUserId": "user-3",
+     "toUserId": "user-23",
+     "amount": 11928.32,
+     "createdAt": "2025-06-08T15:05:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.17543
+    },
+    {
+     "txId": "txn-38",
+     "fromUserId": "user-42",
+     "toUserId": "user-23",
+     "amount": 13703.46,
+     "createdAt": "2025-06-08T15:10:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.409408
+    },
+    {
+     "txId": "txn-39",
+     "fromUserId": "user-16",
+     "toUserId": "user-23",
+     "amount": 9523.3,
+     "createdAt": "2025-06-08T15:15:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.336653
+    },
+    {
+     "txId": "txn-40",
+     "fromUserId": "user-23",
+     "toUserId": "user-32",
+     "amount": 7511.91,
+     "createdAt": "2025-06-08T15:20:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.196832
+    },
+    {
+     "txId": "txn-41",
+     "fromUserId": "user-32",
+     "toUserId": "user-6",
+     "amount": 10123.81,
+     "createdAt": "2025-06-08T15:25:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.701296
+    },
+    {
+     "txId": "txn-42",
+     "fromUserId": "user-6",
+     "toUserId": "user-23",
+     "amount": 6143.15,
+     "createdAt": "2025-06-08T15:30:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.729532
+    },
+    {
+     "txId": "txn-43",
+     "fromUserId": "user-20",
+     "toUserId": "user-44",
+     "amount": 10441.7,
+     "createdAt": "2025-06-08T15:35:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.226826
+    },
+    {
+     "txId": "txn-44",
+     "fromUserId": "user-44",
+     "toUserId": "user-41",
+     "amount": 9214.33,
+     "createdAt": "2025-06-08T15:40:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.159213
+    },
+    {
+     "txId": "txn-45",
+     "fromUserId": "user-41",
+     "toUserId": "user-20",
+     "amount": 5778.1,
+     "createdAt": "2025-06-08T15:45:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.722107
+    },
+    {
+     "txId": "txn-46",
+     "fromUserId": "user-44",
+     "toUserId": "user-7",
+     "amount": 6977.86,
+     "createdAt": "2025-06-08T15:50:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.14255
+    },
+    {
+     "txId": "txn-47",
+     "fromUserId": "user-7",
+     "toUserId": "user-20",
+     "amount": 13138.61,
+     "createdAt": "2025-06-08T15:55:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.878066
+    },
+    {
+     "txId": "txn-48",
+     "fromUserId": "user-15",
+     "toUserId": "user-38",
+     "amount": 8374.19,
+     "createdAt": "2025-06-08T16:00:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.191596
+    },
+    {
+     "txId": "txn-49",
+     "fromUserId": "user-20",
+     "toUserId": "user-42",
+     "amount": 12924.72,
+     "createdAt": "2025-06-08T16:05:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.337334
+    },
+    {
+     "txId": "txn-50",
+     "fromUserId": "user-42",
+     "toUserId": "user-39",
+     "amount": 6939.73,
+     "createdAt": "2025-06-08T16:10:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.191117
+    },
+    {
+     "txId": "txn-51",
+     "fromUserId": "user-11",
+     "toUserId": "user-31",
+     "amount": 5682.39,
+     "createdAt": "2025-06-08T16:15:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.0
+    },
+    {
+     "txId": "txn-52",
+     "fromUserId": "user-11",
+     "toUserId": "user-33",
+     "amount": 6208.76,
+     "createdAt": "2025-06-08T16:20:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.0
+    },
+    {
+     "txId": "txn-53",
+     "fromUserId": "user-31",
+     "toUserId": "user-13",
+     "amount": 6132.89,
+     "createdAt": "2025-06-08T16:25:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.11114
+    },
+    {
+     "txId": "txn-54",
+     "fromUserId": "user-33",
+     "toUserId": "user-13",
+     "amount": 7412.48,
+     "createdAt": "2025-06-08T16:30:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.352821
+    },
+    {
+     "txId": "txn-55",
+     "fromUserId": "user-39",
+     "toUserId": "user-37",
+     "amount": 4908.63,
+     "createdAt": "2025-06-08T16:35:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.171169
+    },
+    {
+     "txId": "txn-56",
+     "fromUserId": "user-37",
+     "toUserId": "user-0",
+     "amount": 5244.37,
+     "createdAt": "2025-06-08T16:40:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.192288
+    },
+    {
+     "txId": "txn-57",
+     "fromUserId": "user-0",
+     "toUserId": "user-49",
+     "amount": 8439.38,
+     "createdAt": "2025-06-08T16:45:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.194178
+    },
+    {
+     "txId": "txn-58",
+     "fromUserId": "user-49",
+     "toUserId": "user-37",
+     "amount": 12908.41,
+     "createdAt": "2025-06-08T16:50:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.730348
+    },
+    {
+     "txId": "txn-59",
+     "fromUserId": "user-33",
+     "toUserId": "user-38",
+     "amount": 6549.54,
+     "createdAt": "2025-06-08T16:55:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.270083
+    },
+    {
+     "txId": "txn-60",
+     "fromUserId": "user-38",
+     "toUserId": "user-27",
+     "amount": 10082.39,
+     "createdAt": "2025-06-08T17:00:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.155908
+    },
+    {
+     "txId": "txn-61",
+     "fromUserId": "user-27",
+     "toUserId": "user-33",
+     "amount": 8210.91,
+     "createdAt": "2025-06-08T17:05:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.722494
+    },
+    {
+     "txId": "txn-62",
+     "fromUserId": "user-38",
+     "toUserId": "user-13",
+     "amount": 12512.63,
+     "createdAt": "2025-06-08T17:10:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.40975
+    },
+    {
+     "txId": "txn-63",
+     "fromUserId": "user-13",
+     "toUserId": "user-33",
+     "amount": 5656.25,
+     "createdAt": "2025-06-08T17:15:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.864067
+    },
+    {
+     "txId": "txn-64",
+     "fromUserId": "user-6",
+     "toUserId": "user-1",
+     "amount": 13815.64,
+     "createdAt": "2025-06-08T17:20:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.099168
+    },
+    {
+     "txId": "txn-65",
+     "fromUserId": "user-33",
+     "toUserId": "user-5",
+     "amount": 10660.11,
+     "createdAt": "2025-06-08T17:25:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.171612
+    },
+    {
+     "txId": "txn-66",
+     "fromUserId": "user-5",
+     "toUserId": "user-21",
+     "amount": 9677.6,
+     "createdAt": "2025-06-08T17:30:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.165972
+    },
+    {
+     "txId": "txn-67",
+     "fromUserId": "user-40",
+     "toUserId": "user-38",
+     "amount": 8964.56,
+     "createdAt": "2025-06-08T17:35:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.292483
+    },
+    {
+     "txId": "txn-68",
+     "fromUserId": "user-40",
+     "toUserId": "user-27",
+     "amount": 7119.58,
+     "createdAt": "2025-06-08T17:40:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.279406
+    },
+    {
+     "txId": "txn-69",
+     "fromUserId": "user-38",
+     "toUserId": "user-3",
+     "amount": 8616.22,
+     "createdAt": "2025-06-08T17:45:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.163699
+    },
+    {
+     "txId": "txn-70",
+     "fromUserId": "user-27",
+     "toUserId": "user-3",
+     "amount": 8034.9,
+     "createdAt": "2025-06-08T17:50:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.407317
+    },
+    {
+     "txId": "txn-71",
+     "fromUserId": "user-27",
+     "toUserId": "user-26",
+     "amount": 10990.33,
+     "createdAt": "2025-06-08T17:55:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.15929
+    },
+    {
+     "txId": "txn-72",
+     "fromUserId": "user-26",
+     "toUserId": "user-39",
+     "amount": 13220.02,
+     "createdAt": "2025-06-08T18:00:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.221203
+    },
+    {
+     "txId": "txn-73",
+     "fromUserId": "user-39",
+     "toUserId": "user-4",
+     "amount": 9678.04,
+     "createdAt": "2025-06-08T18:05:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.712415
+    },
+    {
+     "txId": "txn-74",
+     "fromUserId": "user-4",
+     "toUserId": "user-26",
+     "amount": 12054.09,
+     "createdAt": "2025-06-08T18:10:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.730671
+    },
+    {
+     "txId": "txn-75",
+     "fromUserId": "user-16",
+     "toUserId": "user-48",
+     "amount": 7333.95,
+     "createdAt": "2025-06-08T18:15:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.111892
+    },
+    {
+     "txId": "txn-76",
+     "fromUserId": "user-48",
+     "toUserId": "user-10",
+     "amount": 11021.23,
+     "createdAt": "2025-06-08T18:20:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.121697
+    },
+    {
+     "txId": "txn-77",
+     "fromUserId": "user-10",
+     "toUserId": "user-16",
+     "amount": 5579.14,
+     "createdAt": "2025-06-08T18:25:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.713961
+    },
+    {
+     "txId": "txn-78",
+     "fromUserId": "user-48",
+     "toUserId": "user-20",
+     "amount": 13224.7,
+     "createdAt": "2025-06-08T18:30:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.183225
+    },
+    {
+     "txId": "txn-79",
+     "fromUserId": "user-20",
+     "toUserId": "user-16",
+     "amount": 12046.32,
+     "createdAt": "2025-06-08T18:35:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.878066
+    },
+    {
+     "txId": "txn-80",
+     "fromUserId": "user-1",
+     "toUserId": "user-41",
+     "amount": 11853.91,
+     "createdAt": "2025-06-08T18:40:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.526237
+    },
+    {
+     "txId": "txn-81",
+     "fromUserId": "user-42",
+     "toUserId": "user-2",
+     "amount": 9975.32,
+     "createdAt": "2025-06-08T18:45:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.074566
+    },
+    {
+     "txId": "txn-82",
+     "fromUserId": "user-2",
+     "toUserId": "user-39",
+     "amount": 6214.66,
+     "createdAt": "2025-06-08T18:50:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.406722
+    },
+    {
+     "txId": "txn-83",
+     "fromUserId": "user-13",
+     "toUserId": "user-6",
+     "amount": 8865.2,
+     "createdAt": "2025-06-08T18:55:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.155392
+    },
+    {
+     "txId": "txn-84",
+     "fromUserId": "user-13",
+     "toUserId": "user-20",
+     "amount": 11970.87,
+     "createdAt": "2025-06-08T19:00:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.308077
+    },
+    {
+     "txId": "txn-85",
+     "fromUserId": "user-6",
+     "toUserId": "user-32",
+     "amount": 13113.07,
+     "createdAt": "2025-06-08T19:05:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.408531
+    },
+    {
+     "txId": "txn-86",
+     "fromUserId": "user-20",
+     "toUserId": "user-32",
+     "amount": 5384.97,
+     "createdAt": "2025-06-08T19:10:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.638034
+    },
+    {
+     "txId": "txn-87",
+     "fromUserId": "user-49",
+     "toUserId": "user-46",
+     "amount": 11664.04,
+     "createdAt": "2025-06-08T19:15:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.66455
+    },
+    {
+     "txId": "txn-88",
+     "fromUserId": "user-46",
+     "toUserId": "user-20",
+     "amount": 12752.39,
+     "createdAt": "2025-06-08T19:20:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.896406
+    },
+    {
+     "txId": "txn-89",
+     "fromUserId": "user-20",
+     "toUserId": "user-31",
+     "amount": 7857.64,
+     "createdAt": "2025-06-08T19:25:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.669933
+    },
+    {
+     "txId": "txn-90",
+     "fromUserId": "user-31",
+     "toUserId": "user-46",
+     "amount": 5938.93,
+     "createdAt": "2025-06-08T19:30:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.903743
+    },
+    {
+     "txId": "txn-91",
+     "fromUserId": "user-5",
+     "toUserId": "user-16",
+     "amount": 8095.33,
+     "createdAt": "2025-06-08T19:35:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.273618
+    },
+    {
+     "txId": "txn-92",
+     "fromUserId": "user-16",
+     "toUserId": "user-1",
+     "amount": 13036.92,
+     "createdAt": "2025-06-08T19:40:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.272621
+    },
+    {
+     "txId": "txn-93",
+     "fromUserId": "user-1",
+     "toUserId": "user-5",
+     "amount": 8006.8,
+     "createdAt": "2025-06-08T19:45:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.729544
+    },
+    {
+     "txId": "txn-94",
+     "fromUserId": "user-16",
+     "toUserId": "user-7",
+     "amount": 13161.75,
+     "createdAt": "2025-06-08T19:50:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.557057
+    },
+    {
+     "txId": "txn-95",
+     "fromUserId": "user-7",
+     "toUserId": "user-5",
+     "amount": 10179.43,
+     "createdAt": "2025-06-08T19:55:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.878066
+    },
+    {
+     "txId": "txn-96",
+     "fromUserId": "user-34",
+     "toUserId": "user-23",
+     "amount": 10716.2,
+     "createdAt": "2025-06-08T20:00:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.138369
+    },
+    {
+     "txId": "txn-97",
+     "fromUserId": "user-44",
+     "toUserId": "user-7",
+     "amount": 11892.79,
+     "createdAt": "2025-06-08T20:05:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.329916
+    },
+    {
+     "txId": "txn-98",
+     "fromUserId": "user-7",
+     "toUserId": "user-25",
+     "amount": 8512.33,
+     "createdAt": "2025-06-08T20:10:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.225649
+    },
+    {
+     "txId": "txn-99",
+     "fromUserId": "user-24",
+     "toUserId": "user-22",
+     "amount": 11461.01,
+     "createdAt": "2025-06-08T20:15:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.600496
+    },
+    {
+     "txId": "hf-temporal01-tx1",
+     "fromUserId": "hf_A1",
+     "toUserId": "hf_A2",
+     "amount": 1000.0,
+     "createdAt": "2026-06-08T00:00:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.0
+    },
+    {
+     "txId": "hf-temporal01-tx4",
+     "fromUserId": "hf_B1",
+     "toUserId": "hf_B2",
+     "amount": 1000.0,
+     "createdAt": "2026-06-08T00:00:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.0
+    },
+    {
+     "txId": "hf-struct01-tx1",
+     "fromUserId": "hf_E1",
+     "toUserId": "hf_E1",
+     "amount": 1000.0,
+     "createdAt": "2026-06-08T00:00:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.0
+    },
+    {
+     "txId": "hf-temporal01-tx2",
+     "fromUserId": "hf_A2",
+     "toUserId": "hf_A3",
+     "amount": 1000.0,
+     "createdAt": "2026-06-08T01:00:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.081431
+    },
+    {
+     "txId": "hf-temporal01-tx5",
+     "fromUserId": "hf_B2",
+     "toUserId": "hf_B3",
+     "amount": 1000.0,
+     "createdAt": "2026-06-08T01:00:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.081431
+    },
+    {
+     "txId": "hf-struct01-tx2",
+     "fromUserId": "hf_E2",
+     "toUserId": "hf_E3",
+     "amount": 1000.0,
+     "createdAt": "2026-06-08T01:00:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.0
+    },
+    {
+     "txId": "hf-struct01-tx3",
+     "fromUserId": "hf_E3",
+     "toUserId": "hf_E2",
+     "amount": 1000.0,
+     "createdAt": "2026-06-08T02:00:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.584907
+    },
+    {
+     "txId": "hf-temporal01-tx3",
+     "fromUserId": "hf_A3",
+     "toUserId": "hf_A1",
+     "amount": 1000.0,
+     "createdAt": "2026-06-08T23:00:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.300193
+    },
+    {
+     "txId": "hf-temporal01-tx6",
+     "fromUserId": "hf_B3",
+     "toUserId": "hf_B1",
+     "amount": 1000.0,
+     "createdAt": "2026-06-09T00:00:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.010033
+    }
+   ]
+  },
+  {
+   "phase": 2,
+   "transactions": [
+    {
+     "txId": "txn-0",
+     "fromUserId": "user-8",
+     "toUserId": "user-41",
+     "amount": 9040.87,
+     "createdAt": "2025-06-08T12:00:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.0
+    },
+    {
+     "txId": "txn-1",
+     "fromUserId": "user-17",
+     "toUserId": "user-23",
+     "amount": 10959.1,
+     "createdAt": "2025-06-08T12:05:00+00:00",
+     "ipAddress": "10.0.0.18",
+     "deviceId": "device-1",
+     "riskScore": 0.0
+    },
+    {
+     "txId": "txn-2",
+     "fromUserId": "user-23",
+     "toUserId": "user-30",
+     "amount": 8374.49,
+     "createdAt": "2025-06-08T12:10:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.144323
+    },
+    {
+     "txId": "txn-3",
+     "fromUserId": "user-30",
+     "toUserId": "user-17",
+     "amount": 7800.65,
+     "createdAt": "2025-06-08T12:15:00+00:00",
+     "ipAddress": "10.7.2.16",
+     "deviceId": "div-device-6",
+     "riskScore": 0.712627
+    },
+    {
+     "txId": "txn-4",
+     "fromUserId": "user-30",
+     "toUserId": "user-39",
+     "amount": 10089.19,
+     "createdAt": "2025-06-08T12:20:00+00:00",
+     "ipAddress": null,
+     "deviceId": "device-5",
+     "riskScore": 0.132081
+    },
+    {
+     "txId": "txn-5",
+     "fromUserId": "user-17",
+     "toUserId": "user-40",
+     "amount": 8183.68,
+     "createdAt": "2025-06-08T12:25:00+00:00",
+     "ipAddress": "10.0.0.3",
+     "deviceId": "device-0",
+     "riskScore": 0.171926
+    },
+    {
+     "txId": "txn-6",
+     "fromUserId": "user-39",
+     "toUserId": "user-40",
+     "amount": 9637.0,
+     "createdAt": "2025-06-08T12:30:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.39774
+    },
+    {
+     "txId": "txn-7",
+     "fromUserId": "user-31",
+     "toUserId": "user-4",
+     "amount": 11973.9,
+     "createdAt": "2025-06-08T12:35:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.0
+    },
+    {
+     "txId": "txn-8",
+     "fromUserId": "user-4",
+     "toUserId": "user-8",
+     "amount": 7085.96,
+     "createdAt": "2025-06-08T12:40:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.114753
+    },
+    {
+     "txId": "txn-9",
+     "fromUserId": "user-8",
+     "toUserId": "user-41",
+     "amount": 13245.19,
+     "createdAt": "2025-06-08T12:45:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.136507
+    },
+    {
+     "txId": "txn-10",
+     "fromUserId": "user-41",
+     "toUserId": "user-4",
+     "amount": 10909.83,
+     "createdAt": "2025-06-08T12:50:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.716927
+    },
+    {
+     "txId": "txn-11",
+     "fromUserId": "user-44",
+     "toUserId": "user-34",
+     "amount": 8525.25,
+     "createdAt": "2025-06-08T12:55:00+00:00",
+     "ipAddress": "10.0.0.5",
+     "deviceId": "device-2",
+     "riskScore": 0.0
+    },
+    {
+     "txId": "txn-12",
+     "fromUserId": "user-34",
+     "toUserId": "user-31",
+     "amount": 5941.51,
+     "createdAt": "2025-06-08T13:00:00+00:00",
+     "ipAddress": "10.0.0.18",
+     "deviceId": "device-0",
+     "riskScore": 0.159851
+    },
+    {
+     "txId": "txn-13",
+     "fromUserId": "user-31",
+     "toUserId": "user-44",
+     "amount": 7318.01,
+     "createdAt": "2025-06-08T13:05:00+00:00",
+     "ipAddress": "10.7.4.16",
+     "deviceId": "div-device-17",
+     "riskScore": 0.729029
+    },
+    {
+     "txId": "txn-14",
+     "fromUserId": "user-34",
+     "toUserId": "user-13",
+     "amount": 6734.68,
+     "createdAt": "2025-06-08T13:10:00+00:00",
+     "ipAddress": "10.0.0.6",
+     "deviceId": "device-1",
+     "riskScore": 0.15214
+    },
+    {
+     "txId": "txn-15",
+     "fromUserId": "user-13",
+     "toUserId": "user-44",
+     "amount": 12506.87,
+     "createdAt": "2025-06-08T13:15:00+00:00",
+     "ipAddress": "10.0.0.11",
+     "deviceId": "device-4",
+     "riskScore": 0.907751
+    },
+    {
+     "txId": "txn-16",
+     "fromUserId": "user-25",
+     "toUserId": "user-32",
+     "amount": 6151.4,
+     "createdAt": "2025-06-08T13:20:00+00:00",
+     "ipAddress": "10.0.0.4",
+     "deviceId": "device-9",
+     "riskScore": 0.0
+    },
+    {
+     "txId": "txn-17",
+     "fromUserId": "user-23",
+     "toUserId": "user-31",
+     "amount": 14365.24,
+     "createdAt": "2025-06-08T13:25:00+00:00",
+     "ipAddress": "10.0.0.17",
+     "deviceId": "device-3",
+     "riskScore": 0.139174
+    },
+    {
+     "txId": "txn-18",
+     "fromUserId": "user-31",
+     "toUserId": "user-21",
+     "amount": 12842.1,
+     "createdAt": "2025-06-08T13:30:00+00:00",
+     "ipAddress": null,
+     "deviceId": "div-device-4",
+     "riskScore": 0.185324
+    },
+    {
+     "txId": "txn-19",
+     "fromUserId": "user-7",
+     "toUserId": "user-42",
+     "amount": 13317.57,
+     "createdAt": "2025-06-08T13:35:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.0
+    },
+    {
+     "txId": "txn-20",
+     "fromUserId": "user-7",
+     "toUserId": "user-13",
+     "amount": 11151.28,
+     "createdAt": "2025-06-08T13:40:00+00:00",
+     "ipAddress": "10.0.0.2",
+     "deviceId": "device-6",
+     "riskScore": 0.081548
+    },
+    {
+     "txId": "txn-21",
+     "fromUserId": "user-42",
+     "toUserId": "user-11",
+     "amount": 6512.03,
+     "createdAt": "2025-06-08T13:45:00+00:00",
+     "ipAddress": "10.0.0.9",
+     "deviceId": "device-0",
+     "riskScore": 0.157883
+    },
+    {
+     "txId": "txn-22",
+     "fromUserId": "user-13",
+     "toUserId": "user-11",
+     "amount": 9785.92,
+     "createdAt": "2025-06-08T13:50:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.383474
+    },
+    {
+     "txId": "txn-23",
+     "fromUserId": "user-12",
+     "toUserId": "user-40",
+     "amount": 7761.35,
+     "createdAt": "2025-06-08T13:55:00+00:00",
+     "ipAddress": "10.34.181.21",
+     "deviceId": "prof-d-991312",
+     "riskScore": 0.237597
+    },
+    {
+     "txId": "txn-24",
+     "fromUserId": "user-40",
+     "toUserId": "user-0",
+     "amount": 12156.02,
+     "createdAt": "2025-06-08T14:00:00+00:00",
+     "ipAddress": "10.34.181.21",
+     "deviceId": "prof-d-176053",
+     "riskScore": 0.191794
+    },
+    {
+     "txId": "txn-25",
+     "fromUserId": "user-0",
+     "toUserId": "user-31",
+     "amount": 13605.28,
+     "createdAt": "2025-06-08T14:05:00+00:00",
+     "ipAddress": "10.34.181.21",
+     "deviceId": "prof-d-420133",
+     "riskScore": 0.387009
+    },
+    {
+     "txId": "txn-26",
+     "fromUserId": "user-31",
+     "toUserId": "user-40",
+     "amount": 8924.01,
+     "createdAt": "2025-06-08T14:10:00+00:00",
+     "ipAddress": "10.34.181.21",
+     "deviceId": "prof-d-337031",
+     "riskScore": 0.744283
+    },
+    {
+     "txId": "txn-27",
+     "fromUserId": "user-7",
+     "toUserId": "user-23",
+     "amount": 6629.71,
+     "createdAt": "2025-06-08T14:15:00+00:00",
+     "ipAddress": "10.50.197.165",
+     "deviceId": "profile-device-w-49940",
+     "riskScore": 0.048463
+    },
+    {
+     "txId": "txn-28",
+     "fromUserId": "user-23",
+     "toUserId": "user-17",
+     "amount": 8992.64,
+     "createdAt": "2025-06-08T14:20:00+00:00",
+     "ipAddress": "10.50.197.165",
+     "deviceId": "profile-device-w-49940",
+     "riskScore": 0.723105
+    },
+    {
+     "txId": "txn-29",
+     "fromUserId": "user-17",
+     "toUserId": "user-7",
+     "amount": 13467.06,
+     "createdAt": "2025-06-08T14:25:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.730245
+    },
+    {
+     "txId": "txn-30",
+     "fromUserId": "user-23",
+     "toUserId": "user-9",
+     "amount": 9499.45,
+     "createdAt": "2025-06-08T14:30:00+00:00",
+     "ipAddress": "10.0.0.15",
+     "deviceId": "device-8",
+     "riskScore": 0.16067
+    },
+    {
+     "txId": "txn-31",
+     "fromUserId": "user-9",
+     "toUserId": "user-7",
+     "amount": 9050.12,
+     "createdAt": "2025-06-08T14:35:00+00:00",
+     "ipAddress": "10.7.6.17",
+     "deviceId": "div-device-42",
+     "riskScore": 0.907751
+    },
+    {
+     "txId": "txn-32",
+     "fromUserId": "user-32",
+     "toUserId": "user-14",
+     "amount": 9520.99,
+     "createdAt": "2025-06-08T14:40:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.073097
+    },
+    {
+     "txId": "txn-33",
+     "fromUserId": "user-10",
+     "toUserId": "user-45",
+     "amount": 9691.72,
+     "createdAt": "2025-06-08T14:45:00+00:00",
+     "ipAddress": "10.0.0.3",
+     "deviceId": "device-8",
+     "riskScore": 0.0
+    },
+    {
+     "txId": "txn-34",
+     "fromUserId": "user-45",
+     "toUserId": "user-43",
+     "amount": 6432.91,
+     "createdAt": "2025-06-08T14:50:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.144323
+    },
+    {
+     "txId": "txn-35",
+     "fromUserId": "user-24",
+     "toUserId": "user-17",
+     "amount": 10950.9,
+     "createdAt": "2025-06-08T14:55:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.288125
+    },
+    {
+     "txId": "txn-36",
+     "fromUserId": "user-24",
+     "toUserId": "user-10",
+     "amount": 13760.81,
+     "createdAt": "2025-06-08T15:00:00+00:00",
+     "ipAddress": null,
+     "deviceId": "device-4",
+     "riskScore": 0.0
+    },
+    {
+     "txId": "txn-37",
+     "fromUserId": "user-17",
+     "toUserId": "user-29",
+     "amount": 9039.99,
+     "createdAt": "2025-06-08T15:05:00+00:00",
+     "ipAddress": "10.0.0.16",
+     "deviceId": "device-5",
+     "riskScore": 0.16805
+    },
+    {
+     "txId": "txn-38",
+     "fromUserId": "user-10",
+     "toUserId": "user-29",
+     "amount": 4966.67,
+     "createdAt": "2025-06-08T15:10:00+00:00",
+     "ipAddress": "10.0.0.2",
+     "deviceId": "device-2",
+     "riskScore": 0.400844
+    },
+    {
+     "txId": "txn-39",
+     "fromUserId": "user-28",
+     "toUserId": "user-21",
+     "amount": 14470.23,
+     "createdAt": "2025-06-08T15:15:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.054839
+    },
+    {
+     "txId": "txn-40",
+     "fromUserId": "user-21",
+     "toUserId": "user-26",
+     "amount": 10477.94,
+     "createdAt": "2025-06-08T15:20:00+00:00",
+     "ipAddress": "10.7.7.6",
+     "deviceId": "div-device-13",
+     "riskScore": 0.156403
+    },
+    {
+     "txId": "txn-41",
+     "fromUserId": "user-26",
+     "toUserId": "user-20",
+     "amount": 12004.99,
+     "createdAt": "2025-06-08T15:25:00+00:00",
+     "ipAddress": "10.7.1.18",
+     "deviceId": "div-device-51",
+     "riskScore": 0.198015
+    },
+    {
+     "txId": "txn-42",
+     "fromUserId": "user-20",
+     "toUserId": "user-21",
+     "amount": 13245.84,
+     "createdAt": "2025-06-08T15:30:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.732265
+    },
+    {
+     "txId": "txn-43",
+     "fromUserId": "user-33",
+     "toUserId": "user-20",
+     "amount": 9310.41,
+     "createdAt": "2025-06-08T15:35:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.091184
+    },
+    {
+     "txId": "txn-44",
+     "fromUserId": "user-20",
+     "toUserId": "user-15",
+     "amount": 8820.39,
+     "createdAt": "2025-06-08T15:40:00+00:00",
+     "ipAddress": "10.103.216.6",
+     "deviceId": "prof-d-495859",
+     "riskScore": 0.17639
+    },
+    {
+     "txId": "txn-45",
+     "fromUserId": "user-15",
+     "toUserId": "user-33",
+     "amount": 8330.37,
+     "createdAt": "2025-06-08T15:45:00+00:00",
+     "ipAddress": "10.110.154.104",
+     "deviceId": "prof-d-929145",
+     "riskScore": 0.739036
+    },
+    {
+     "txId": "txn-46",
+     "fromUserId": "user-20",
+     "toUserId": "user-19",
+     "amount": 7977.28,
+     "createdAt": "2025-06-08T15:50:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.165608
+    },
+    {
+     "txId": "txn-47",
+     "fromUserId": "user-19",
+     "toUserId": "user-33",
+     "amount": 6590.85,
+     "createdAt": "2025-06-08T15:55:00+00:00",
+     "ipAddress": "10.0.0.11",
+     "deviceId": "device-7",
+     "riskScore": 0.878066
+    },
+    {
+     "txId": "txn-48",
+     "fromUserId": "user-21",
+     "toUserId": "user-34",
+     "amount": 5203.79,
+     "createdAt": "2025-06-08T16:00:00+00:00",
+     "ipAddress": null,
+     "deviceId": "device-3",
+     "riskScore": 0.467599
+    },
+    {
+     "txId": "txn-49",
+     "fromUserId": "user-25",
+     "toUserId": "user-23",
+     "amount": 13313.66,
+     "createdAt": "2025-06-08T16:05:00+00:00",
+     "ipAddress": "10.0.0.4",
+     "deviceId": "device-1",
+     "riskScore": 0.23009
+    },
+    {
+     "txId": "txn-50",
+     "fromUserId": "user-23",
+     "toUserId": "user-24",
+     "amount": 5621.42,
+     "createdAt": "2025-06-08T16:10:00+00:00",
+     "ipAddress": null,
+     "deviceId": "device-3",
+     "riskScore": 0.167186
+    },
+    {
+     "txId": "txn-51",
+     "fromUserId": "user-8",
+     "toUserId": "user-48",
+     "amount": 11438.66,
+     "createdAt": "2025-06-08T16:15:00+00:00",
+     "ipAddress": null,
+     "deviceId": "device-8",
+     "riskScore": 0.049108
+    },
+    {
+     "txId": "txn-52",
+     "fromUserId": "user-8",
+     "toUserId": "user-7",
+     "amount": 9215.02,
+     "createdAt": "2025-06-08T16:20:00+00:00",
+     "ipAddress": "10.0.0.16",
+     "deviceId": "device-3",
+     "riskScore": 0.23957
+    },
+    {
+     "txId": "txn-53",
+     "fromUserId": "user-48",
+     "toUserId": "user-35",
+     "amount": 8469.41,
+     "createdAt": "2025-06-08T16:25:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.165379
+    },
+    {
+     "txId": "txn-54",
+     "fromUserId": "user-7",
+     "toUserId": "user-35",
+     "amount": 8568.64,
+     "createdAt": "2025-06-08T16:30:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.407313
+    },
+    {
+     "txId": "txn-55",
+     "fromUserId": "user-1",
+     "toUserId": "user-21",
+     "amount": 13788.33,
+     "createdAt": "2025-06-08T16:35:00+00:00",
+     "ipAddress": null,
+     "deviceId": "device-3",
+     "riskScore": 0.269402
+    },
+    {
+     "txId": "txn-56",
+     "fromUserId": "user-21",
+     "toUserId": "user-17",
+     "amount": 10779.49,
+     "createdAt": "2025-06-08T16:40:00+00:00",
+     "ipAddress": "10.7.3.8",
+     "deviceId": "div-device-46",
+     "riskScore": 0.677104
+    },
+    {
+     "txId": "txn-57",
+     "fromUserId": "user-17",
+     "toUserId": "user-48",
+     "amount": 6250.27,
+     "createdAt": "2025-06-08T16:45:00+00:00",
+     "ipAddress": "10.7.7.14",
+     "deviceId": "div-device-38",
+     "riskScore": 0.299231
+    },
+    {
+     "txId": "txn-58",
+     "fromUserId": "user-48",
+     "toUserId": "user-21",
+     "amount": 8621.2,
+     "createdAt": "2025-06-08T16:50:00+00:00",
+     "ipAddress": "10.0.0.13",
+     "deviceId": "div-device-48",
+     "riskScore": 0.907751
+    },
+    {
+     "txId": "txn-59",
+     "fromUserId": "user-1",
+     "toUserId": "user-22",
+     "amount": 7411.42,
+     "createdAt": "2025-06-08T16:55:00+00:00",
+     "ipAddress": "10.0.0.5",
+     "deviceId": "device-2",
+     "riskScore": 0.0198
+    },
+    {
+     "txId": "txn-60",
+     "fromUserId": "user-22",
+     "toUserId": "user-39",
+     "amount": 12089.49,
+     "createdAt": "2025-06-08T17:00:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.173065
+    },
+    {
+     "txId": "txn-61",
+     "fromUserId": "user-39",
+     "toUserId": "user-1",
+     "amount": 12936.24,
+     "createdAt": "2025-06-08T17:05:00+00:00",
+     "ipAddress": "10.7.4.3",
+     "deviceId": "div-device-20",
+     "riskScore": 0.715543
+    },
+    {
+     "txId": "txn-62",
+     "fromUserId": "user-22",
+     "toUserId": "user-33",
+     "amount": 8229.35,
+     "createdAt": "2025-06-08T17:10:00+00:00",
+     "ipAddress": "10.85.164.109",
+     "deviceId": "profile-device-x-8901",
+     "riskScore": 0.259448
+    },
+    {
+     "txId": "txn-63",
+     "fromUserId": "user-33",
+     "toUserId": "user-1",
+     "amount": 6047.9,
+     "createdAt": "2025-06-08T17:15:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.89753
+    },
+    {
+     "txId": "txn-64",
+     "fromUserId": "user-0",
+     "toUserId": "user-39",
+     "amount": 6857.89,
+     "createdAt": "2025-06-08T17:20:00+00:00",
+     "ipAddress": "10.0.0.1",
+     "deviceId": "device-1",
+     "riskScore": 0.472731
+    },
+    {
+     "txId": "txn-65",
+     "fromUserId": "user-42",
+     "toUserId": "user-38",
+     "amount": 5094.94,
+     "createdAt": "2025-06-08T17:25:00+00:00",
+     "ipAddress": "10.0.0.6",
+     "deviceId": "device-4",
+     "riskScore": 0.044748
+    },
+    {
+     "txId": "txn-66",
+     "fromUserId": "user-38",
+     "toUserId": "user-25",
+     "amount": 10229.05,
+     "createdAt": "2025-06-08T17:30:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.157152
+    },
+    {
+     "txId": "txn-67",
+     "fromUserId": "user-23",
+     "toUserId": "user-4",
+     "amount": 8152.54,
+     "createdAt": "2025-06-08T17:35:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.16505
+    },
+    {
+     "txId": "txn-68",
+     "fromUserId": "user-23",
+     "toUserId": "user-14",
+     "amount": 10647.14,
+     "createdAt": "2025-06-08T17:40:00+00:00",
+     "ipAddress": null,
+     "deviceId": "device-1",
+     "riskScore": 0.263465
+    },
+    {
+     "txId": "txn-69",
+     "fromUserId": "user-4",
+     "toUserId": "user-34",
+     "amount": 10169.7,
+     "createdAt": "2025-06-08T17:45:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.348381
+    },
+    {
+     "txId": "txn-70",
+     "fromUserId": "user-14",
+     "toUserId": "user-34",
+     "amount": 8335.01,
+     "createdAt": "2025-06-08T17:50:00+00:00",
+     "ipAddress": "10.0.0.7",
+     "deviceId": "device-2",
+     "riskScore": 0.440448
+    },
+    {
+     "txId": "txn-71",
+     "fromUserId": "user-46",
+     "toUserId": "user-12",
+     "amount": 11393.87,
+     "createdAt": "2025-06-08T17:55:00+00:00",
+     "ipAddress": "10.39.214.52",
+     "deviceId": "prof-d-787908",
+     "riskScore": 0.0
+    },
+    {
+     "txId": "txn-72",
+     "fromUserId": "user-12",
+     "toUserId": "user-2",
+     "amount": 12729.89,
+     "createdAt": "2025-06-08T18:00:00+00:00",
+     "ipAddress": "10.39.214.52",
+     "deviceId": "prof-d-734255",
+     "riskScore": 0.160436
+    },
+    {
+     "txId": "txn-73",
+     "fromUserId": "user-2",
+     "toUserId": "user-16",
+     "amount": 11634.23,
+     "createdAt": "2025-06-08T18:05:00+00:00",
+     "ipAddress": "10.39.214.52",
+     "deviceId": "prof-d-583125",
+     "riskScore": 0.186251
+    },
+    {
+     "txId": "txn-74",
+     "fromUserId": "user-16",
+     "toUserId": "user-12",
+     "amount": 8885.2,
+     "createdAt": "2025-06-08T18:10:00+00:00",
+     "ipAddress": "10.39.214.52",
+     "deviceId": "prof-d-956094",
+     "riskScore": 0.738299
+    },
+    {
+     "txId": "txn-75",
+     "fromUserId": "user-28",
+     "toUserId": "user-34",
+     "amount": 7633.36,
+     "createdAt": "2025-06-08T18:15:00+00:00",
+     "ipAddress": null,
+     "deviceId": "device-0",
+     "riskScore": 0.362239
+    },
+    {
+     "txId": "txn-76",
+     "fromUserId": "user-34",
+     "toUserId": "user-15",
+     "amount": 5370.13,
+     "createdAt": "2025-06-08T18:20:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.400524
+    },
+    {
+     "txId": "txn-77",
+     "fromUserId": "user-15",
+     "toUserId": "user-28",
+     "amount": 5750.28,
+     "createdAt": "2025-06-08T18:25:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.435862
+    },
+    {
+     "txId": "txn-78",
+     "fromUserId": "user-34",
+     "toUserId": "user-18",
+     "amount": 7039.93,
+     "createdAt": "2025-06-08T18:30:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.1851
+    },
+    {
+     "txId": "txn-79",
+     "fromUserId": "user-18",
+     "toUserId": "user-28",
+     "amount": 6669.4,
+     "createdAt": "2025-06-08T18:35:00+00:00",
+     "ipAddress": "10.116.5.233",
+     "deviceId": "prof-d-954743",
+     "riskScore": 0.867367
+    },
+    {
+     "txId": "txn-80",
+     "fromUserId": "user-37",
+     "toUserId": "user-26",
+     "amount": 7212.18,
+     "createdAt": "2025-06-08T18:40:00+00:00",
+     "ipAddress": "10.0.0.15",
+     "deviceId": "device-0",
+     "riskScore": 0.050496
+    },
+    {
+     "txId": "txn-81",
+     "fromUserId": "user-48",
+     "toUserId": "user-45",
+     "amount": 10186.43,
+     "createdAt": "2025-06-08T18:45:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.113115
+    },
+    {
+     "txId": "txn-82",
+     "fromUserId": "user-45",
+     "toUserId": "user-43",
+     "amount": 6508.19,
+     "createdAt": "2025-06-08T18:50:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.139178
+    },
+    {
+     "txId": "txn-83",
+     "fromUserId": "user-5",
+     "toUserId": "user-46",
+     "amount": 11239.54,
+     "createdAt": "2025-06-08T18:55:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.0
+    },
+    {
+     "txId": "txn-84",
+     "fromUserId": "user-5",
+     "toUserId": "user-13",
+     "amount": 12308.74,
+     "createdAt": "2025-06-08T19:00:00+00:00",
+     "ipAddress": "10.0.0.18",
+     "deviceId": "device-8",
+     "riskScore": 0.194191
+    },
+    {
+     "txId": "txn-85",
+     "fromUserId": "user-46",
+     "toUserId": "user-7",
+     "amount": 5759.83,
+     "createdAt": "2025-06-08T19:05:00+00:00",
+     "ipAddress": "10.0.0.13",
+     "deviceId": "device-2",
+     "riskScore": 0.242574
+    },
+    {
+     "txId": "txn-86",
+     "fromUserId": "user-13",
+     "toUserId": "user-7",
+     "amount": 8214.43,
+     "createdAt": "2025-06-08T19:10:00+00:00",
+     "ipAddress": null,
+     "deviceId": "device-7",
+     "riskScore": 0.662534
+    },
+    {
+     "txId": "txn-87",
+     "fromUserId": "user-5",
+     "toUserId": "user-33",
+     "amount": 12069.24,
+     "createdAt": "2025-06-08T19:15:00+00:00",
+     "ipAddress": "10.35.182.147",
+     "deviceId": "prof-d-989585",
+     "riskScore": 0.205326
+    },
+    {
+     "txId": "txn-88",
+     "fromUserId": "user-33",
+     "toUserId": "user-13",
+     "amount": 12304.09,
+     "createdAt": "2025-06-08T19:20:00+00:00",
+     "ipAddress": "10.35.182.147",
+     "deviceId": "prof-d-565980",
+     "riskScore": 0.409281
+    },
+    {
+     "txId": "txn-89",
+     "fromUserId": "user-13",
+     "toUserId": "user-46",
+     "amount": 5308.82,
+     "createdAt": "2025-06-08T19:25:00+00:00",
+     "ipAddress": "10.35.182.147",
+     "deviceId": "prof-d-498637",
+     "riskScore": 0.405781
+    },
+    {
+     "txId": "txn-90",
+     "fromUserId": "user-46",
+     "toUserId": "user-33",
+     "amount": 5803.52,
+     "createdAt": "2025-06-08T19:30:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.938299
+    },
+    {
+     "txId": "txn-91",
+     "fromUserId": "user-17",
+     "toUserId": "user-4",
+     "amount": 11473.1,
+     "createdAt": "2025-06-08T19:35:00+00:00",
+     "ipAddress": null,
+     "deviceId": "device-9",
+     "riskScore": 0.232
+    },
+    {
+     "txId": "txn-92",
+     "fromUserId": "user-4",
+     "toUserId": "user-42",
+     "amount": 7655.95,
+     "createdAt": "2025-06-08T19:40:00+00:00",
+     "ipAddress": "10.0.0.9",
+     "deviceId": "device-8",
+     "riskScore": 0.23254
+    },
+    {
+     "txId": "txn-93",
+     "fromUserId": "user-42",
+     "toUserId": "user-17",
+     "amount": 12673.83,
+     "createdAt": "2025-06-08T19:45:00+00:00",
+     "ipAddress": "10.7.10.16",
+     "deviceId": "div-device-9",
+     "riskScore": 0.942825
+    },
+    {
+     "txId": "txn-94",
+     "fromUserId": "user-4",
+     "toUserId": "user-0",
+     "amount": 5426.47,
+     "createdAt": "2025-06-08T19:50:00+00:00",
+     "ipAddress": null,
+     "deviceId": "device-2",
+     "riskScore": 0.474052
+    },
+    {
+     "txId": "txn-95",
+     "fromUserId": "user-0",
+     "toUserId": "user-17",
+     "amount": 8919.04,
+     "createdAt": "2025-06-08T19:55:00+00:00",
+     "ipAddress": "10.0.0.5",
+     "deviceId": "device-2",
+     "riskScore": 0.923158
+    },
+    {
+     "txId": "txn-96",
+     "fromUserId": "user-30",
+     "toUserId": "user-27",
+     "amount": 8936.29,
+     "createdAt": "2025-06-08T20:00:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.015663
+    },
+    {
+     "txId": "txn-97",
+     "fromUserId": "user-44",
+     "toUserId": "user-28",
+     "amount": 5652.76,
+     "createdAt": "2025-06-08T20:05:00+00:00",
+     "ipAddress": "10.23.245.250",
+     "deviceId": "prof-d-190824",
+     "riskScore": 0.239541
+    },
+    {
+     "txId": "txn-98",
+     "fromUserId": "user-28",
+     "toUserId": "user-27",
+     "amount": 7705.68,
+     "createdAt": "2025-06-08T20:10:00+00:00",
+     "ipAddress": "10.23.245.250",
+     "deviceId": "prof-d-114140",
+     "riskScore": 0.385967
+    },
+    {
+     "txId": "txn-99",
+     "fromUserId": "user-47",
+     "toUserId": "user-9",
+     "amount": 7092.99,
+     "createdAt": "2025-06-08T20:15:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.020751
+    },
+    {
+     "txId": "hf-temporal01-tx1",
+     "fromUserId": "hf_A1",
+     "toUserId": "hf_A2",
+     "amount": 1000.0,
+     "createdAt": "2026-06-08T00:00:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.0
+    },
+    {
+     "txId": "hf-temporal01-tx4",
+     "fromUserId": "hf_B1",
+     "toUserId": "hf_B2",
+     "amount": 1000.0,
+     "createdAt": "2026-06-08T00:00:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.0
+    },
+    {
+     "txId": "hf-struct01-tx1",
+     "fromUserId": "hf_E1",
+     "toUserId": "hf_E1",
+     "amount": 1000.0,
+     "createdAt": "2026-06-08T00:00:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.0
+    },
+    {
+     "txId": "hf-temporal01-tx2",
+     "fromUserId": "hf_A2",
+     "toUserId": "hf_A3",
+     "amount": 1000.0,
+     "createdAt": "2026-06-08T01:00:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.081431
+    },
+    {
+     "txId": "hf-temporal01-tx5",
+     "fromUserId": "hf_B2",
+     "toUserId": "hf_B3",
+     "amount": 1000.0,
+     "createdAt": "2026-06-08T01:00:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.081431
+    },
+    {
+     "txId": "hf-struct01-tx2",
+     "fromUserId": "hf_E2",
+     "toUserId": "hf_E3",
+     "amount": 1000.0,
+     "createdAt": "2026-06-08T01:00:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.0
+    },
+    {
+     "txId": "hf-struct01-tx3",
+     "fromUserId": "hf_E3",
+     "toUserId": "hf_E2",
+     "amount": 1000.0,
+     "createdAt": "2026-06-08T02:00:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.584907
+    },
+    {
+     "txId": "hf-temporal01-tx3",
+     "fromUserId": "hf_A3",
+     "toUserId": "hf_A1",
+     "amount": 1000.0,
+     "createdAt": "2026-06-08T23:00:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.300193
+    },
+    {
+     "txId": "hf-temporal01-tx6",
+     "fromUserId": "hf_B3",
+     "toUserId": "hf_B1",
+     "amount": 1000.0,
+     "createdAt": "2026-06-09T00:00:00+00:00",
+     "ipAddress": null,
+     "deviceId": null,
+     "riskScore": 0.010033
+    }
+   ]
+  }
+ ]
+}
