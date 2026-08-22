@@ -33,22 +33,25 @@ M, A, C, H, S, O, N = (
 IOS, ANDROID = "dev_ios_7f3a91", "dev_android_c2e4b8"
 IP = "10.0.0.1"
 
-# Phase 1 scores of the 369-point build, captured before Phase 2 was written. A
-# stream carrying no identity fields must still produce exactly these.
+# What Phase 1 scores on its own. A stream carrying no identity fields must produce
+# exactly these -- the point of the pin is that Phase 2 leaks nothing into a stream
+# that has no identity in it, which is what a Phase 2 evaluation re-tests.
 #
-# `example_5[2]` and `hf_temporal_A[2]` were briefly higher (0.728354 / 0.596019)
-# while the dedicated-cycle exemption was shipped; run 9 scored 368 with it and run
-# 8 scored 368 without, so it bought nothing, and these are the 369 numbers again.
+# These are the DECAY_FREE_BANDS build. The 369-point build's numbers, one flag
+# away, were: example_2 0.11774, example_3 [_, _, 0.116985, 0.360534], example_4
+# [_, 0.11774, 0.140565, 0.73052], example_5 [_, 0.11774, 0.725981, 0.116235,
+# 0.887572], hf_temporal_A [_, 0.081431, 0.300193], hf_temporal_B [_, 0.081431,
+# 0.010033], hf_struct_recip [_, 0.584907].
 PHASE_1_BASELINE = {
     "example_1": [0.0],
-    "example_2": [0.0, 0.11774],
-    "example_3": [0.0, 0.0, 0.116985, 0.360534],
-    "example_4": [0.0, 0.11774, 0.140565, 0.73052],
-    "example_5": [0.0, 0.11774, 0.725981, 0.116235, 0.887572],
-    "hf_temporal_A": [0.0, 0.081431, 0.300193],
-    "hf_temporal_B": [0.0, 0.081431, 0.010033],
+    "example_2": [0.0, 0.11834],
+    "example_3": [0.0, 0.0, 0.11818, 0.362097],
+    "example_4": [0.0, 0.11834, 0.141292, 0.732918],
+    "example_5": [0.0, 0.11834, 0.728354, 0.118021, 0.889452],
+    "hf_temporal_A": [0.0, 0.109691, 0.596019],
+    "hf_temporal_B": [0.0, 0.109691, 0.080024],
     "hf_struct_self": [0.0],
-    "hf_struct_recip": [0.0, 0.584907],
+    "hf_struct_recip": [0.0, 0.69762],
 }
 
 

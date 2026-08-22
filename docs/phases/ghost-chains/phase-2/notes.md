@@ -8,8 +8,9 @@
   <https://ghost-chains-0fdb9aeda564.herokuapp.com/phase/2>, 10 pages)
 - **Endpoints required:** unchanged — `GET /ghost-chains/health`,
   `POST /ghost-chains/reset`, `POST /ghost-chains/transactions`
-- **Submitted to controller:** yes — came back below the Phase 1 baseline
-- **Score:** not recorded. See "Why the numbers are missing" below.
+- **Submitted to controller:** yes
+- **Score:** ~368/400, same as Phase 1. Graded stream archived at
+  `docs/phases/ghost-chains/logs/2026-08-22-graded-runs.json`.
 
 ## What is new in Phase 2 (pages 7–8)
 
@@ -303,40 +304,36 @@ case — costs 0.019 ms.
    as something that *may* be required to interpret Ex. 4; it defines no amount
    semantics, and Phase 1 deliberately has none. Left for Phase 3.
 
-## Why the numbers are missing, and what now stops that happening again
+## What the captured graded stream says
 
-A Phase 1 and a Phase 2 evaluation both came back worse than the 369-point Phase 1
-baseline, and **neither result survived long enough to be diagnosed**. `RECENT` in
-`app/reqlog.py` is a 500-entry ring buffer shared by every challenge in this service
-and it dies with the process: by the time the Ghost Chains traffic was looked for, a
-250-call SHOWDOWN run and a redeploy had overwritten all of it. Eight archived runs
-are what turned every previous Ghost Chains disagreement into a fix, and this time
-there was nothing to read.
+The capture worked. `GET /ghost-chains/debug/stream` on the branch service held
+**both** evaluations whole — 220 entries, split on the `/reset` markers into two
+runs of 109 — and they are archived at
+`docs/phases/ghost-chains/logs/2026-08-22-graded-runs.json`. Replaying either run
+through `app/routers/phase3.py` reproduces all 109 answers exactly, so the archive
+is a faithful offline copy of the evaluator and every question below was settled by
+measurement rather than argument.
 
-`GET /ghost-chains/debug/stream?token=…` now keeps the graded stream itself — every
-transaction as sent, with the score we gave it, plus a marker at each `/reset` so a
-capture holding more than one run can be split back into runs. Bounded at 5 000
-entries (`GHOST_CAPTURE=0` disables, `GHOST_CAPTURE=n` resizes) against a graded
-stream of ~109, and the cost is inside run-to-run noise: 1 000 transactions with
-both identity fields ran 156 ms with the capture and 124 ms without, and a dense
-2 000 ran 1 110 ms with against 1 080 ms without.
+**The Phase 1 stream carries no identity fields. The Phase 2 stream does.** Run 1:
+zero `ipAddress`, zero `deviceId`, in all 109. Run 2: the same 109 txIds over
+freshly generated entities, with `ipAddress` on 55 and `deviceId` on 67. Two things
+follow:
 
-**Read it immediately after the next evaluation**, before anything redeploys the
-service — a Render restart still wipes it.
+- Phase 1's score is **purely the structural model**. No identity change can move
+  it — the whole Phase 2 model never fires on a single graded Phase 1 transaction.
+  So the two phases need two different levers, and this was worth knowing before
+  spending another run.
+- The identity model *is* live in Phase 2, on 67 of 109 transactions.
 
-Two things worth ruling in or out with that capture, because they explain a bad
-result on *both* phases at once and nothing in the code can distinguish them:
+**Containment was doing real work.** On this exact stream the headroom lift it
+replaced promoted **7** transactions out of their structural band — `txn-68`
+0.230 → 0.344 and `txn-80` 0.035 → 0.100 among them — while the band-contained form
+promotes **0**, at a Spearman against the pure structural score of 0.9869 versus
+0.9840. Pinned against the archive by
+`test_identity_never_moves_a_graded_transaction_out_of_its_band`.
 
-1. **Identity fields are now in the Phase 1 re-test stream.** All eight archived
-   Phase 1 runs contained no non-null optional field, so the identity lift never
-   fired during Phase 1's tuning. If the Phase 2-era stream carries them, the lift
-   was reordering the ranking that scored 369 — which is exactly what band
-   containment stops.
-2. **The service was asleep.** A free dyno sleeps after ~15 idle minutes and takes
-   ~50 s to wake; SHOWDOWN attempt 4 scored 0 with no hand played for precisely this
-   reason. Run `scripts/warm.sh` before triggering, and check `captured` on the
-   debug endpoint afterwards — if it is 0, the grader never reached us and the
-   scoring model is not the problem.
+That said: both runs scored ~368, the same as runs 8 and 9 before any of this. The
+identity work has not yet been shown to be worth points — only to be better behaved.
 
 ## Clarifications from challenge developers
 

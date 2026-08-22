@@ -574,3 +574,37 @@ versus the 369 build — every one of them a demotion in the contaminated tail.
   requirement, and if the re-test stream carries `ipAddress`/`deviceId` — which no
   archived Phase 1 run ever did — then the lift was silently reordering the ranking
   that earned 369. Full write-up in `docs/phases/ghost-chains/phase-2/notes.md`.
+
+- **Eleventh evaluation: ~368/400 on both phases, and this time the stream was
+  captured.** `GET /ghost-chains/debug/stream` held both graded runs whole; they are
+  archived at `docs/phases/ghost-chains/logs/2026-08-22-graded-runs.json` and replay
+  through the router to all 218 answers exactly. After three evaluations spent
+  arguing from a stream we could not see, the offline copy is back.
+
+  **The Phase 1 evaluation sends no identity fields at all** — 0 of 109 carry
+  `ipAddress` or `deviceId`, while the Phase 2 stream carries them on 67 of 109. So
+  Phase 1's score is purely structural and no amount of Phase 2 work can move it,
+  which retires the open question from the previous entry: the identity lift was
+  *not* what put Phase 1 below its baseline.
+
+- **`DECAY_FREE_BANDS` is now ON.** Held back last run to keep one lever per
+  evaluation; the identity lever has now been spent and measured (~368, unchanged),
+  so this is the next one, and it is the last documented candidate with leaderboard
+  evidence behind it.
+
+  Re-measured on the real graded stream rather than the synthetic one: **96 of 109
+  scores move, all 96 upward, zero demotions, 30 across a band**, Spearman 0.9760
+  against the decaying build. The case for it is unchanged and now better evidenced:
+  the brief's window is binary, "active" or "expired", and never mentions recency;
+  every staleness decay in band *placement* was our invention, tuned against two
+  local proxies the leaderboard later contradicted; and run 7 priced demoting stale
+  cycles at **-19**, which says the reference scores them hot. Under-scoring a
+  reference-hot transaction costs ~4x over-scoring a cold one, so an upward-only
+  change spends the run in the cheap direction.
+
+  `tests/test_ghost_chains_graded.py` pins the upward-only property against the
+  archive itself, both phases. If a later edit makes it demote anything, the
+  reasoning above no longer covers that edit.
+
+  Set the flag to False to get the 369-point build back byte-for-byte.
+
