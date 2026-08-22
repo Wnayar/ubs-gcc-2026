@@ -31,7 +31,14 @@ from __future__ import annotations
 
 import hashlib
 
-from app.showdown_rules import observe, posterior_for, range_weights, rule_equity, unbeatable
+from app.showdown_rules import (
+    observe,
+    posterior_for,
+    range_weights,
+    rule_equity,
+    rule_equity_multiway,
+    unbeatable,
+)
 
 DECK = 13
 ACTIONS = ("fold", "check", "call", "bet", "raise")
@@ -85,6 +92,30 @@ TARGET_DELTA = 10
 ENDGAME_HANDS = 12
 PROTECT_TILT = 0.09
 CHASE_TILT = -0.07
+
+# ── phase 3: six seats ────────────────────────────────────────────────────────
+# Every threshold above is equity against ONE opponent, where a fair share of the
+# pot is a half. Against k opponents a fair share is 1/(k+1), so the thresholds
+# are rescaled rather than re-tuned: each keeps the multiple of a fair share it
+# always meant. At k == 1 the factor is exactly 1.0, which is what leaves phases
+# 1 and 2 — 700 points the grader may re-run — running the same arithmetic.
+# On top of that each extra live opponent adds FIELD_TAX to the multiple we
+# demand, because a bet has to get through all of them and the hands that call
+# it are the ones that beat us.
+FIELD_TAX = 0.03
+# A bluff needs *everyone* to fold, which gets geometrically less likely as the
+# field grows, so the bluff rate decays per extra opponent rather than staying
+# at the heads-up figure.
+MULTIWAY_BLUFF_DECAY = 0.55
+# Phase 3 clears on "chip delta >= +10 AND strictly the highest at the table".
+# Being second scores exactly what being last scores, which is what makes a
+# losing position the one where variance is free.
+PHASE3_TARGET_DELTA = 10
+PHASE3_ENDGAME_HANDS = 18
+PHASE3_CHASE_TILT = -0.16
+# Roughly what an ordinary run of hands is worth, used to judge whether a
+# shortfall is one we can play our way out of or one that needs gambling.
+CHASE_REACH_PER_HAND = 4
 
 
 def _showdown_value(n: int, c: int | None, m: int) -> float:
@@ -179,6 +210,50 @@ def _me(state: dict) -> dict:
     return {}
 
 
+def live_opponents(state: dict) -> list[dict]:
+    """The seats that can still take this pot.
+
+    "Folded players stay in `players` with `folded: true` — the list is the
+    table's seating, not the list of live opponents. Filter on `folded`/`busted`
+    yourself." A busted seat is out of the match entirely: no cards, no forced
+    bets, no button.
+    """
+    players = state.get("players")
+    if not isinstance(players, list):
+        return []
+    me = _me(state)
+    seat = _int(state.get("your_seat"))
+    live = []
+    for player in players:
+        if not isinstance(player, dict):
+            continue
+        if player is me or player.get("name") == "you":
+            continue
+        if seat is not None and _int(player.get("seat")) == seat:
+            continue
+        if player.get("folded") or player.get("busted"):
+            continue
+        live.append(player)
+    return live
+
+
+def _table_size(state: dict) -> int:
+    """Seats at this table, folded and busted included — it is the seating."""
+    players = state.get("players")
+    if not isinstance(players, list):
+        return 0
+    return sum(1 for player in players if isinstance(player, dict))
+
+
+def _field_scale(opponents: int) -> float:
+    """A fair share of the pot against `opponents`, relative to heads-up.
+
+    Exactly 1.0 for one opponent, which is what makes the phase-1/2 thresholds
+    survive the rescaling untouched.
+    """
+    return 2.0 / (opponents + 1)
+
+
 def _legal(state: dict) -> list[str]:
     raw = state.get("legal_actions")
     if not isinstance(raw, list):
@@ -240,6 +315,57 @@ def _effective_equity(state: dict, n: int, c: int | None, pot: int, to_call: int
     return RANGE_TRUST * read + (1 - RANGE_TRUST) * honest
 
 
+def _seat_sharpness(state: dict, seat: int | None, pot: int, to_call: int) -> float:
+    """How hard THIS seat's betting says its number is strong.
+
+    Phase 2 pooled every opponent's aggression, which is the same thing when
+    there is only one of them and badly wrong when there are five: a seat that
+    has raised twice and a seat that has called once are not the same threat,
+    and averaging them is throwing the read away.
+    """
+    if seat is None:
+        return 0.0
+    actions = state.get("current_hand_actions")
+    if not isinstance(actions, list):
+        return 0.0
+    raises = 0
+    for entry in actions:
+        if not isinstance(entry, dict) or entry.get("round") != state.get("round"):
+            continue
+        if entry.get("action") in ("bet", "raise") and _int(entry.get("seat")) == seat:
+            raises += 1
+    if raises <= 0:
+        return 0.0
+    size = min(to_call / max(pot - to_call, 1), 2.0) if to_call > 0 else 1.0
+    return SHARPNESS_PER_RAISE * raises * (0.5 + 0.5 * size)
+
+
+def _field_equity(
+    state: dict, n: int, c: int | None, live: list[dict], pot: int, to_call: int
+) -> float:
+    """Our share of the pot against everyone still in the hand.
+
+    "A bet now has to get through everyone still in the hand, not just one
+    player. The same number is worth less than it is one-on-one" — so this is
+    the probability of beating them ALL, not of beating a representative one.
+    """
+    belief = posterior_for(_codename(state))
+    honest = rule_equity_multiway(belief, n, c, [None] * len(live))
+    ranges: list[dict[int, float] | None] = []
+    reading = False
+    for opponent in live:
+        sharpness = _seat_sharpness(state, _int(opponent.get("seat")), pot, to_call)
+        if sharpness > 0:
+            reading = True
+            ranges.append(range_weights(belief, c, sharpness))
+        else:
+            ranges.append(None)
+    if not reading:
+        return honest
+    read = rule_equity_multiway(belief, n, c, ranges)
+    return RANGE_TRUST * read + (1 - RANGE_TRUST) * honest
+
+
 def _coin(state: dict, salt: str) -> float:
     """A stable pseudo-random number in [0, 1) for this exact spot.
 
@@ -262,6 +388,60 @@ def _coin(state: dict, salt: str) -> float:
     return int.from_bytes(hashlib.sha256(key.encode()).digest()[:8], "big") / 2**64
 
 
+def _best_other_delta(state: dict) -> int | None:
+    """The best chip delta at the table that is not ours — the seat to beat.
+
+    Busted seats count. One frozen at −200 is still a seat we are ahead of, and
+    a leg is scored on the final standings, not on who is still playing.
+    """
+    players = state.get("players")
+    if not isinstance(players, list):
+        return None
+    me = _me(state)
+    seat = _int(state.get("your_seat"))
+    best = None
+    for player in players:
+        if not isinstance(player, dict):
+            continue
+        if player is me or player.get("name") == "you":
+            continue
+        if seat is not None and _int(player.get("seat")) == seat:
+            continue
+        delta = _int(player.get("chip_delta"))
+        if delta is None:
+            continue
+        best = delta if best is None else max(best, delta)
+    return best
+
+
+def _crowded_tilt(state: dict, hands_left: int) -> float:
+    """The run-in at a six-seat table, where clearing is a relative target.
+
+    "You must finish the leg with strictly the highest chip delta at the table —
+    beating four of the five is worth nothing." Second place and last place score
+    the same, so once the leg is nearly over and somebody is ahead of us, the
+    downside of variance is nil and the upside is the only 150 points on offer.
+
+    Both halves of the clearing condition — at least +10, and strictly ahead —
+    collapse into one number: the chips we still need. Chasing a shortfall we
+    could play our way into is just spew, so the chase scales with how big that
+    shortfall is against what the hands left could ordinarily produce.
+    """
+    if hands_left > PHASE3_ENDGAME_HANDS:
+        return 0.0  # the standings are not settled yet; play the hand, not the board
+    delta = _int(_me(state).get("chip_delta"))
+    best_other = _best_other_delta(state)
+    if delta is None or best_other is None:
+        return 0.0
+    need = max(best_other + 1 - delta, PHASE3_TARGET_DELTA - delta)
+    if need > 0:
+        reachable = max(CHASE_REACH_PER_HAND * hands_left, 1)
+        return PHASE3_CHASE_TILT * min(1.0, need / reachable)
+    if delta - best_other > 2 * hands_left:
+        return PROTECT_TILT  # a lead the blinds cannot eat is worth protecting
+    return 0.0
+
+
 def _tilt(state: dict) -> float:
     """Threshold shift for the run-in: + plays tighter, − takes more risk.
 
@@ -273,6 +453,8 @@ def _tilt(state: dict) -> float:
     if total is None or hand is None:
         return 0.0
     hands_left = total - hand
+    if _table_size(state) >= 3:
+        return _crowded_tilt(state, hands_left)
     if hands_left > ENDGAME_HANDS:
         return 0.0
     delta = _int(_me(state).get("chip_delta"))
@@ -298,7 +480,13 @@ def _window(state: dict) -> tuple[int, int] | None:
 
 
 def _put_in(
-    state: dict, action: str, total: float, eq: float, floor: float, risk_free: bool = False
+    state: dict,
+    action: str,
+    total: float,
+    eq: float,
+    floor: float,
+    risk_free: bool = False,
+    scale: float = 1.0,
 ) -> dict | None:
     """Bet/raise to `total`, but only if the equity covers the stack risk.
 
@@ -314,7 +502,7 @@ def _put_in(
     mine = _int(_me(state).get("bet_this_round"), 0) or 0
     stack = max(_int(state.get("your_stack"), 0) or 0, 1)
     for target in (max(low, min(high, int(round(total)))), low):
-        risk = 0.0 if risk_free else RAISE_RISK * (max(target - mine, 0) / stack)
+        risk = 0.0 if risk_free else RAISE_RISK * scale * (max(target - mine, 0) / stack)
         if eq >= floor + risk:
             return {"action": action, "amount": target}
     return None
@@ -362,11 +550,26 @@ def _play(state: dict, legal: list[str]) -> dict:
     pot = max(_int(state.get("pot"), 0) or 0, 0)
     to_call = max(_int(state.get("to_call"), 0) or 0, 0)
     stack = max(_int(state.get("your_stack"), 0) or 0, 1)
-    eq = _effective_equity(state, number, community, pot, to_call)
+    live = live_opponents(state)
+    # Two or more opponents is a different game and takes the phase-3 maths. One
+    # or none is heads-up — which is phase 1 and phase 2, and also a six-seat hand
+    # that has folded down to a duel, where the heads-up reasoning is simply
+    # correct again. Below, `scale` and `tax` are both exactly 1.0 on that path,
+    # so it runs the arithmetic those phases were tuned on, unchanged.
+    crowded = len(live) >= 2
+    scale = _field_scale(len(live)) if crowded else 1.0
+    tax = 1.0 + FIELD_TAX * (len(live) - 1) if crowded else 1.0
+    if crowded:
+        eq = _field_equity(state, number, community, live, pot, to_call)
+    else:
+        eq = _effective_equity(state, number, community, pot, to_call)
     locked = _cannot_lose(state, number, community)
-    tilt = _tilt(state)
+    tilt = _tilt(state) * scale
     mine = _int(_me(state).get("bet_this_round"), 0) or 0
     _, our_raises = _aggression(state)
+    # equity read back on the heads-up scale, so bet sizing keeps meaning what it
+    # meant: "how strong is this, for a hand that has to beat this many people?"
+    strength = eq / scale
 
     if to_call > 0 and "call" in legal:
         # The opponent may bet more than we can cover: "you can still call for
@@ -378,19 +581,23 @@ def _play(state: dict, legal: list[str]) -> dict:
         # `pot` already includes the bet we are facing, so back it out to size
         # the bet against the pot it was aimed at
         pressure = min(risked / max(pot - risked, 1), 2.0)
-        needed = odds + CALL_MARGIN * pressure + tilt + CALL_RISK * (risked / stack)
+        needed = (
+            odds + CALL_MARGIN * scale * pressure + tilt + CALL_RISK * scale * (risked / stack)
+        )
         if "raise" in legal:
             # a second raise in one round means the pot is getting away from us —
             # unless the hand cannot lose, in which case there is nothing to fear
-            floor = RAISE_EQ + tilt if locked else (RERAISE_EQ if our_raises else RAISE_EQ) + tilt
+            base = RAISE_EQ if locked else (RERAISE_EQ if our_raises else RAISE_EQ)
+            floor = base * scale * tax + tilt
             if eq >= floor:
                 raised = _put_in(
                     state,
                     "raise",
-                    mine + to_call + (pot + to_call) * _size_for(eq),
+                    mine + to_call + (pot + to_call) * _size_for(strength),
                     eq,
                     floor,
                     risk_free=locked,
+                    scale=scale,
                 )
                 if raised is not None:
                     return raised
@@ -400,15 +607,20 @@ def _play(state: dict, legal: list[str]) -> dict:
     if "bet" in legal:
         # value first, then the smaller "charge them to see a showdown" bet
         for floor, fraction in (
-            (VALUE_BET_EQ + tilt, _size_for(eq)),
-            (THIN_BET_EQ + tilt, SIZE_THIN),
+            (VALUE_BET_EQ * scale * tax + tilt, _size_for(strength)),
+            (THIN_BET_EQ * scale * tax + tilt, SIZE_THIN),
         ):
             if eq >= floor:
-                opened = _put_in(state, "bet", mine + pot * fraction, eq, floor, risk_free=locked)
+                opened = _put_in(
+                    state, "bet", mine + pot * fraction, eq, floor,
+                    risk_free=locked, scale=scale,
+                )
                 if opened is not None:
                     return opened
                 break
-        if eq <= BLUFF_MAX_EQ and _coin(state, "bluff") < BLUFF_RATE - tilt:
+        # a bluff has to get through every live opponent, so it gets rarer fast
+        bluff_rate = BLUFF_RATE * MULTIWAY_BLUFF_DECAY ** max(len(live) - 1, 0)
+        if eq <= BLUFF_MAX_EQ * scale and _coin(state, "bluff") < bluff_rate - tilt:
             # a bluff is priced by the pot, not by our equity, so it bypasses
             # the stack-risk floor — but only ever for a fraction of the pot
             window = _window(state)
