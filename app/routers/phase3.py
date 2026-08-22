@@ -1,35 +1,46 @@
 """Phase 3 (our folder numbering) — Ghost Chains, the challenge's Phase 1.
 
 "Follow the Money": a streaming AML risk scorer over a rolling 24-hour directed
-graph of entities. The score of a transaction is how much the edge it adds
-increases the graph's capacity to support recurring flow — new or shortened paths,
-convergence of routes, and above all return paths that close loops.
+graph of entities.
 
-The full derivation, the five worked examples and every assumption are in
-docs/phases/phase-3/notes.md.
+The graph is *temporal*. A path only counts if money could actually have travelled
+it: edge timestamps must not decrease along the direction of flow. Scoring a
+transaction on paths that ignore time credits round trips that never happened —
+the first version of this router did exactly that, and the evaluator reported
+STRUCTURAL_DEVIATION and TEMPORAL_DEVIATION both High.
+
+The full derivation and every assumption are in docs/phases/phase-3/notes.md.
 """
 from __future__ import annotations
 
 import asyncio
-from collections import deque
+import bisect
+import math
 from datetime import datetime, timedelta, timezone
 from heapq import heappop, heappush
-from typing import Iterable, Mapping
 
 from fastapi import APIRouter
 from pydantic import BaseModel
 
 router = APIRouter(prefix="/ghost-chains", tags=["ghost-chains-phase-1"])
 
-WINDOW = timedelta(hours=24)  # active lookback; a tx is active while age <= WINDOW
-BFS_CAP = 50_000  # guard against a pathological stream stalling the instance
+WINDOW = timedelta(hours=24).total_seconds()  # active lookback, inclusive
 MAX_REMEMBERED_SCORES = 200_000  # idempotency memory, bounded
+NEG_INF = float("-inf")
 
-# Component weights sum to 1.0, so the score is in [0, 1] by construction. The
-# loop/return terms only apply when the edge closes a cycle, which is why a return
-# path outranks convergence, and convergence outranks a plain extension.
-W_REACH, W_SHORTEN, W_CONVERGE, W_LOOP, W_RETURN = 0.22, 0.08, 0.22, 0.28, 0.20
-K_REACH, K_SHORTEN, K_CONVERGE, K_LOOP, K_RETURN = 3.0, 2.0, 2.0, 2.0, 1.0
+# Recency: money that moved recently weighs more than money that moved this
+# morning, and a round trip that closes fast is tighter than one that dawdles.
+TAU_TRAIL = 3 * 3600.0
+TAU_HOLD = 2 * 3600.0
+
+# Weights sum to 1.0, so the score is in [0, 1] by construction.
+# the three signals the statement names: money that travels onward, fans into the
+# same destination, and — "especially" — loops back through entities already seen
+W_TRAIL, W_FAN, W_CONVERGE, W_LOOP = 0.12, 0.10, 0.15, 0.63
+K_TRAIL, K_FAN, K_CONVERGE, K_ROUTES = 3.0, 2.0, 2.0, 1.0
+# how the loop weight splits: closing any real round trip, how fast it closed,
+# how few hops it took, and how many independent return routes converge
+LOOP_BASE, LOOP_TIGHT, LOOP_SHORT, LOOP_ROUTES = 0.30, 0.20, 0.20, 0.30
 
 
 class Transaction(BaseModel):
@@ -70,119 +81,157 @@ def _saturate(value: float, k: float) -> float:
     return value / (value + k) if value > 0 else 0.0
 
 
+def _decay(age: float, tau: float) -> float:
+    """1.0 for something that just happened, fading towards 0 with age."""
+    return math.exp(-max(age, 0.0) / tau)
+
+
 class GhostGraph:
-    """Rolling directed multigraph of entities, with incremental scoring."""
+    """Rolling temporal graph of entity transfers, scored incrementally."""
 
     def __init__(self) -> None:
         self.clear()
 
     def clear(self) -> None:
-        self.out: dict[str, dict[str, int]] = {}
-        self.inn: dict[str, dict[str, int]] = {}
-        self.expiry: list[tuple[float, str, str, str]] = []  # heap by createdAt
+        # sender -> receiver -> sorted timestamps of the transfers between them
+        self.out: dict[str, dict[str, list[float]]] = {}
+        self.inn: dict[str, dict[str, list[float]]] = {}
+        self.expiry: list[tuple[float, str, str, str]] = []
         self.scores: dict[str, float] = {}
-        self.clock: datetime | None = None
+        self.clock: float | None = None
 
     # --- graph maintenance ------------------------------------------------
 
     @staticmethod
-    def _link(side: dict[str, dict[str, int]], a: str, b: str) -> None:
-        row = side.setdefault(a, {})
-        row[b] = row.get(b, 0) + 1
+    def _link(side: dict[str, dict[str, list[float]]], a: str, b: str, when: float) -> None:
+        bisect.insort(side.setdefault(a, {}).setdefault(b, []), when)
 
     @staticmethod
-    def _unlink(side: dict[str, dict[str, int]], a: str, b: str) -> None:
+    def _unlink(side: dict[str, dict[str, list[float]]], a: str, b: str, when: float) -> None:
         row = side.get(a)
-        if not row or b not in row:
+        times = row.get(b) if row else None
+        if not times:
             return
-        row[b] -= 1
-        if row[b] <= 0:
+        index = bisect.bisect_left(times, when)
+        if index < len(times) and times[index] == when:
+            del times[index]
+        if not times:
             del row[b]
         if not row:
             del side[a]
 
-    def _add_edge(self, sender: str, receiver: str) -> None:
-        self._link(self.out, sender, receiver)
-        self._link(self.inn, receiver, sender)
-
-    def _drop_edge(self, sender: str, receiver: str) -> None:
-        self._unlink(self.out, sender, receiver)
-        self._unlink(self.inn, receiver, sender)
-
-    def _expire(self, now: datetime) -> None:
+    def _expire(self, now: float) -> None:
         """Drop everything created strictly more than WINDOW before `now`."""
-        cutoff = (now - WINDOW).timestamp()
+        cutoff = now - WINDOW
         while self.expiry and self.expiry[0][0] < cutoff:
-            _, _, sender, receiver = heappop(self.expiry)
-            self._drop_edge(sender, receiver)
+            when, _, sender, receiver = heappop(self.expiry)
+            self._unlink(self.out, sender, receiver, when)
+            self._unlink(self.inn, receiver, sender, when)
 
-    def _bfs(self, side: Mapping[str, dict[str, int]], start: str) -> dict[str, int]:
-        """Distances from `start` following `side` (self.out = forward, self.inn = reverse)."""
-        seen = {start: 0}
-        queue: deque[str] = deque([start])
+    # --- temporal traversal ------------------------------------------------
+
+    def _earliest_arrival(self, source: str, ceiling: float):
+        """Where money leaving `source` could have got to, and how soon.
+
+        Follows edges whose timestamps do not decrease along the path, so every
+        node reached is one funds could genuinely have flowed to.
+        """
+        arrival = {source: NEG_INF}
+        hops = {source: 0}
+        queue: list[tuple[float, int, str]] = [(NEG_INF, 0, source)]
         while queue:
-            node = queue.popleft()
-            step = seen[node] + 1
-            for neighbour in side.get(node, ()):
-                if neighbour not in seen:
-                    seen[neighbour] = step
-                    if len(seen) >= BFS_CAP:
-                        return seen
-                    queue.append(neighbour)
-        return seen
+            when, hop, node = heappop(queue)
+            if when > arrival[node]:
+                continue  # already reached sooner by another route
+            for nxt, times in self.out.get(node, {}).items():
+                index = bisect.bisect_left(times, when)
+                if index >= len(times):
+                    continue
+                step = times[index]
+                if step > ceiling or step >= arrival.get(nxt, math.inf):
+                    continue
+                arrival[nxt] = step
+                hops[nxt] = hop + 1
+                heappush(queue, (step, hop + 1, nxt))
+        return arrival, hops
+
+    def _latest_departure(self, target: str, ceiling: float) -> dict[str, float]:
+        """Who could have fed `target` by `ceiling`, and how late they let go."""
+        departure = {target: ceiling}
+        queue: list[tuple[float, str]] = [(-ceiling, target)]
+        while queue:
+            negated, node = heappop(queue)
+            when = -negated
+            if when < departure[node]:
+                continue
+            for prev, times in self.inn.get(node, {}).items():
+                index = bisect.bisect_right(times, when) - 1
+                if index < 0:
+                    continue
+                step = times[index]
+                if step <= departure.get(prev, NEG_INF):
+                    continue
+                departure[prev] = step
+                heappush(queue, (-step, prev))
+        return departure
 
     # --- scoring ----------------------------------------------------------
 
-    def structural_score(self, sender: str, receiver: str) -> float:
-        """How much would edge sender->receiver raise the graph's recurring-flow capacity?
-
-        Measured against the graph as it stands *before* the edge is added.
-        """
+    def structural_score(self, sender: str, receiver: str, when: float) -> float:
+        """How much does this transfer raise the graph's capacity for recurring flow?"""
         if sender == receiver:
-            return 0.0  # a self-transfer connects nothing new (notes.md)
+            return 0.0  # a self-transfer connects nothing (notes.md)
 
-        to_sender = self._bfs(self.inn, sender)  # who can reach the sender
-        to_receiver = self._bfs(self.inn, receiver)
-        from_receiver = self._bfs(self.out, receiver)  # who the receiver can reach
-        from_sender = self._bfs(self.out, sender)
+        upstream = self._latest_departure(sender, when)
+        feeding_receiver = self._latest_departure(receiver, when)
+        onward, hops = self._earliest_arrival(receiver, when)
 
-        ancestors_s, ancestors_r = set(to_sender), set(to_receiver)
-        descendants_r, descendants_s = set(from_receiver), set(from_sender)
-
-        # entities that reach the sender but could not reach the receiver, crossed
-        # with entities the receiver reaches but the sender could not: the pairs
-        # this edge newly connects. Minus one for the trivial (sender, receiver).
-        reach = len(ancestors_s - ancestors_r) * len(descendants_r - descendants_s) - 1
-
-        # the edge is a genuine shortcut for anyone who could already reach the receiver
-        shorten = sum(
-            1
-            for node, distance in to_sender.items()
-            if node in to_receiver and distance + 1 < to_receiver[node]
+        # the money trail arriving at the sender: how much traceable flow this
+        # transfer is carrying onward, discounted by how stale each hop is
+        trail = sum(
+            _decay(when - moved, TAU_TRAIL)
+            for node, moved in upstream.items()
+            if node != sender
+        )
+        # entities upstream of *both* ends: they could already reach the receiver
+        # and this transfer hands them a second, distinct route to it
+        shared = (set(upstream) & set(feeding_receiver)) - {sender, receiver}
+        converge = sum(_decay(when - upstream[node], TAU_TRAIL) for node in shared)
+        # plain fan-in: distinct counterparties already paying into this receiver
+        fan = sum(
+            _decay(when - times[-1], TAU_TRAIL)
+            for other, times in self.inn.get(receiver, {}).items()
+            if other != sender
         )
 
-        edge_exists = receiver in self.out.get(sender, ())
-        # entities that could already reach the receiver and now gain a second,
-        # distinct route to it. A repeated edge is no new route at all.
-        converge = 0 if edge_exists else len(ancestors_s & ancestors_r)
-
         signal = (
-            W_REACH * _saturate(reach, K_REACH)
-            + W_SHORTEN * _saturate(shorten, K_SHORTEN)
+            W_TRAIL * _saturate(trail, K_TRAIL)
+            + W_FAN * _saturate(fan, K_FAN)
             + W_CONVERGE * _saturate(converge, K_CONVERGE)
         )
 
-        if sender in descendants_r:  # the receiver already reached the sender: a loop
-            # the strongly connected component the edge produces, derived without a
-            # further traversal: reachable from the receiver AND reaching it
-            component = (descendants_r | {receiver}) & (ancestors_r | ancestors_s)
-            returns = sum(1 for node in self.inn.get(receiver, ()) if node in component)
-            if not edge_exists and sender in component:
-                returns += 1  # the edge being added is itself a return route
-            signal += W_LOOP * _saturate(len(component) - 1, K_LOOP)
-            # two independent return routes converging on one node outrank a single
-            # return — this is what separates the statement's example 5 from 4
-            signal += W_RETURN * _saturate(returns - 1, K_RETURN)
+        arrival = onward.get(sender)
+        if arrival is not None:
+            # funds left the receiver, moved through the network in time order and
+            # reached the sender — this transfer closes a genuine round trip
+            tight = _decay(when - arrival, TAU_HOLD)  # how fast it bounced back
+            short = 2.0 / (hops[sender] + 1)  # how few hops the cycle takes
+            routes = 1  # the transfer being scored is one return route
+            for other, times in self.inn.get(receiver, {}).items():
+                if other == sender:
+                    continue
+                reached = onward.get(other)
+                if reached is None:
+                    continue
+                index = bisect.bisect_left(times, reached)
+                if index < len(times) and times[index] <= when:
+                    routes += 1  # an independent return route into the receiver
+            signal += W_LOOP * (
+                LOOP_BASE
+                + LOOP_TIGHT * tight
+                + LOOP_SHORT * short
+                + LOOP_ROUTES * _saturate(routes - 1, K_ROUTES)
+            )
 
         return round(min(1.0, max(0.0, signal)), 6)
 
@@ -198,24 +247,19 @@ class GhostGraph:
         created = transaction.createdAt
         if created.tzinfo is None:
             created = created.replace(tzinfo=timezone.utc)
+        when = created.timestamp()
         # event time, not wall clock, and it never runs backwards
-        if self.clock is None or created > self.clock:
-            self.clock = created
+        if self.clock is None or when > self.clock:
+            self.clock = when
         self._expire(self.clock)
 
-        risk = self.structural_score(transaction.fromUserId, transaction.toUserId)
+        sender, receiver = transaction.fromUserId, transaction.toUserId
+        risk = self.structural_score(sender, receiver, when)
 
-        if created >= self.clock - WINDOW:  # inside the window: it joins the graph
-            self._add_edge(transaction.fromUserId, transaction.toUserId)
-            heappush(
-                self.expiry,
-                (
-                    created.timestamp(),
-                    transaction.txId,
-                    transaction.fromUserId,
-                    transaction.toUserId,
-                ),
-            )
+        if when >= self.clock - WINDOW:  # inside the window: it joins the graph
+            self._link(self.out, sender, receiver, when)
+            self._link(self.inn, receiver, sender, when)
+            heappush(self.expiry, (when, transaction.txId, sender, receiver))
 
         self.scores[transaction.txId] = risk
         while len(self.scores) > MAX_REMEMBERED_SCORES:
