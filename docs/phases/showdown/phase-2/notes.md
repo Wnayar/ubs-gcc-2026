@@ -5,8 +5,8 @@
   **not** changed, and it never mentions legs, so `leg_number`/`total_legs` are new
   fields added for this phase)
 - **Endpoints required:** `POST /move` — same endpoint as phase 1, no new route
-- **Submitted to controller:** yes — attempt 1 (100/400) and attempt 2 (200/400)
-- **Score:** **200/400** on attempt 2. Attempt 3 fixes below, not yet submitted.
+- **Submitted to controller:** yes — attempts scored 100 → 200 → **300** / 400
+- **Score:** **300/400** on attempt 3. Attempt-4 fixes below, not yet submitted.
 
 ## What phase 2 adds
 
@@ -294,3 +294,193 @@ into a bad rule. Not shipped.
   times the evidence a showdown-only view gives.
 - **`cinnabar` missed by 18 chips.** Nothing diagnostic in the log; it read 0.84 standard
   and simply did not get there.
+
+
+## Attempt 3 — 300/400
+
+| leg | table | final delta | cleared (+25)? |
+|---|---|---|---|
+| 1 | verdigris | +79 | **yes** |
+| 2 | cinnabar | +133 (busted them in 11 hands) | **yes** |
+| 3 | amaranth | +19 (peaked +48) | no — **missed by 6 chips** |
+| 4 | obsidian | **+39** | **yes** |
+
+**Obsidian flipped from −162 to +39** — exactly the leg the seed was supposed to fix, and
+it went from 0.46 confidence to fully identified. The seed loop is working: 87 observed
+showdowns became 131.
+
+### Amaranth, finally identified
+
+Amaranth is the last failing leg and it was the one table nothing explained. With 26
+showdowns, two facts stood out and no ordering by size accounts for either:
+
+- **`7 beats 8`, twice, at two different community numbers** — and a 7 never lost.
+- **`13` and `12` split a pot**, so those two are equal strength.
+
+`a 7 beats everything, then a pair beats any non-pair, then numbers in bands of two`
+explains **26 of 26**. Adding a "lucky number" family (one candidate per number, with and
+without banding) lets the posterior find it rather than us naming it, and it now reads
+**`lucky7_band2` at 0.97**.
+
+Two checks before trusting it. Seat bias exists in the data (14 wins to 8) but "seat 0
+always wins" explains only 14 of 22 decided hands, so position is not the rule. And the
+banding half is independently corroborated — cinnabar split a 13 against a 12 back in
+attempt 1, so grouped decks are a real feature of this event, not a curve fit.
+
+The 7-specialness still rests on **only two hands**, which is why it is a hypothesis with
+a prior rather than a hard-coded mapping. If a later attempt contradicts it, the posterior
+will move.
+
+### Where the four tables now stand
+
+| table | rule | confidence | explains |
+|---|---|---|---|
+| verdigris | a pair beats any non-pair, then higher | 0.97 | 41/43 |
+| cinnabar | a pair beats any non-pair, then higher | 0.86 | 21/23 |
+| amaranth | a 7 beats everything, then a pair, then bands of two | 0.97 | **26/26** |
+| obsidian | a pair *loses* to any non-pair, then lower wins | 1.00 | 38/39 |
+
+Cost of the larger hypothesis set: 58 rules after dedupe, and a `/move` still answers in
+**10 ms** against a 5-second budget.
+
+
+## Attempt 4 — scored 0, and no hand was played
+
+The controller **never reached our service**. Pulled from the live log afterwards:
+
+- **3 `/move` calls total**, all of them my own smoke tests (`total_hands: 100`, no
+  `table_rule` — phase-1 shaped, not phase-2). No grader traffic, no legs, no codenames.
+- 139 of the 145 `/health` hits came from `10.209.26.167` — Render's internal
+  health-check poller on a 5 second cycle, not the coordinator.
+
+So this was a deployment failure, not a strategy failure, and the 300 from attempt 3
+still stands because only the best attempt counts.
+
+Two ways a branch deployment silently fails, both now fixed on this branch:
+
+1. **A cold service scores exactly 0.** Free dynos spin down after ~15 idle minutes and
+   take ~50 s to wake; the coordinator allows 5 s per `/move` and forfeits a leg after
+   five failures in a row. A service nobody warmed loses every leg without playing a hand.
+   `scripts/warm.sh <url> [expected-commit]` wakes it, waits until `/health` answers in
+   under a second, and **fails loudly if the commit served is not the one expected** —
+   which is exactly the second failure mode:
+2. **A Blueprint takes the branch from `render.yaml`, not from the branch the file is on.**
+   A service created from this repo without an explicit entry builds `main` and serves the
+   old code however many times you push to `showdown-phase-2`. `render.yaml` now declares
+   a second service, `ubs-gcc-2026-showdown`, pinned to `branch: showdown-phase-2`.
+
+Note its `DEBUG_TOKEN` is `sync: false`, not `generateValue: true` — `generateValue` mints
+a *different* token per service, so the value in the local `.env` would not authenticate
+against it and `/debug/requests` would be unreadable exactly when it is needed. Set it by
+hand in the dashboard to match the main service.
+
+Before every submission from now on:
+
+```
+./scripts/warm.sh https://<service>.onrender.com 4e5dc6c
+```
+
+
+## Attempt 5 — 300/400, and the bug behind all of it
+
+Legs: verdigris **+13 FAILED**, cinnabar +114, amaranth **+63 cleared**, obsidian +40 in
+eight hands. The lucky-7 fix worked — amaranth had been the failing leg and now clears —
+but the failure simply rotated to verdigris, which had cleared comfortably twice before.
+
+Verdigris reads `standard` at 0.97, the rule we know best, so this was not a rule we had
+failed to learn. Its only two unexplained showdowns were **splits between different
+numbers**: `12 vs 11` and, stranger still, `10 vs 12` where the 10 *paired the community
+and still did not win*.
+
+### Two winners with different numbers is not a tie
+
+Checking the pot sizes settled it:
+
+| kind of hand | count | median pot |
+|---|---|---|
+| decided | 73 | **8** |
+| split, identical numbers (genuine tie) | 15 | 24 |
+| split, **different** numbers | 3 | **307** (127, 307, 405) |
+
+Every one is an all-in. When both players are all in, chips nobody could cover go back and
+the hand log lists **both** seats as winners. They are refunds, not ties — and we had been
+feeding them to the rule learner as evidence that two different numbers were equal in
+strength.
+
+That single misreading is the only reason the deck ever looked like it was grouped into
+bands. Discard those three hands and **every table is explained exactly**:
+
+| table | rule | fit |
+|---|---|---|
+| verdigris | a pair beats any non-pair, then higher | **52/52** |
+| cinnabar | a pair beats any non-pair, then higher | **37/37** |
+| amaranth | **a 7 beats everything**, then a pair, then higher | **36/36** |
+| obsidian | a pair *loses* to any non-pair, then lower wins | **40/40** |
+
+Note amaranth is plain `lucky7`, not the banded `lucky7_band2` we shipped last time: the
+banding half was fitting one refund.
+
+### The fix, and the trap inside it
+
+`observe()` now rejects a two-winner hand whose numbers differ **when the pot is at least
+half a starting stack**. The pot is the discriminator, not the numbers — plenty of rules
+tie different numbers honestly (under "closest to the community" a 3 and a 7 both sit two
+away from a 5), so filtering on the numbers alone would throw away real evidence for every
+distance-based rule. A first attempt at this fix did exactly that and a test caught it.
+
+The banded-rule family is removed, since the evidence for it was those refunds. That takes
+the hypothesis set from 58 back to **27**, which also sharpens every other table's read by
+not splitting the posterior between near-identical explanations.
+
+
+## Attempt 6 — 25/400, and the fix that caused it
+
+Legs: verdigris −52, cinnabar +91, amaranth **−171**, obsidian **−176**. Amaranth and
+obsidian were the two tables read at 1.00 confidence, and they were the two that lost most.
+
+**The rule reads were not the problem.** Fitting only this attempt's showdowns, with no
+seed: verdigris `standard` 100%, cinnabar `standard` 100%, obsidian `antipair_low` 100%.
+The tables are stable and we have them right.
+
+**Nor was the strategy.** Replaying all 257 of this attempt's real `/move` requests through
+the previous build and the new one, **6 decisions differ — 2%**. A 2% difference cannot
+move a leg from +63 to −171. Most of the swing is the opponent (the bot was named Vince
+this time, Tess before) and the cards.
+
+But one of those 2% was catastrophic, and it was my doing.
+
+### How a filter became a stack-off
+
+Leg 3, hand 6: holding a **7** on amaranth, we raised to 43 and then shoved all 211 chips.
+We lost 187. `unbeatable()` had said the hand could not lose, and `unbeatable()` waives
+**every** stack-risk guard we own — that is the whole point of it, and it is correct for a
+pair under the standard rule.
+
+The hand that would have stopped us was in the log all along: `7 vs 8, community 8`, with
+**both** seats listed as winners. That directly contradicts "a 7 beats everything". The
+previous attempt's fix had discarded it as an all-in refund because its pot was 400.
+
+- keeping it: no rule explains amaranth better than **87%**, the posterior spreads, and a 7
+  is not unbeatable
+- discarding it: `lucky7` reaches **100%**, and the bot bets its whole stack on it
+
+The filter removed exactly the hands that discriminate between rules, because those are the
+hands people play for stacks. It manufactured the confidence that lost the leg.
+
+### The fix
+
+1. **The refund filter is reverted.** Odd hands are evidence, especially the expensive ones.
+2. **`unbeatable()` now takes an empirical veto.** Before waiving the risk guards, it checks
+   whether we have ever *seen* that number fail to win outright at that community number.
+   One direct counter-example outranks any amount of posterior. The check is
+   community-scoped — a 9 losing when it does not pair says nothing about a 9 that does —
+   and a genuine pair under the standard rule is still unbeatable, which is what keeps
+   phase 1 intact.
+3. **The seed is rebuilt from the raw request logs**, not from harvested observations. The
+   deployed build had already filtered the contradicting hands out of what
+   `/debug/showdown-observations` returns, so harvesting from a running service loses
+   exactly the evidence a bad attempt was supposed to teach us. 227 showdowns.
+
+Amaranth now reads `lucky7` at 0.50 rather than 1.00, and a 7 there is **not** treated as
+unbeatable. That is the honest state of the evidence: two hands say a 7 beat an 8, one says
+it did not.

@@ -102,6 +102,22 @@ def _rules() -> tuple[Rule, ...]:
                 f"numbers grouped into bands of {width}, LOWER band wins",
                 (lambda w, o: lambda n, c: (-((n + o) // w),))(width, offset),
             ))
+    # "One number beats everything." Amaranth showed a 7 beating an 8 twice, at two
+    # different community numbers, and a 7 never lost — which no ordering by size
+    # explains. Paired with banding (that table also split a 13 against a 12) it
+    # accounts for all 27 of its showdowns. Every number gets a candidate so the
+    # evidence picks the lucky one rather than us naming it.
+    for lucky in range(1, DECK + 1):
+        spec.append((
+            f"lucky{lucky}",
+            f"a {lucky} beats everything, then a pair, then higher wins",
+            (lambda k: lambda n, c: (n == k, n == c, n))(lucky),
+        ))
+        spec.append((
+            f"lucky{lucky}_band2",
+            f"a {lucky} beats everything, then a pair, then bands of two",
+            (lambda k: lambda n, c: (n == k, n == c, n // 2))(lucky),
+        ))
     return tuple(Rule(name, desc, key) for name, desc, key in spec)
 
 
@@ -532,13 +548,44 @@ def range_weights(belief: dict[str, float], c: int | None, sharpness: float) -> 
     return {m: w / total for m, w in weights.items()}
 
 
-def unbeatable(belief: dict[str, float], n: int, c: int | None, floor: float = 0.995) -> bool:
+def contradicted_as_unbeatable(codename: str, n: int, community: int) -> bool:
+    """Have we actually SEEN this number fail to win a showdown outright?
+
+    `unbeatable` waives every stack-risk guard we own, so it must not rest on a
+    rule the evidence already argues with. Amaranth cost us a leg exactly this
+    way: two hands said a 7 beat an 8, "a 7 beats everything" reached ~100% of
+    the posterior between two near-identical variants, and the bot shoved its
+    whole 211-chip stack — into a hand the log then reported as NOT an outright
+    win for the 7. One direct counter-example outranks any amount of posterior.
+    """
+    for obs in RuleBelief.for_codename(codename).seen.values():
+        if obs.community != community:
+            continue  # a number's strength depends on the community number
+        holders = [s for s, v in obs.numbers.items() if v == n]
+        if not holders:
+            continue
+        if len({v for v in obs.numbers.values()}) == 1:
+            continue  # everyone holds n; tying with a copy of yourself proves nothing
+        if set(obs.winners) != set(holders):
+            return True
+    return False
+
+
+def unbeatable(
+    belief: dict[str, float],
+    n: int,
+    c: int | None,
+    floor: float = 0.995,
+    codename: str | None = None,
+) -> bool:
     """True when, under everything we believe, no number beats ours.
 
     The generalisation of phase 1's "a pair cannot lose": worth knowing because a
     hand with no downside should ignore every stack-risk guard we own.
     """
     if c is None:
+        return False
+    if codename is not None and contradicted_as_unbeatable(codename, n, c):
         return False
     weight = 0.0
     for name, p in belief.items():
