@@ -5,8 +5,9 @@
   is the documented reference copy and the file is untracked in git)
 - **Endpoints required:** `POST /kan-cheong-delivery-driver`
 - **Submitted to controller:** yes
-- **Score:** 92/100 on five straight runs. The no-cycling change made after run 5 is
-  **reverted** — it was measured and cannot be the missing 8 (see "Sixth investigation").
+- **Score:** 92, 92, 92, 92 then **91** on run 6. The score is *noisy by ±1*, which
+  retires the "exactly 92 every time" premise a lot of earlier reasoning rested on.
+  The no-cycling change made after run 5 was reverted before run 6 and never graded.
 
 > **Reading the PDF:** every code block is clipped on the right by the print-to-PDF
 > (`base_duration_sec` values, the batch response line). The full text *is* in the PDF
@@ -671,3 +672,63 @@ example 3.
 Both captured batches replayed through the restored build reproduce the recorded
 known-92 live responses **byte for byte** (0/1000 differences each), in 0.36 s and
 0.20 s against the statement's 10 s. Full suite: 389 passed.
+
+
+## Run 6 — 91/100, and what it kills
+
+Run 6 ran the restored build (cycling on, truncation on) — the *same semantics* that
+scored 92 four times — and came back **91**. Batch captured whole
+(`run6-request.json.gz`, 1000 cases, 4.71 s).
+
+**The score is noisy by ±1.** That is the single most useful thing run 6 tells us, and
+it retires two earlier conclusions:
+
+- "Exactly 92 on five straight runs" was the load-bearing premise of the no-cycling
+  diagnosis — a constant score demanding a constant-sized planted family. It is not
+  constant.
+- The "+1 from truncation" (91 -> 92 between runs 1 and 2) was almost certainly the
+  same noise, not a measurement. Truncation may never have been worth anything.
+
+So the real signal is a loss of **roughly 8.5%, drifting by about a point run to run**.
+
+### What run 6 rules out
+
+| hypothesis | how it died |
+|---|---|
+| an uncaptured probe batch | the capture now keeps every request of any size: the grader sent **exactly one**, 1000 cases |
+| the budget truncating answers live | live response is identical to a clean local re-solve, **0/1000** |
+| any single reading of the statement | all three runs scored: every near-8% reading is **smaller** in run 6, which scored **worse** (see below) |
+| float arithmetic in the reference | re-walking every optimal route in floats changes **0** truncated answers across all three batches |
+| combinations of readings | no union of up to 3 readings matches 92/92/91; every near miss needs `bidirectional` at 15-19%, which Example 1 contradicts |
+
+Share of cases each reading would flip, against the score that run actually got:
+
+| reading | run 3 (92) | run 5 (92) | run 6 (91) |
+|---|---|---|---|
+| no cycling | 12.0% | 12.3% | **10.4%** |
+| entry-only factor | 14.5% | 14.0% | **13.4%** |
+| `start == end` -> null | 8.6% | 7.3% | **6.8%** |
+| waiting / enter a blocked arc | 8.9% | 10.2% | **8.4%** |
+| obstructions bidirectional | 15.6% | 13.6% | 18.8% |
+
+Every candidate near the right size is **anti-correlated** with the score: run 6 lost
+more points while having fewer such cases. `bidirectional` is the only one that moves
+the right way and it is three times too big, explicitly contradicted by the statement
+("obstructions are directional") and by Example 1's reversed obstruction.
+
+### Where this leaves it
+
+Six graded runs say the same thing: our answers to the batch we are sent are optimal
+under the statement, and the ~8 points are not in any property of that batch we can
+measure from the outside. The remaining possibilities are a reference that differs on a
+data-dependent subset for reasons that are not a clean rule, or a scoring component
+that is not per-case correctness.
+
+The one lever never actually graded is `CYCLE_SEARCH = False` — shipped after run 5,
+reverted before run 6. It is a high-variance bet (it flips 10-12% of cases, so it lands
+near 100 if right and near 80 if wrong) and the three-run correlation above argues
+against it. Not recommended without a reason better than "nothing else is left".
+
+Better next step: **ask the challenge developers for one case id we answer wrongly.**
+That converts an unfalsifiable search into a single worked example. The
+"Clarifications from challenge developers" section above is where the answer goes.
