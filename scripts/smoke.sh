@@ -42,3 +42,18 @@ check "mcp calculate" \
   -H 'Accept: application/json, text/event-stream' \
   -d '{"jsonrpc": "2.0", "id": 2, "method": "tools/call",
        "params": {"name": "calculate", "arguments": {"expression": "2 + 2"}}}'
+
+# SHOWDOWN: the guide's own worked example. Holding a 3 against a community 5 and
+# facing 18 into 32 — the reply should be {"action":"fold"}, and must never be a
+# non-200 (a bad response is substituted with check; five in a row forfeit).
+check "showdown /move" -X POST "$BASE/move" -H 'Content-Type: application/json' -d '{
+  "match_id":"smoke","round":"post_reveal","your_number":3,"community_number":5,
+  "your_seat":0,"button_seat":1,"your_stack":185,"starting_stack":200,
+  "hand_number":6,"total_hands":100,"small_blind":1,"big_blind":2,
+  "pot":32,"to_call":18,"min_raise_to":36,"max_raise_to":185,
+  "legal_actions":["fold","call","raise"],
+  "players":[{"seat":0,"name":"you","bet_this_round":0,"stack":185,"chip_delta":-8},
+             {"seat":1,"name":"Gaston","bet_this_round":18,"stack":183,"chip_delta":8}],
+  "current_hand_actions":[],"recent_hands":[]}'
+check "showdown /move garbage body" -X POST "$BASE/move" -H 'Content-Type: application/json' -d 'not json'
+
