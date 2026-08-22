@@ -3,6 +3,7 @@ import os
 from fastapi import APIRouter, Header, HTTPException
 
 from app.reqlog import RECENT
+from app.showdown_rules import learned_summary
 
 router = APIRouter(prefix="/debug", tags=["debug"])
 
@@ -30,3 +31,19 @@ async def recent_requests(
     if only_errors:
         entries = [e for e in entries if e.get("status", 500) >= 400]
     return entries[-n:]
+
+
+@router.get("/showdown-rules")
+async def showdown_rules(
+    token: str | None = None,
+    x_debug_token: str | None = Header(default=None),
+):
+    """What each `table_rule` codename looks like so far.
+
+    Phase 2 hides the showdown rule behind a codename, and the mapping is fixed
+    for the whole event — so anything here that reads confident is worth baking
+    into app.showdown_rules.KNOWN_RULES and committing, since in-process memory
+    does not survive a Render restart.
+    """
+    _check(token or x_debug_token)
+    return learned_summary()

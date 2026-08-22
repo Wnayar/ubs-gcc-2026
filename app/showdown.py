@@ -31,6 +31,8 @@ from __future__ import annotations
 
 import hashlib
 
+from app.showdown_rules import observe, posterior_for, range_weights, rule_equity, unbeatable
+
 DECK = 13
 ACTIONS = ("fold", "check", "call", "bet", "raise")
 
@@ -49,18 +51,17 @@ CALL_MARGIN = 0.09
 # against a raising war: putting in half our stack costs half of this.
 RAISE_RISK = 0.18
 CALL_RISK = 0.20
-# How narrow we read the opponent after each bet/raise they make this round:
-# the lowest number we credit them with. Index = their raises this round.
-RANGE_LADDER = (1, 4, 7, 9, 10)
+# How sharply each bet/raise of theirs concentrates their range onto the numbers
+# that are strong *under the rule this table is using*. Replaces phase 1's
+# "they hold a high number" ladder, which only made sense under the standard rule.
+SHARPNESS_PER_RAISE = 2.2
 # How far to trust that read. The rest stays uniform, which is what stops a
 # bluffer from folding us off every decent number.
 RANGE_TRUST = 0.85
-# Post-reveal, "a high number" is the wrong read: the ONLY hand that beats a high
-# card is the community number itself. So a big commitment is read mostly as the
-# pair, rising from its 1/13 prior with the size and count of their raises.
-PAIR_PRIOR = 1 / DECK
-PAIR_GAIN = 0.18
-PAIR_MAX = 0.55
+# Phase 2 scores +25 a leg over 40 hands; phase 1 scored +10 over 100. We cannot
+# read the target off the wire, so it keys off whether we are in a multi-leg
+# attempt at all.
+LEG_TARGET_DELTA = 25
 # Pot fractions for our own bets, by strength.
 SIZE_STRONG = 0.90  # a pair, or a 13 that missed
 SIZE_VALUE = 0.62
@@ -201,24 +202,34 @@ def _aggression(state: dict) -> tuple[int, int]:
     return theirs, ours
 
 
-def _pair_weight(theirs: int, pot: int, to_call: int) -> float:
-    """How much of the opponent's range is the community number itself."""
+def _codename(state: dict) -> str:
+    rule = state.get("table_rule")
+    return rule if isinstance(rule, str) and rule else "standard"
+
+
+def _sharpness(state: dict, pot: int, to_call: int) -> float:
+    """How hard the opponent's betting says "my number is strong"."""
+    theirs, _ = _aggression(state)
     if theirs <= 0:
-        return PAIR_PRIOR
+        return 0.0
     size = min(to_call / max(pot - to_call, 1), 2.0) if to_call > 0 else 1.0
-    return min(PAIR_MAX, PAIR_PRIOR + PAIR_GAIN * theirs * (0.5 + 0.5 * size))
+    return SHARPNESS_PER_RAISE * theirs * (0.5 + 0.5 * size)
 
 
 def _effective_equity(state: dict, n: int, c: int | None, pot: int, to_call: int) -> float:
-    """Equity against the range the opponent's betting implies, not vs random."""
-    theirs, _ = _aggression(state)
-    low = RANGE_LADDER[min(theirs, len(RANGE_LADDER) - 1)]
-    if to_call > 0 and to_call > max(pot - to_call, 1):
-        low += 1  # a bet bigger than the pot it was aimed at says more again
-    honest = equity(n, c)
-    if low <= 1 and theirs <= 0:
+    """Equity under what we believe this table's rule is, against the range the
+    opponent's betting implies.
+
+    Both halves are rule-relative: with the belief spread across rules that
+    disagree the number collapses toward a coin flip on its own, which is the
+    right caution while the table is still unknown.
+    """
+    belief = posterior_for(_codename(state))
+    honest = rule_equity(belief, n, c)
+    sharpness = _sharpness(state, pot, to_call)
+    if sharpness <= 0:
         return honest
-    read = equity_vs_range(n, c, low, _pair_weight(theirs, pot, to_call))
+    read = rule_equity(belief, n, c, range_weights(belief, c, sharpness))
     return RANGE_TRUST * read + (1 - RANGE_TRUST) * honest
 
 
@@ -260,10 +271,11 @@ def _tilt(state: dict) -> float:
     delta = _int(_me(state).get("chip_delta"))
     if delta is None:
         return 0.0
+    target = LEG_TARGET_DELTA if _int(state.get("leg_number")) is not None else TARGET_DELTA
     # a cushion big enough that the blinds left to post cannot eat it
-    if delta >= TARGET_DELTA + 2 * hands_left:
+    if delta >= target + 2 * hands_left:
         return PROTECT_TILT
-    if delta < TARGET_DELTA:
+    if delta < target:
         return CHASE_TILT
     return 0.0
 
@@ -301,16 +313,16 @@ def _put_in(
     return None
 
 
-def _cannot_lose(n: int, c: int | None) -> bool:
-    """True when we hold the pair, which no hand beats.
+def _cannot_lose(state: dict, n: int, c: int | None) -> bool:
+    """True when, under every rule we still believe in, no number beats ours.
 
-    "Any pair beats any non-pair" and "identical results split the pot", so
-    every opponent number either loses to us or ties: there is no distribution
-    of their range under which putting chips in costs us any. That makes the
-    stack-risk floor and the raising-war cap — both of which exist to stop us
-    getting stacked — actively wrong here.
+    Under the standard rule that is exactly "we hold the pair" — any pair beats
+    any non-pair and identical results split, so every opponent number either
+    loses to us or ties. A hand with no downside should ignore the stack-risk
+    floor and the raising-war cap, both of which exist only to stop us getting
+    stacked. Phase 2 generalises it: what is unbeatable depends on the table.
     """
-    return c is not None and n == c
+    return unbeatable(posterior_for(_codename(state)), n, c)
 
 
 def _size_for(eq: float) -> float:
@@ -343,7 +355,7 @@ def _play(state: dict, legal: list[str]) -> dict:
     to_call = max(_int(state.get("to_call"), 0) or 0, 0)
     stack = max(_int(state.get("your_stack"), 0) or 0, 1)
     eq = _effective_equity(state, number, community, pot, to_call)
-    locked = _cannot_lose(number, community)
+    locked = _cannot_lose(state, number, community)
     tilt = _tilt(state)
     mine = _int(_me(state).get("bet_this_round"), 0) or 0
     _, our_raises = _aggression(state)
@@ -401,6 +413,41 @@ def _play(state: dict, legal: list[str]) -> dict:
     return _passive(legal)
 
 
+def _learn(state: dict) -> None:
+    """Fold every completed showdown in `recent_hands` into what we know about
+    this codename. Hands won by a fold show nothing and teach nothing.
+    """
+    hands = state.get("recent_hands")
+    if not isinstance(hands, list):
+        return
+    codename = _codename(state)
+    match_id, leg = state.get("match_id"), _int(state.get("leg_number"))
+    for entry in hands:
+        if not isinstance(entry, dict):
+            continue
+        shown = entry.get("shown_numbers")
+        if not isinstance(shown, dict) or len(shown) < 2:
+            continue
+        numbers = {}
+        for seat, value in shown.items():
+            try:
+                numbers[int(seat)] = int(value)
+            except (TypeError, ValueError):
+                numbers = {}
+                break
+        if len(numbers) < 2:
+            continue
+        observe(
+            codename,
+            match_id=match_id,
+            leg=leg,
+            hand_number=_int(entry.get("hand_number")),
+            numbers=numbers,
+            community=_int(entry.get("community_number")),
+            winners=entry.get("winners"),
+        )
+
+
 def decide(state: dict) -> dict:
     """One /move request in, one reply out. Never raises, never returns an
     action outside `legal_actions` — the coordinator substitutes a check for
@@ -411,6 +458,10 @@ def decide(state: dict) -> dict:
     legal = _legal(state)
     if not legal:
         return {"action": "check"}
+    try:
+        _learn(state)
+    except Exception:
+        pass  # never let a malformed history cost us the hand
     try:
         move = _play(state, legal)
     except Exception:

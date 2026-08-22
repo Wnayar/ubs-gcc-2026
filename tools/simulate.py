@@ -23,6 +23,27 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from app import showdown  # noqa: E402
 from app.showdown import decide, equity  # noqa: E402
+from app.showdown_rules import BY_NAME, Rule, forget_all, rule_equity  # noqa: E402
+
+# The leg's true rule. The engine sets it; the opponent bots read it, because a
+# house bot presumably knows the table it deals. Our own bot only ever sees the
+# codename.
+TABLE: dict = {"rule": BY_NAME["standard"], "codename": "standard"}
+
+
+def _is_prime(n):
+    return n in (2, 3, 5, 7, 11, 13)
+
+
+# Rules deliberately OUTSIDE app.showdown_rules.RULES, to measure what happens
+# when the real table is something we never hypothesised.
+EXOTIC = (
+    Rule("x_mod3", "n mod 3, then higher", lambda n, c: (n % 3, n)),
+    Rule("x_prime", "primes beat composites, then higher", lambda n, c: (_is_prime(n), n)),
+    Rule("x_cycdist", "cyclic distance to the community", 
+         lambda n, c: (-min(abs(n - c), DECK - abs(n - c)),)),
+    Rule("x_sumpar", "parity of n+c, then higher", lambda n, c: ((n + c) % 2, n)),
+)
 
 DECK = 13
 SMALL_BLIND, BIG_BLIND = 1, 2
@@ -81,7 +102,7 @@ class Hand:
             "protocol_version": 2,
             "match_id": self.table.match_id,
             "phase": 1,
-            "table_rule": "standard",
+            "table_rule": TABLE["codename"],
             "small_blind": SMALL_BLIND,
             "big_blind": BIG_BLIND,
             "starting_stack": STARTING_STACK,
@@ -91,6 +112,8 @@ class Hand:
             "round": self.round,
             "your_number": self.numbers[seat],
             "community_number": self.community if self.round == "post_reveal" else None,
+            "leg_number": self.table.leg_number,
+            "total_legs": self.table.total_legs,
             "your_seat": seat,
             "button_seat": self.button,
             "pot": self.pot,
@@ -197,10 +220,10 @@ class Hand:
     # -- resolution ------------------------------------------------------------
 
     def beats(self, a: int, b: int) -> int:
-        pair_a, pair_b = self.numbers[a] == self.community, self.numbers[b] == self.community
-        if pair_a != pair_b:
-            return 1 if pair_a else -1
-        return (self.numbers[a] > self.numbers[b]) - (self.numbers[a] < self.numbers[b])
+        rule = TABLE["rule"]
+        ka = rule.key(self.numbers[a], self.community)
+        kb = rule.key(self.numbers[b], self.community)
+        return (ka > kb) - (ka < kb)
 
     def play(self) -> None:
         sb, bb = self.button, 1 - self.button
@@ -253,9 +276,11 @@ class Hand:
 
 
 class Table:
-    def __init__(self, bots, names, total_hands, seed):
+    def __init__(self, bots, names, total_hands, seed, leg_number=None, total_legs=None):
         self.bots = bots
         self.names = names
+        self.leg_number = leg_number
+        self.total_legs = total_legs
         self.total_hands = total_hands
         self.stacks = [STARTING_STACK, STARTING_STACK]
         self.recent_hands: list[dict] = []
@@ -275,7 +300,21 @@ class Table:
 
 
 def _eq(state) -> float:
-    return equity(state["your_number"], state.get("community_number"))
+    """Opponent-side equity, computed under the table's ACTUAL rule."""
+    return rule_equity({TABLE["rule"].name: 1.0}, state["your_number"],
+                       state.get("community_number")) \
+        if TABLE["rule"].name in BY_NAME else _eq_exotic(state)
+
+
+def _eq_exotic(state) -> float:
+    rule, n, c = TABLE["rule"], state["your_number"], state.get("community_number")
+    cs = range(1, DECK + 1) if c is None else (c,)
+    total = 0.0
+    for cc in cs:
+        for m in range(1, DECK + 1):
+            ka, kb = rule.key(n, cc), rule.key(m, cc)
+            total += 1.0 if ka > kb else (0.5 if ka == kb else 0.0)
+    return total / (DECK * len(cs))
 
 
 def bot_station(state):
@@ -340,7 +379,10 @@ def make_gaston(rng):
         legal, eq = state["legal_actions"], _eq(state)
         pot, to_call = state["pot"], state["to_call"]
         n, c = state["your_number"], state.get("community_number")
-        pair = c is not None and n == c
+        rule = TABLE["rule"]
+        pair = c is not None and all(
+            rule.key(m, c) <= rule.key(n, c) for m in range(1, DECK + 1)
+        )
         lo, hi = state["min_raise_to"], state["max_raise_to"]
         big = rng.random() < 0.30  # bluff-shove frequency
         if lo is not None and (pair or eq >= 0.80 or big):
@@ -453,13 +495,70 @@ def sweep(matches, hands):
         setattr(showdown, knob, original)
 
 
+# ───────────────────────────── phase 2: hidden tables ───────────────────────────
+
+
+def play_leg(bots, names, rule, codename, hands, seed, leg_number, total_legs):
+    """One leg: fresh stacks, its own table rule, its own recent_hands."""
+    TABLE["rule"], TABLE["codename"] = rule, codename
+    table = Table(bots, names, hands, seed, leg_number, total_legs)
+    return table.play(random.Random(seed))
+
+
+def phase2_attempt(opponent, name, rules, seed, hands=40):
+    """Four legs back to back. Returns each leg's chip delta for us."""
+    deltas = []
+    for i, rule in enumerate(rules, start=1):
+        us, them = (decide, opponent) if i % 2 == 0 else (opponent, decide)
+        names = ["you", name] if i % 2 == 0 else [name, "you"]
+        out = play_leg(
+            [us, them], names, rule, f"codename-{rule.name}", hands,
+            seed * 10 + i, i, len(rules),
+        )
+        deltas.append(out[0] if i % 2 == 0 else out[1])
+    return deltas
+
+
+def phase2_report(attempts, opponent_name, rule_names, hands=40):
+    """Cold = a fresh process meeting these tables for the first time.
+    Warm  = a later retry, where an earlier attempt already taught us the rules
+            (the statement guarantees the leg order and rules never change)."""
+    rules = [BY_NAME.get(n) or next(r for r in EXOTIC if r.name == n) for n in rule_names]
+    rng = random.Random(7)
+    opponent = opponents(rng)[opponent_name]
+    print(f"\nvs {opponent_name}: legs = {', '.join(rule_names)}   ({attempts} attempts)")
+    print(f"  {'':14} {'leg1':>6} {'leg2':>6} {'leg3':>6} {'leg4':>6} {'points':>8}")
+    for label in ("cold", "warm"):
+        cleared = [0] * len(rules)
+        points = []
+        for a in range(attempts):
+            forget_all()
+            if label == "warm":
+                phase2_attempt(opponent, opponent_name, rules, seed=9000 + a, hands=hands)
+            deltas = phase2_attempt(opponent, opponent_name, rules, seed=a, hands=hands)
+            got = 0
+            for i, d in enumerate(deltas):
+                if d >= 25:
+                    cleared[i] += 1
+                    got += 100
+            points.append(got)
+        rates = "".join(f"{c / attempts:>6.0%}" for c in cleared)
+        print(f"  {label:<14}{rates} {statistics.mean(points):>8.0f}")
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--matches", type=int, default=1000)
     parser.add_argument("--hands", type=int, default=100)
     parser.add_argument("--sweep", action="store_true")
+    parser.add_argument("--phase2", action="store_true")
+    parser.add_argument("--legs", default="low,near,wrap_up,antipair_high")
     args = parser.parse_args()
     if args.sweep:
         sweep(max(args.matches // 4, 150), args.hands)
+    elif args.phase2:
+        names = args.legs.split(",")
+        for who in ("sane", "gaston", "rock"):
+            phase2_report(max(args.matches // 10, 40), who, names)
     else:
         report(args.matches, args.hands)
