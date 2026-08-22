@@ -1,21 +1,21 @@
+import importlib
 import os
+import pkgutil
 
 from fastapi import FastAPI
 
+from app import routers
 from app.reqlog import RequestLogMiddleware
-from app.routers import debug, kan_cheong, phase1, phase2, phase3, showdown, toolbox
 
 app = FastAPI(title="UBS GCC 2026", version="0.1.0")
 app.add_middleware(RequestLogMiddleware)
 
-app.include_router(debug.router)
-# phase routers get added here as statements are released:
-app.include_router(phase1.router)
-app.include_router(phase2.router)
-app.include_router(phase3.router)
-app.include_router(toolbox.router)
-app.include_router(kan_cheong.router)
-app.include_router(showdown.router)  # SHOWDOWN: POST /move, all phases
+# Phase routers are auto-discovered: any app/routers/*.py exposing `router` is
+# mounted. Keeps main.py conflict-free when phases are developed on branches.
+for mod_info in sorted(pkgutil.iter_modules(routers.__path__), key=lambda m: m.name):
+    module = importlib.import_module(f"{routers.__name__}.{mod_info.name}")
+    if hasattr(module, "router"):
+        app.include_router(module.router)
 
 
 def _commit() -> str:
