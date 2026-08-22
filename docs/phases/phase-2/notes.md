@@ -1,5 +1,11 @@
 # Phase 2 — Adaptive API Gateway
 
+> **Superseded by `docs/phases/adaptive-api-gateway/`.** This folder holds the
+> earlier `/adapt` guide. The challenge later published `/adapt-slo`, which adds
+> SLO metrics to the same `POST /solve` and overturns one rule recorded below:
+> an unknown or missing priority defaults to **2**, not 0. Read that folder
+> first; keep this one for the history.
+
 - **PDF:** `statement.pdf` in this folder (printed from
   <https://adaptive-api-gateway-be2304567894.herokuapp.com/adapt>; the base64 in the
   PDF is visually clipped — the full string below came from the page's markdown
