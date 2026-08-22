@@ -131,6 +131,16 @@ CHASE_REACH_PER_HAND = 4
 # is how much of the stack-risk guard the chase is allowed to lift, at full
 # pressure. Live attempt 1 finished second twice, +261 and +173, for zero points.
 CHASE_RISK_RELIEF = 0.6
+# ...and how much of it comes off for the whole of a six-seat leg, not just the
+# run-in. The stack-risk prices were measured heads-up in phase 2, where busting
+# is a flat -200 with an ABSOLUTE target still to reach, so refusing to play for
+# stacks on a read is right. Phase 3 scores a RELATIVE target: attempt 2 finished
+# +77, -89 and -78 in its three losing legs while one opponent took ~900 chips,
+# never once contesting a big pot — its biggest winning hand across two whole
+# legs was 13 and 14 chips. Folding a 13 on a community 7 (only the 7 beats it,
+# 88%) getting 3:1 because CALL_RISK alone wanted +0.347 more equity is not
+# caution when second place and last place both score zero.
+PHASE3_RISK_RELIEF = 0.5
 
 
 def _showdown_value(n: int, c: int | None, m: int) -> float:
@@ -618,10 +628,15 @@ def _play(state: dict, legal: list[str]) -> dict:
     # correct again. Below, `scale` and `tax` are both exactly 1.0 on that path,
     # so it runs the arithmetic those phases were tuned on, unchanged.
     crowded = len(live) >= 2
-    # Once we are behind at a six-seat table the stack-risk guard is protecting a
-    # stack that scores nothing, so the chase lifts part of it. Zero pressure
-    # (and every two-seat table) leaves both prices exactly where they were.
+    # At a six-seat table the stack-risk guard is protecting a stack that only
+    # scores if it ends up the biggest one, so part of it comes off for the whole
+    # leg and more of it once we are behind and out of road. Gated on the SEATING,
+    # so a phase 1 or 2 match keeps both prices exactly where phase 2 measured
+    # them — and so a phase 3 leg that has folded down to a duel, which is where
+    # the worst of these folds happened, still gets the relief.
     relief = 1.0 - CHASE_RISK_RELIEF * _chase_pressure(state)
+    if _table_size(state) >= 3:
+        relief *= 1.0 - PHASE3_RISK_RELIEF
     # Solving for the largest affordable bet is gated on the SEATING, not on who
     # is still live: a six-seat leg that has folded down to a duel is still a
     # phase 3 leg scored on topping the table, and that is exactly where the

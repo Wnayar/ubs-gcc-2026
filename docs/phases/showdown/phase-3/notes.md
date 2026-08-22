@@ -376,3 +376,76 @@ shipping a plausible-looking staking rule.
 The honest reading of attempt 1 is that one demonstrable defect was worth fixing and the
 rest was a variance contest we lost 0-for-4. Retries are free and only the best attempt
 counts.
+
+
+## Attempt 2 — 150/600
+
+Match `phase3-seed3645897548`, same four codenames. The token-bet fix worked and the
+busting stopped, and one leg was won outright. The other three were folded away.
+
+| leg | table | ours | rank | leader | our biggest winning hand, all leg |
+|---|---|---|---|---|---|
+| 1 | verdigris | +77 | 2 of 6 | Miles **+723** | +127 |
+| 2 | obsidian | **+629** | **1 — cleared, 150 pts** | Dana +27 | +600 |
+| 3 | amaranth | −89 | 2 of 6 | Rhea **+889** | **+13** |
+| 4 | cinnabar | −78 | 2 of 6 | Rhea **+898** | **+14** |
+
+Protocol clean again: 318 `/move` calls, all 200, mean 8.6 ms, max 112 ms. **Zero busts**
+(attempt 1 had two), so the size-solving fix did what it was meant to.
+
+### What went wrong: we never contested a pot
+
+In legs 3 and 4 our single biggest winning hand across sixty hands was **13 and 14
+chips**. Four opponents busted in each leg, putting ~800 chips on the table, and one
+opponent collected essentially all of it while we sat at −89 and −78. That is not a
+losing run of cards, it is a bot that folds every pot worth winning.
+
+Three real folds, all with the rule correctly identified:
+
+| leg | hand | we held | community | rule read | pot | to call | pot odds | equity | played |
+|---|---|---|---|---|---|---|---|---|---|
+| 4 | 3 | **13** | 7 | `standard` 0.95 | 192 | 96 | 0.33 | **0.885** | **fold** |
+| 4 | 10 | 12 | 2 | `standard` 0.95 | 102 | 51 | 0.33 | 0.806 | **fold** |
+| 3 | 12 | 12 | 7 | `lucky7` 0.97 | 154 | 73 | 0.32 | 0.809 | **fold** |
+
+A 13 on a community 7 under the standard rule is beaten by exactly one number, the 7
+itself. Folding it getting 3:1 is indefensible. The cause is not the rule model and not
+the equity — both were right — it is `CALL_RISK`:
+
+    CALL_RISK x (risked / stack) = 0.55 x 0.63 = +0.347 of extra equity demanded
+
+`CALL_RISK = 0.55` and `RAISE_RISK = 0.40` were measured on **live phase 2 data**, and
+they are correct there: heads-up, over 40 hands, against an **absolute** +25 target,
+busting forfeits a target that was still reachable, so refusing to play for a stack on a
+read is right. Phase 3 scores a **relative** target. Second place and last place both pay
+zero, so a stack that does not finish biggest is worth nothing, and ruin-aversion is
+close to worthless — while the cost of it, every leg, is the ~800 chips of dead money
+going to whichever opponent was willing to play for them.
+
+### Fix
+
+`PHASE3_RISK_RELIEF = 0.5` takes half the stack-risk price off for the whole of a
+six-seat leg, on top of the existing chase relief in the run-in. Gated on the
+**seating** being three or more, not on who is still live — leg 4 hand 3 was heads-up by
+the time it reached us but still a six-seat leg scored on topping the table, and a real
+two-seat phase 1/2 match is untouched. Will's `test_no_real_phase_2_request_ever_takes_
+the_multiway_path` still passes, so the 700 banked points are provably unaffected.
+
+Replayed against the live log this changes **7 of 318** real decisions — five folds
+become calls, two bets get bigger, nothing becomes illegal or out of range. The five
+pots it now contests are worth 514 chips in legs we finished 89 and 78 chips down.
+
+Swept on the four real legs:
+
+| `PHASE3_RISK_RELIEF` | points | bust |
+|---|---|---|
+| 0.0 (attempt 2) | 308 | 16.9% |
+| 0.3 | 326 | 19.4% |
+| **0.5 (shipped)** | **341** | 26.2% |
+| 0.7 | 330 | 25.6% |
+| 0.85 | 319 | 28.7% |
+
+A clean inverted U peaking at the midpoint, and +11% rather than the noise-level
+differences that were rejected in attempt 1's write-up. The bust rate rising to 26% is
+the price and it is the right price to pay: busting and finishing second score the same
+zero, so the points column already values it correctly.

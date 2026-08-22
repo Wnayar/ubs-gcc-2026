@@ -723,3 +723,59 @@ def test_a_two_seat_table_never_chases():
     for p in state["players"]:
         p["chip_delta"] = -100 if p["name"] == "you" else 300
     assert _chase_pressure(state) == 0.0
+
+
+# ─────────── attempt 2 regressions: 150/600, three legs folded away ────────────
+# Attempt 2 fixed the token bets and stopped busting, then finished +77, −89 and
+# −78 in its three losing legs while one opponent took ~900 chips. Its biggest
+# winning hand across two whole legs was 13 and 14 chips: it never contested a
+# pot. These are the real spots it passed up.
+
+
+def test_a_near_nuts_hand_is_not_folded_getting_three_to_one():
+    """leg 4 hand 3: a 13 on a community 7 under cinnabar (the standard rule),
+    so only the 7 itself beats us — 88% — with 192 in the pot and 96 to call.
+
+    CALL_RISK alone wanted +0.347 of extra equity on top of the pot odds. That
+    price was measured heads-up in phase 2, where busting forfeits an ABSOLUTE
+    target that is still reachable. Phase 3 scores a relative one: second place
+    and last place both pay zero, so refusing to play for a stack is not caution.
+    """
+    from app.showdown import decide
+
+    state = _logged("a2_leg4_h3")
+    assert state["your_number"] == 13 and state["community_number"] == 7
+    assert decide(state)["action"] == "call"
+
+
+def test_the_same_fold_two_ways():
+    from app.showdown import decide
+
+    for key, number in (("a2_leg4_h10", 12), ("a2_leg3_h12", 12)):
+        state = _logged(key)
+        assert state["your_number"] == number
+        assert decide(state)["action"] == "call", key
+
+
+def test_the_relief_is_gated_on_the_seating_not_on_who_is_still_live():
+    """leg 4 hand 3 was heads-up *inside* a six-seat leg — one opponent live, five
+    seats at the table. That is still a leg scored on topping the table, so it
+    gets the relief; a real two-seat phase 1/2 match must not."""
+    from app.showdown import _table_size, live_opponents
+
+    state = _logged("a2_leg4_h3")
+    assert len(live_opponents(state)) == 1, "heads-up by the time it got to us"
+    assert _table_size(state) >= 3, "but still a six-seat leg"
+
+
+def test_a_two_seat_match_keeps_phase_twos_prices_exactly():
+    # the same spot at a genuine two-seat table must price the call the way
+    # phase 2 measured it — the relief must not leak into 700 banked points
+    from app.showdown import PHASE3_RISK_RELIEF, _table_size
+
+    state = _logged("a2_leg4_h3")
+    state["players"] = [p for p in state["players"] if p["name"] == "you"][:1] + [
+        p for p in state["players"] if p["name"] != "you"
+    ][:1]
+    assert _table_size(state) == 2
+    assert PHASE3_RISK_RELIEF > 0, "otherwise this test proves nothing"

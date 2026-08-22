@@ -1890,5 +1890,1588 @@
     ]
    }
   ]
+ },
+ "a2_leg3_h12": {
+  "protocol_version": 2,
+  "match_id": "phase3-seed3645897548-leg3",
+  "phase": 3,
+  "table_rule": "amaranth",
+  "leg_number": 3,
+  "total_legs": 4,
+  "starting_stack": 200,
+  "your_stack": 180,
+  "hand_number": 12,
+  "total_hands": 60,
+  "round": "post_reveal",
+  "your_number": 12,
+  "community_number": 7,
+  "your_seat": 0,
+  "button_seat": 4,
+  "small_blind": 1,
+  "big_blind": 2,
+  "pot": 154,
+  "to_call": 73,
+  "min_raise_to": 167,
+  "max_raise_to": 201,
+  "legal_actions": [
+   "fold",
+   "call",
+   "raise"
+  ],
+  "players": [
+   {
+    "seat": 0,
+    "name": "you",
+    "folded": false,
+    "chip_delta": 7,
+    "bet_this_round": 21,
+    "stack": 180,
+    "all_in": false,
+    "busted": false
+   },
+   {
+    "seat": 1,
+    "name": "Dana",
+    "folded": false,
+    "chip_delta": 3,
+    "bet_this_round": 21,
+    "stack": 176,
+    "all_in": false,
+    "busted": false
+   },
+   {
+    "seat": 2,
+    "name": "Miles",
+    "folded": false,
+    "chip_delta": -6,
+    "bet_this_round": 94,
+    "stack": 94,
+    "all_in": false,
+    "busted": false
+   },
+   {
+    "seat": 3,
+    "name": "Theo",
+    "folded": true,
+    "chip_delta": -200,
+    "bet_this_round": 0,
+    "stack": 0,
+    "all_in": false,
+    "busted": true
+   },
+   {
+    "seat": 4,
+    "name": "Rhea",
+    "folded": true,
+    "chip_delta": 396,
+    "bet_this_round": 0,
+    "stack": 596,
+    "all_in": false,
+    "busted": false
+   },
+   {
+    "seat": 5,
+    "name": "Bram",
+    "folded": true,
+    "chip_delta": -200,
+    "bet_this_round": 0,
+    "stack": 0,
+    "all_in": false,
+    "busted": true
+   }
+  ],
+  "current_hand_actions": [
+   {
+    "round": "pre_reveal",
+    "seat": 2,
+    "action": "raise",
+    "amount": 6
+   },
+   {
+    "round": "pre_reveal",
+    "seat": 4,
+    "action": "fold"
+   },
+   {
+    "round": "pre_reveal",
+    "seat": 0,
+    "action": "call",
+    "amount": 6
+   },
+   {
+    "round": "pre_reveal",
+    "seat": 1,
+    "action": "call",
+    "amount": 6
+   },
+   {
+    "round": "post_reveal",
+    "seat": 0,
+    "action": "bet",
+    "amount": 21
+   },
+   {
+    "round": "post_reveal",
+    "seat": 1,
+    "action": "call",
+    "amount": 21
+   },
+   {
+    "round": "post_reveal",
+    "seat": 2,
+    "action": "raise",
+    "amount": 94
+   }
+  ],
+  "recent_hands": [
+   {
+    "hand_number": 1,
+    "community_number": 13,
+    "winners": [
+     4
+    ],
+    "pot": 603,
+    "shown_numbers": {
+     "3": 12,
+     "4": 7,
+     "5": 12
+    },
+    "actions": [
+     {
+      "round": "pre_reveal",
+      "seat": 3,
+      "action": "call",
+      "amount": 2
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 4,
+      "action": "raise",
+      "amount": 7
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 5,
+      "action": "raise",
+      "amount": 26
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 0,
+      "action": "fold"
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 1,
+      "action": "fold"
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 2,
+      "action": "fold"
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 3,
+      "action": "raise",
+      "amount": 45
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 4,
+      "action": "raise",
+      "amount": 134
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 5,
+      "action": "raise",
+      "amount": 200
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 3,
+      "action": "call",
+      "amount": 200
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 4,
+      "action": "call",
+      "amount": 200
+     }
+    ]
+   },
+   {
+    "hand_number": 2,
+    "community_number": 2,
+    "winners": [
+     1
+    ],
+    "pot": 8,
+    "shown_numbers": {},
+    "actions": [
+     {
+      "round": "pre_reveal",
+      "seat": 0,
+      "action": "fold"
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 1,
+      "action": "call",
+      "amount": 2
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 2,
+      "action": "fold"
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 4,
+      "action": "check"
+     },
+     {
+      "round": "post_reveal",
+      "seat": 4,
+      "action": "check"
+     },
+     {
+      "round": "post_reveal",
+      "seat": 1,
+      "action": "bet",
+      "amount": 3
+     },
+     {
+      "round": "post_reveal",
+      "seat": 4,
+      "action": "fold"
+     }
+    ]
+   },
+   {
+    "hand_number": 3,
+    "community_number": null,
+    "winners": [
+     0
+    ],
+    "pot": 3,
+    "shown_numbers": {},
+    "actions": [
+     {
+      "round": "pre_reveal",
+      "seat": 1,
+      "action": "fold"
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 2,
+      "action": "fold"
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 4,
+      "action": "fold"
+     }
+    ]
+   },
+   {
+    "hand_number": 4,
+    "community_number": 4,
+    "winners": [
+     2,
+     4
+    ],
+    "pot": 20,
+    "shown_numbers": {
+     "2": 13,
+     "4": 13
+    },
+    "actions": [
+     {
+      "round": "pre_reveal",
+      "seat": 2,
+      "action": "call",
+      "amount": 2
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 4,
+      "action": "call",
+      "amount": 2
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 0,
+      "action": "call",
+      "amount": 2
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 1,
+      "action": "check"
+     },
+     {
+      "round": "post_reveal",
+      "seat": 0,
+      "action": "check"
+     },
+     {
+      "round": "post_reveal",
+      "seat": 1,
+      "action": "check"
+     },
+     {
+      "round": "post_reveal",
+      "seat": 2,
+      "action": "bet",
+      "amount": 6
+     },
+     {
+      "round": "post_reveal",
+      "seat": 4,
+      "action": "call",
+      "amount": 6
+     },
+     {
+      "round": "post_reveal",
+      "seat": 0,
+      "action": "fold"
+     },
+     {
+      "round": "post_reveal",
+      "seat": 1,
+      "action": "fold"
+     }
+    ]
+   },
+   {
+    "hand_number": 5,
+    "community_number": null,
+    "winners": [
+     2
+    ],
+    "pot": 3,
+    "shown_numbers": {},
+    "actions": [
+     {
+      "round": "pre_reveal",
+      "seat": 4,
+      "action": "fold"
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 0,
+      "action": "fold"
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 1,
+      "action": "fold"
+     }
+    ]
+   },
+   {
+    "hand_number": 6,
+    "community_number": 8,
+    "winners": [
+     2
+    ],
+    "pot": 4,
+    "shown_numbers": {
+     "2": 6,
+     "4": 4
+    },
+    "actions": [
+     {
+      "round": "pre_reveal",
+      "seat": 0,
+      "action": "fold"
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 1,
+      "action": "fold"
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 2,
+      "action": "call",
+      "amount": 2
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 4,
+      "action": "check"
+     },
+     {
+      "round": "post_reveal",
+      "seat": 2,
+      "action": "check"
+     },
+     {
+      "round": "post_reveal",
+      "seat": 4,
+      "action": "check"
+     }
+    ]
+   },
+   {
+    "hand_number": 7,
+    "community_number": 4,
+    "winners": [
+     0
+    ],
+    "pot": 17,
+    "shown_numbers": {
+     "0": 4,
+     "2": 11
+    },
+    "actions": [
+     {
+      "round": "pre_reveal",
+      "seat": 1,
+      "action": "fold"
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 2,
+      "action": "call",
+      "amount": 2
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 4,
+      "action": "fold"
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 0,
+      "action": "check"
+     },
+     {
+      "round": "post_reveal",
+      "seat": 0,
+      "action": "bet",
+      "amount": 6
+     },
+     {
+      "round": "post_reveal",
+      "seat": 2,
+      "action": "call",
+      "amount": 6
+     }
+    ]
+   },
+   {
+    "hand_number": 8,
+    "community_number": 8,
+    "winners": [
+     1
+    ],
+    "pot": 7,
+    "shown_numbers": {},
+    "actions": [
+     {
+      "round": "pre_reveal",
+      "seat": 2,
+      "action": "fold"
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 4,
+      "action": "fold"
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 0,
+      "action": "call",
+      "amount": 2
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 1,
+      "action": "check"
+     },
+     {
+      "round": "post_reveal",
+      "seat": 0,
+      "action": "check"
+     },
+     {
+      "round": "post_reveal",
+      "seat": 1,
+      "action": "bet",
+      "amount": 3
+     },
+     {
+      "round": "post_reveal",
+      "seat": 0,
+      "action": "fold"
+     }
+    ]
+   },
+   {
+    "hand_number": 9,
+    "community_number": null,
+    "winners": [
+     2
+    ],
+    "pot": 3,
+    "shown_numbers": {},
+    "actions": [
+     {
+      "round": "pre_reveal",
+      "seat": 4,
+      "action": "fold"
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 0,
+      "action": "fold"
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 1,
+      "action": "fold"
+     }
+    ]
+   },
+   {
+    "hand_number": 10,
+    "community_number": 8,
+    "winners": [
+     1
+    ],
+    "pot": 8,
+    "shown_numbers": {},
+    "actions": [
+     {
+      "round": "pre_reveal",
+      "seat": 0,
+      "action": "fold"
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 1,
+      "action": "call",
+      "amount": 2
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 2,
+      "action": "fold"
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 4,
+      "action": "check"
+     },
+     {
+      "round": "post_reveal",
+      "seat": 4,
+      "action": "check"
+     },
+     {
+      "round": "post_reveal",
+      "seat": 1,
+      "action": "bet",
+      "amount": 3
+     },
+     {
+      "round": "post_reveal",
+      "seat": 4,
+      "action": "fold"
+     }
+    ]
+   },
+   {
+    "hand_number": 11,
+    "community_number": null,
+    "winners": [
+     0
+    ],
+    "pot": 3,
+    "shown_numbers": {},
+    "actions": [
+     {
+      "round": "pre_reveal",
+      "seat": 1,
+      "action": "fold"
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 2,
+      "action": "fold"
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 4,
+      "action": "fold"
+     }
+    ]
+   }
+  ]
+ },
+ "a2_leg4_h3": {
+  "protocol_version": 2,
+  "match_id": "phase3-seed3645897548-leg4",
+  "phase": 3,
+  "table_rule": "cinnabar",
+  "leg_number": 4,
+  "total_legs": 4,
+  "starting_stack": 200,
+  "your_stack": 152,
+  "hand_number": 3,
+  "total_hands": 60,
+  "round": "post_reveal",
+  "your_number": 13,
+  "community_number": 7,
+  "your_seat": 0,
+  "button_seat": 4,
+  "small_blind": 1,
+  "big_blind": 2,
+  "pot": 192,
+  "to_call": 96,
+  "min_raise_to": 152,
+  "max_raise_to": 152,
+  "legal_actions": [
+   "fold",
+   "call",
+   "raise"
+  ],
+  "players": [
+   {
+    "seat": 0,
+    "name": "you",
+    "folded": false,
+    "chip_delta": 0,
+    "bet_this_round": 0,
+    "stack": 152,
+    "all_in": false,
+    "busted": false
+   },
+   {
+    "seat": 1,
+    "name": "Dana",
+    "folded": true,
+    "chip_delta": 199,
+    "bet_this_round": 0,
+    "stack": 399,
+    "all_in": false,
+    "busted": false
+   },
+   {
+    "seat": 2,
+    "name": "Miles",
+    "folded": true,
+    "chip_delta": -200,
+    "bet_this_round": 0,
+    "stack": 0,
+    "all_in": false,
+    "busted": true
+   },
+   {
+    "seat": 3,
+    "name": "Theo",
+    "folded": true,
+    "chip_delta": -200,
+    "bet_this_round": 0,
+    "stack": 0,
+    "all_in": false,
+    "busted": true
+   },
+   {
+    "seat": 4,
+    "name": "Rhea",
+    "folded": true,
+    "chip_delta": -1,
+    "bet_this_round": 0,
+    "stack": 199,
+    "all_in": false,
+    "busted": false
+   },
+   {
+    "seat": 5,
+    "name": "Bram",
+    "folded": false,
+    "chip_delta": 207,
+    "bet_this_round": 96,
+    "stack": 263,
+    "all_in": false,
+    "busted": false
+   }
+  ],
+  "current_hand_actions": [
+   {
+    "round": "pre_reveal",
+    "seat": 1,
+    "action": "fold"
+   },
+   {
+    "round": "pre_reveal",
+    "seat": 4,
+    "action": "fold"
+   },
+   {
+    "round": "pre_reveal",
+    "seat": 5,
+    "action": "raise",
+    "amount": 6
+   },
+   {
+    "round": "pre_reveal",
+    "seat": 0,
+    "action": "raise",
+    "amount": 16
+   },
+   {
+    "round": "pre_reveal",
+    "seat": 5,
+    "action": "raise",
+    "amount": 48
+   },
+   {
+    "round": "pre_reveal",
+    "seat": 0,
+    "action": "call",
+    "amount": 48
+   },
+   {
+    "round": "post_reveal",
+    "seat": 5,
+    "action": "bet",
+    "amount": 96
+   }
+  ],
+  "recent_hands": [
+   {
+    "hand_number": 1,
+    "community_number": 3,
+    "winners": [
+     5
+    ],
+    "pot": 601,
+    "shown_numbers": {
+     "2": 13,
+     "3": 6,
+     "5": 3
+    },
+    "actions": [
+     {
+      "round": "pre_reveal",
+      "seat": 3,
+      "action": "call",
+      "amount": 2
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 4,
+      "action": "fold"
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 5,
+      "action": "call",
+      "amount": 2
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 0,
+      "action": "fold"
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 1,
+      "action": "fold"
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 2,
+      "action": "raise",
+      "amount": 7
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 3,
+      "action": "call",
+      "amount": 7
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 5,
+      "action": "raise",
+      "amount": 29
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 2,
+      "action": "raise",
+      "amount": 88
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 3,
+      "action": "call",
+      "amount": 88
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 5,
+      "action": "call",
+      "amount": 88
+     },
+     {
+      "round": "post_reveal",
+      "seat": 2,
+      "action": "bet",
+      "amount": 112
+     },
+     {
+      "round": "post_reveal",
+      "seat": 3,
+      "action": "call",
+      "amount": 112
+     },
+     {
+      "round": "post_reveal",
+      "seat": 5,
+      "action": "call",
+      "amount": 112
+     }
+    ]
+   },
+   {
+    "hand_number": 2,
+    "community_number": 2,
+    "winners": [
+     1
+    ],
+    "pot": 399,
+    "shown_numbers": {
+     "1": 11,
+     "5": 7
+    },
+    "actions": [
+     {
+      "round": "pre_reveal",
+      "seat": 0,
+      "action": "fold"
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 1,
+      "action": "call",
+      "amount": 2
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 4,
+      "action": "fold"
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 5,
+      "action": "raise",
+      "amount": 7
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 1,
+      "action": "raise",
+      "amount": 19
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 5,
+      "action": "raise",
+      "amount": 58
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 1,
+      "action": "raise",
+      "amount": 152
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 5,
+      "action": "call",
+      "amount": 152
+     },
+     {
+      "round": "post_reveal",
+      "seat": 5,
+      "action": "check"
+     },
+     {
+      "round": "post_reveal",
+      "seat": 1,
+      "action": "bet",
+      "amount": 47
+     },
+     {
+      "round": "post_reveal",
+      "seat": 5,
+      "action": "call",
+      "amount": 47
+     }
+    ]
+   }
+  ]
+ },
+ "a2_leg4_h10": {
+  "protocol_version": 2,
+  "match_id": "phase3-seed3645897548-leg4",
+  "phase": 3,
+  "table_rule": "cinnabar",
+  "leg_number": 4,
+  "total_legs": 4,
+  "starting_stack": 200,
+  "your_stack": 125,
+  "hand_number": 10,
+  "total_hands": 60,
+  "round": "post_reveal",
+  "your_number": 12,
+  "community_number": 2,
+  "your_seat": 0,
+  "button_seat": 1,
+  "small_blind": 1,
+  "big_blind": 2,
+  "pot": 102,
+  "to_call": 51,
+  "min_raise_to": 102,
+  "max_raise_to": 125,
+  "legal_actions": [
+   "fold",
+   "call",
+   "raise"
+  ],
+  "players": [
+   {
+    "seat": 0,
+    "name": "you",
+    "folded": false,
+    "chip_delta": -50,
+    "bet_this_round": 0,
+    "stack": 125,
+    "all_in": false,
+    "busted": false
+   },
+   {
+    "seat": 1,
+    "name": "Dana",
+    "folded": true,
+    "chip_delta": -59,
+    "bet_this_round": 0,
+    "stack": 141,
+    "all_in": false,
+    "busted": false
+   },
+   {
+    "seat": 2,
+    "name": "Miles",
+    "folded": true,
+    "chip_delta": -200,
+    "bet_this_round": 0,
+    "stack": 0,
+    "all_in": false,
+    "busted": true
+   },
+   {
+    "seat": 3,
+    "name": "Theo",
+    "folded": true,
+    "chip_delta": -200,
+    "bet_this_round": 0,
+    "stack": 0,
+    "all_in": false,
+    "busted": true
+   },
+   {
+    "seat": 4,
+    "name": "Rhea",
+    "folded": true,
+    "chip_delta": 482,
+    "bet_this_round": 0,
+    "stack": 681,
+    "all_in": false,
+    "busted": false
+   },
+   {
+    "seat": 5,
+    "name": "Bram",
+    "folded": false,
+    "chip_delta": 37,
+    "bet_this_round": 51,
+    "stack": 161,
+    "all_in": false,
+    "busted": false
+   }
+  ],
+  "current_hand_actions": [
+   {
+    "round": "pre_reveal",
+    "seat": 0,
+    "action": "raise",
+    "amount": 8
+   },
+   {
+    "round": "pre_reveal",
+    "seat": 1,
+    "action": "fold"
+   },
+   {
+    "round": "pre_reveal",
+    "seat": 4,
+    "action": "fold"
+   },
+   {
+    "round": "pre_reveal",
+    "seat": 5,
+    "action": "raise",
+    "amount": 25
+   },
+   {
+    "round": "pre_reveal",
+    "seat": 0,
+    "action": "call",
+    "amount": 25
+   },
+   {
+    "round": "post_reveal",
+    "seat": 5,
+    "action": "bet",
+    "amount": 51
+   }
+  ],
+  "recent_hands": [
+   {
+    "hand_number": 1,
+    "community_number": 3,
+    "winners": [
+     5
+    ],
+    "pot": 601,
+    "shown_numbers": {
+     "2": 13,
+     "3": 6,
+     "5": 3
+    },
+    "actions": [
+     {
+      "round": "pre_reveal",
+      "seat": 3,
+      "action": "call",
+      "amount": 2
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 4,
+      "action": "fold"
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 5,
+      "action": "call",
+      "amount": 2
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 0,
+      "action": "fold"
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 1,
+      "action": "fold"
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 2,
+      "action": "raise",
+      "amount": 7
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 3,
+      "action": "call",
+      "amount": 7
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 5,
+      "action": "raise",
+      "amount": 29
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 2,
+      "action": "raise",
+      "amount": 88
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 3,
+      "action": "call",
+      "amount": 88
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 5,
+      "action": "call",
+      "amount": 88
+     },
+     {
+      "round": "post_reveal",
+      "seat": 2,
+      "action": "bet",
+      "amount": 112
+     },
+     {
+      "round": "post_reveal",
+      "seat": 3,
+      "action": "call",
+      "amount": 112
+     },
+     {
+      "round": "post_reveal",
+      "seat": 5,
+      "action": "call",
+      "amount": 112
+     }
+    ]
+   },
+   {
+    "hand_number": 2,
+    "community_number": 2,
+    "winners": [
+     1
+    ],
+    "pot": 399,
+    "shown_numbers": {
+     "1": 11,
+     "5": 7
+    },
+    "actions": [
+     {
+      "round": "pre_reveal",
+      "seat": 0,
+      "action": "fold"
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 1,
+      "action": "call",
+      "amount": 2
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 4,
+      "action": "fold"
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 5,
+      "action": "raise",
+      "amount": 7
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 1,
+      "action": "raise",
+      "amount": 19
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 5,
+      "action": "raise",
+      "amount": 58
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 1,
+      "action": "raise",
+      "amount": 152
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 5,
+      "action": "call",
+      "amount": 152
+     },
+     {
+      "round": "post_reveal",
+      "seat": 5,
+      "action": "check"
+     },
+     {
+      "round": "post_reveal",
+      "seat": 1,
+      "action": "bet",
+      "amount": 47
+     },
+     {
+      "round": "post_reveal",
+      "seat": 5,
+      "action": "call",
+      "amount": 47
+     }
+    ]
+   },
+   {
+    "hand_number": 3,
+    "community_number": 7,
+    "winners": [
+     5
+    ],
+    "pot": 192,
+    "shown_numbers": {},
+    "actions": [
+     {
+      "round": "pre_reveal",
+      "seat": 1,
+      "action": "fold"
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 4,
+      "action": "fold"
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 5,
+      "action": "raise",
+      "amount": 6
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 0,
+      "action": "raise",
+      "amount": 16
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 5,
+      "action": "raise",
+      "amount": 48
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 0,
+      "action": "call",
+      "amount": 48
+     },
+     {
+      "round": "post_reveal",
+      "seat": 5,
+      "action": "bet",
+      "amount": 96
+     },
+     {
+      "round": "post_reveal",
+      "seat": 0,
+      "action": "fold"
+     }
+    ]
+   },
+   {
+    "hand_number": 4,
+    "community_number": 10,
+    "winners": [
+     0,
+     5
+    ],
+    "pot": 429,
+    "shown_numbers": {
+     "0": 13,
+     "5": 13
+    },
+    "actions": [
+     {
+      "round": "pre_reveal",
+      "seat": 4,
+      "action": "fold"
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 5,
+      "action": "call",
+      "amount": 2
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 0,
+      "action": "raise",
+      "amount": 9
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 1,
+      "action": "fold"
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 5,
+      "action": "raise",
+      "amount": 29
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 0,
+      "action": "call",
+      "amount": 29
+     },
+     {
+      "round": "post_reveal",
+      "seat": 0,
+      "action": "bet",
+      "amount": 62
+     },
+     {
+      "round": "post_reveal",
+      "seat": 5,
+      "action": "raise",
+      "amount": 246
+     },
+     {
+      "round": "post_reveal",
+      "seat": 0,
+      "action": "call",
+      "amount": 123
+     }
+    ]
+   },
+   {
+    "hand_number": 5,
+    "community_number": 8,
+    "winners": [
+     4
+    ],
+    "pot": 60,
+    "shown_numbers": {
+     "1": 10,
+     "4": 13
+    },
+    "actions": [
+     {
+      "round": "pre_reveal",
+      "seat": 5,
+      "action": "fold"
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 0,
+      "action": "fold"
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 1,
+      "action": "call",
+      "amount": 2
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 4,
+      "action": "raise",
+      "amount": 5
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 1,
+      "action": "call",
+      "amount": 5
+     },
+     {
+      "round": "post_reveal",
+      "seat": 1,
+      "action": "bet",
+      "amount": 7
+     },
+     {
+      "round": "post_reveal",
+      "seat": 4,
+      "action": "raise",
+      "amount": 25
+     },
+     {
+      "round": "post_reveal",
+      "seat": 1,
+      "action": "call",
+      "amount": 25
+     }
+    ]
+   },
+   {
+    "hand_number": 6,
+    "community_number": null,
+    "winners": [
+     5
+    ],
+    "pot": 3,
+    "shown_numbers": {},
+    "actions": [
+     {
+      "round": "pre_reveal",
+      "seat": 0,
+      "action": "fold"
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 1,
+      "action": "fold"
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 4,
+      "action": "fold"
+     }
+    ]
+   },
+   {
+    "hand_number": 7,
+    "community_number": null,
+    "winners": [
+     5
+    ],
+    "pot": 8,
+    "shown_numbers": {},
+    "actions": [
+     {
+      "round": "pre_reveal",
+      "seat": 1,
+      "action": "fold"
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 4,
+      "action": "fold"
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 5,
+      "action": "raise",
+      "amount": 6
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 0,
+      "action": "fold"
+     }
+    ]
+   },
+   {
+    "hand_number": 8,
+    "community_number": 13,
+    "winners": [
+     4
+    ],
+    "pot": 676,
+    "shown_numbers": {
+     "1": 9,
+     "4": 13,
+     "5": 2
+    },
+    "actions": [
+     {
+      "round": "pre_reveal",
+      "seat": 4,
+      "action": "raise",
+      "amount": 6
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 5,
+      "action": "raise",
+      "amount": 21
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 0,
+      "action": "fold"
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 1,
+      "action": "call",
+      "amount": 21
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 4,
+      "action": "raise",
+      "amount": 69
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 5,
+      "action": "call",
+      "amount": 69
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 1,
+      "action": "call",
+      "amount": 69
+     },
+     {
+      "round": "post_reveal",
+      "seat": 1,
+      "action": "check"
+     },
+     {
+      "round": "post_reveal",
+      "seat": 4,
+      "action": "bet",
+      "amount": 156
+     },
+     {
+      "round": "post_reveal",
+      "seat": 5,
+      "action": "call",
+      "amount": 156
+     },
+     {
+      "round": "post_reveal",
+      "seat": 1,
+      "action": "call",
+      "amount": 156
+     }
+    ]
+   },
+   {
+    "hand_number": 9,
+    "community_number": null,
+    "winners": [
+     5
+    ],
+    "pot": 10,
+    "shown_numbers": {},
+    "actions": [
+     {
+      "round": "pre_reveal",
+      "seat": 5,
+      "action": "raise",
+      "amount": 7
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 0,
+      "action": "fold"
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 1,
+      "action": "fold"
+     },
+     {
+      "round": "pre_reveal",
+      "seat": 4,
+      "action": "fold"
+     }
+    ]
+   }
+  ]
  }
 }
