@@ -12,13 +12,17 @@ documents were byte-identical across repeated fetches on 2026-08-22.
 
 Why counts are baked in
 -----------------------
-The recall tool answers with a *list of strings* and the budget is the sum of
-`len(encoding.encode(chunk))` over the list, with `o200k_base` (tool-box-2,
-"HOW THE 900 TOKENS ARE COUNTED"). BPE counts are not additive across a
-concatenation, so the only way to know a total exactly without a tokeniser at
-runtime is to precompute the count of each string we might emit and never glue
-two of them together. Every unit written here is emitted verbatim as its own
-list element, so the runtime total is an exact integer sum.
+The recall tool answers with a JSON array of strings and the budget is the sum
+of `len(encoding.encode(chunk))` over the array's elements, with `o200k_base`
+(tool-box-2, "HOW THE 900 TOKENS ARE COUNTED"). The run viewer states the same
+rule from the grader's side: "The counts are summed rather than measured over
+the joined text, so you can count each passage as you select it and get the
+same number we do."
+
+BPE counts are not additive across a concatenation, so the only way to know a
+total exactly without a tokeniser at runtime is to precompute the count of each
+string we might emit. Each passage is a section prefix glued to one paragraph
+or sentence, and it is the *prefixed* string whose count is baked in here.
 """
 import json
 import pathlib
@@ -84,13 +88,24 @@ def main() -> int:
             body = http.get(entry["url"]).raise_for_status().text
             sections = []
             for heading, paragraphs in split_sections(body):
+                # Every passage carries its own source, so the android can tell
+                # the Kesterline array from the Halberd sub-array without us
+                # having to spend a separate array element on a heading. Fewer,
+                # self-contained elements also serialise smaller, which is what
+                # the 1,200-token response ceiling actually measures.
+                prefix = f"[{entry['title']} — {heading.lstrip('# ').strip()}] "
                 sections.append(
                     {
                         "heading": unit(heading),
+                        "prefix": prefix,
                         "paragraphs": [
                             dict(
                                 unit(paragraph),
-                                sentences=[unit(s) for s in split_sentences(paragraph)],
+                                passage_tokens=len(encode(prefix + paragraph)),
+                                sentences=[
+                                    dict(unit(s), passage_tokens=len(encode(prefix + s)))
+                                    for s in split_sentences(paragraph)
+                                ],
                             )
                             for paragraph in paragraphs
                         ],

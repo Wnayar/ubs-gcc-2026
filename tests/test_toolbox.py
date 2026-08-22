@@ -227,7 +227,11 @@ def test_every_advertised_tool_is_callable():
             "identify_shape",
             "count_characters",
             # sheet 2 — "School Days"
+            "retrieve",
+            "recall",
             "recall_study_material",
+            "plan_route",
+            "route_cost",
             "next_step_towards",
             "find_location_code",
         }

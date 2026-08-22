@@ -322,7 +322,8 @@ def _cannot_lose(state: dict, n: int, c: int | None) -> bool:
     floor and the raising-war cap, both of which exist only to stop us getting
     stacked. Phase 2 generalises it: what is unbeatable depends on the table.
     """
-    return unbeatable(posterior_for(_codename(state)), n, c)
+    name = _codename(state)
+    return unbeatable(posterior_for(name), n, c, codename=name)
 
 
 def _size_for(eq: float) -> float:

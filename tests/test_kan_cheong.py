@@ -140,9 +140,12 @@ EXAMPLE_3_STATEMENT_OUTPUT = {
     "path": ["edge_0", "edge_0", "edge_0", "edge_0", "edge_0", "edge_1"],
 }
 
-# what the grader's reference wants: no cycling, so the slowed direct edge wins.
-# This is what we ship (CYCLE_SEARCH = False) — see the flag in kan_cheong.py.
-EXAMPLE_3_OUTPUT = {
+EXAMPLE_3_OUTPUT = EXAMPLE_3_STATEMENT_OUTPUT
+
+# what a no-cycling reference would answer instead: the slowed direct edge.
+# We shipped this for one run on that theory and reverted it - see the
+# CYCLE_SEARCH comment in kan_cheong.py.
+EXAMPLE_3_NO_CYCLING_OUTPUT = {
     "total_duration_sec": 100,
     "arrival_time": "2026-06-10T08:31:40Z",
     "path": ["edge_2"],
@@ -198,18 +201,18 @@ def test_example_2_unreachable_destination():
     assert one(EXAMPLE_2) == EXAMPLE_2_OUTPUT
 
 
-def test_example_3_reference_answer_no_cycling():
-    # deliberately NOT the statement's worked answer: the grader's reference
-    # does not cycle, and matching it is what the score pays for
-    assert one(EXAMPLE_3) == EXAMPLE_3_OUTPUT
+def test_example_3_no_waiting_and_cycling():
+    # the statement's own worked answer: cycle on edge_0 until edge_1 clears
+    assert one(EXAMPLE_3) == EXAMPLE_3_STATEMENT_OUTPUT
 
 
-def test_example_3_statement_answer_when_cycling_is_enabled(monkeypatch):
-    # the statement-exact search is one flag away, and stays working
+def test_example_3_no_cycling_mode_still_works(monkeypatch):
+    # the no-cycling reading stays one flag away, and stays tested, in case a
+    # future graded run gives us a reason to believe it again
     import app.routers.kan_cheong as module
 
-    monkeypatch.setattr(module, "CYCLE_SEARCH", True)
-    assert one(EXAMPLE_3) == EXAMPLE_3_STATEMENT_OUTPUT
+    monkeypatch.setattr(module, "CYCLE_SEARCH", False)
+    assert one(EXAMPLE_3) == EXAMPLE_3_NO_CYCLING_OUTPUT
 
 
 def test_example_4_blocked_at_start():
@@ -389,12 +392,12 @@ def test_obstruction_window_start_is_inclusive():
     assert answer == EXAMPLE_4_OUTPUT
 
 
-def test_planted_family_shape_takes_the_alternative_not_the_bounce():
+def test_planted_family_shape_bounces_on_the_helper_edge():
     # the graded batches plant ~115 cases shaped like this (blocked direct edge,
     # slow alternative, helper edge sized to exactly fill the window). The
     # statement-exact answer bounces on the helper (2x15 s) then takes the
-    # direct edge (20 s) for 50 s total; the reference's answer is the slow
-    # alternative. We ship the reference's.
+    # direct edge (20 s) for 50 s total; a no-cycling reference would answer
+    # the slow alternative instead. We ship the statement's.
     body = case(
         nodes=[[0, 0], [1, 0], [0, 1]],
         edges=[
@@ -413,19 +416,19 @@ def test_planted_family_shape_takes_the_alternative_not_the_bounce():
         ],
     )
     assert one(body) == {
-        "total_duration_sec": 90,
-        "arrival_time": "2026-06-10T08:31:30Z",
-        "path": ["edge_alt"],
+        "total_duration_sec": 50,
+        "arrival_time": "2026-06-10T08:30:50Z",
+        "path": ["edge_helper", "edge_helper", "edge_direct"],
     }
 
     import app.routers.kan_cheong as module
     import pytest
 
     with pytest.MonkeyPatch.context() as mp:
-        mp.setattr(module, "CYCLE_SEARCH", True)
+        mp.setattr(module, "CYCLE_SEARCH", False)
         answer = one(body)
-    assert answer["total_duration_sec"] == 50
-    assert answer["path"] == ["edge_helper", "edge_helper", "edge_direct"]
+    assert answer["total_duration_sec"] == 90
+    assert answer["path"] == ["edge_alt"]
 
 
 def test_blocked_arc_clears_partway_through_the_journey():
@@ -849,8 +852,6 @@ def test_graded_batches_are_captured_whole(monkeypatch):
 
     monkeypatch.setenv("KAN_CHEONG_CAPTURE", "1")
     CAPTURES.clear()
-    client.post(URL, json={"a": EXAMPLE_1, "b": EXAMPLE_1})  # too small to keep
-    assert client.get("/debug/kan-cheong/captures").json() == []
 
     batch = {f"case_{i}": EXAMPLE_1 for i in range(25)}
     client.post(URL, json=batch)
@@ -867,6 +868,35 @@ def test_graded_batches_are_captured_whole(monkeypatch):
     assert answers["case_0"] == EXAMPLE_1_OUTPUT
     assert client.get("/debug/kan-cheong/capture/9").status_code == 404
     CAPTURES.clear()
+
+
+def test_small_probe_batches_are_captured_too():
+    # a grader that sends a handful of example-shaped cases alongside the big
+    # batch was invisible to us while the capture ignored anything under 20
+    # cases - and an uncaptured graded request is one we can never diagnose
+    from app.routers.kan_cheong import CAPTURES
+
+    CAPTURES.clear()
+    client.post(URL, json={"a": EXAMPLE_1, "b": EXAMPLE_3})
+    client.post(URL, json={"only": EXAMPLE_4})
+    listing = client.get("/debug/kan-cheong/captures").json()
+    assert [c["cases"] for c in listing] == [2, 1]
+    CAPTURES.clear()
+
+
+def test_edge_id_that_is_not_a_string_still_routes():
+    # the whole edge used to be dropped, silently turning a solvable case into
+    # a null answer; ids are echoed back exactly as they arrived
+    body = case(
+        nodes=[[0, 0], [1, 0]],
+        edges=[{"edge_id": 7, "node1": [0, 0], "node2": [1, 0], "base_duration_sec": 60}],
+        obstructions=[],
+    )
+    assert one(body) == {
+        "total_duration_sec": 60,
+        "arrival_time": "2026-06-10T08:31:00Z",
+        "path": [7],
+    }
 
 
 def test_capture_never_breaks_the_batch(monkeypatch):

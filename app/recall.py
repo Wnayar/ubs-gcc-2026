@@ -152,18 +152,27 @@ def query_weights(question: str) -> dict[str, float]:
 
 
 class Passage:
-    """One string we may emit, with the exact token count of that string."""
+    """One array element we may emit, with the exact token count of that string.
 
-    __slots__ = ("text", "tokens", "doc", "section", "para", "kind", "keys")
+    `text` is the corpus text; `passage` is what actually goes in the array —
+    the same text behind a "[document — section]" prefix so each element stands
+    on its own. `tokens` counts `passage`, because that is the string the
+    grader tokenises.
+    """
 
-    def __init__(self, text, tokens, doc, section, para, kind):
+    __slots__ = ("text", "passage", "tokens", "doc", "section", "para", "kind", "keys")
+
+    def __init__(self, text, passage, tokens, doc, section, para, kind):
         self.text = text
+        self.passage = passage
         self.tokens = tokens
         self.doc = doc
         self.section = section
         self.para = para
         self.kind = kind  # "paragraph" or "sentence"
-        self.keys = _keys(text)
+        # scored on the prefixed string, so a question about calibration is
+        # drawn toward the "Calibration Procedures" section on its heading alone
+        self.keys = _keys(passage)
 
 
 class Corpus:
@@ -182,18 +191,20 @@ class Corpus:
             words: list[str] = _keys(document["title"])
             for s_index, section in enumerate(document["sections"]):
                 self.headings[(doc_id, s_index)] = section["heading"]
+                prefix = section["prefix"]
                 words += _keys(section["heading"]["text"])
                 for p_index, paragraph in enumerate(section["paragraphs"]):
                     passage = Passage(
-                        paragraph["text"], paragraph["tokens"], doc_id, s_index, p_index,
-                        "paragraph",
+                        paragraph["text"], prefix + paragraph["text"],
+                        paragraph["passage_tokens"], doc_id, s_index, p_index, "paragraph",
                     )
                     self.paragraphs.append(passage)
-                    words += passage.keys
+                    words += _keys(paragraph["text"])
                     for sentence in paragraph["sentences"]:
                         self.sentences.append(
-                            Passage(sentence["text"], sentence["tokens"], doc_id,
-                                    s_index, p_index, "sentence")
+                            Passage(sentence["text"], prefix + sentence["text"],
+                                    sentence["passage_tokens"], doc_id, s_index,
+                                    p_index, "sentence")
                         )
             self.doc_keys[doc_id] = words
 
@@ -336,35 +347,22 @@ def _fact_bearing(passage: Passage) -> bool:
 
 
 class _Packer:
-    """Greedy fill of the 900 tokens, charging for headers/headings once."""
+    """Greedy fill of the 900 tokens with self-contained array elements."""
 
     def __init__(self, budget: int):
         self.budget = budget
         self.used = 0
-        self.docs: set[int] = set()
-        self.sections: set[tuple[int, int]] = set()
-        self.chosen: dict[tuple[int, int], list[Passage]] = {}
+        self.chosen: list[Passage] = []
         self.taken: set[tuple[int, int, int, str]] = set()
-
-    def _overhead(self, passage: Passage) -> int:
-        cost = 0
-        if passage.doc not in self.docs:
-            cost += CORPUS.headers[passage.doc]["tokens"]
-        if (passage.doc, passage.section) not in self.sections:
-            cost += CORPUS.headings[(passage.doc, passage.section)]["tokens"]
-        return cost
 
     def add(self, passage: Passage) -> bool:
         key = (passage.doc, passage.section, passage.para, passage.kind)
         if key in self.taken:
             return False
-        cost = passage.tokens + self._overhead(passage)
-        if self.used + cost > self.budget:
+        if self.used + passage.tokens > self.budget:
             return False
-        self.used += cost
-        self.docs.add(passage.doc)
-        self.sections.add((passage.doc, passage.section))
-        self.chosen.setdefault((passage.doc, passage.section), []).append(passage)
+        self.used += passage.tokens
+        self.chosen.append(passage)
         self.taken.add(key)
         return True
 
@@ -373,20 +371,12 @@ class _Packer:
         return (passage.doc, passage.section, passage.para, "paragraph") in self.taken
 
     def emit(self, order: list[int]) -> list[str]:
-        out: list[str] = []
-        for doc_id in order:
-            if doc_id not in self.docs:
-                continue
-            document = next(d for d in CORPUS.documents if d["id"] == doc_id)
-            out.append(CORPUS.headers[doc_id]["text"])
-            for s_index, section in enumerate(document["sections"]):
-                picked = self.chosen.get((doc_id, s_index))
-                if not picked:
-                    continue
-                out.append(section["heading"]["text"])
-                for passage in sorted(picked, key=lambda p: (p.para, p.kind == "sentence")):
-                    out.append(passage.text)
-        return out
+        rank = {doc_id: i for i, doc_id in enumerate(order)}
+        ordered = sorted(
+            self.chosen,
+            key=lambda p: (rank.get(p.doc, 99), p.section, p.para, p.kind == "sentence"),
+        )
+        return [p.passage for p in ordered]
 
 
 def recall(question: str, budget: int = BUDGET) -> list[str]:
@@ -444,13 +434,14 @@ def recall(question: str, budget: int = BUDGET) -> list[str]:
     return packer.emit(order)
 
 
+_SIZES = {p.passage: p.tokens for p in CORPUS.paragraphs + CORPUS.sentences}
+
+
 def token_total(passages: list[str]) -> int:
-    """Exact o200k_base total for passages we emitted, from the baked counts."""
-    sizes: dict[str, int] = {}
-    for doc_id, header in CORPUS.headers.items():
-        sizes[header["text"]] = header["tokens"]
-    for heading in CORPUS.headings.values():
-        sizes[heading["text"]] = heading["tokens"]
-    for passage in CORPUS.paragraphs + CORPUS.sentences:
-        sizes[passage.text] = passage.tokens
-    return sum(sizes[text] for text in passages)
+    """Exact o200k_base total for passages we emitted, from the baked counts.
+
+    Raises KeyError on any string that is not a passage we baked a count for,
+    which is the property the whole design rests on: we never emit text we
+    cannot count.
+    """
+    return sum(_SIZES[text] for text in passages)

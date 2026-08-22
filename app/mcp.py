@@ -146,21 +146,16 @@ class Server:
 
 
 def tool_result(text, failed: bool = False) -> dict:
-    """A tool answers with one string, or with a list of them.
+    """Always exactly one text block.
 
-    sheet 2's recall tool is specified to return "a list of strings" and is
-    budgeted per element ("Each element in the list you return has its own
-    token count"), so a list becomes one text block per element rather than one
-    block of glued-together text — that is the same list on the wire, and it
-    keeps our token accounting identical to theirs.
+    sheet 2's recall tool is specified to return "a list of strings", and we
+    first read that as one MCP content block per element. The grader does not:
+    it joins the blocks and then parses the text, so a run's worth of passages
+    arrived as one run-on string and every retrieval was voided with
+    "Retrieval must return a JSON array of strings". A list is therefore a
+    JSON array *inside* a single block — see recall_passages in the router.
     """
-    if isinstance(text, (list, tuple)):
-        blocks = [{"type": "text", "text": str(item)} for item in text]
-        if not blocks:
-            blocks = [{"type": "text", "text": ""}]
-    else:
-        blocks = [{"type": "text", "text": str(text)}]
-    return {"content": blocks, "isError": failed}
+    return {"content": [{"type": "text", "text": str(text)}], "isError": failed}
 
 
 def error(identifier, code: int, message: str) -> dict:
