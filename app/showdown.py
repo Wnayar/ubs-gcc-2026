@@ -49,8 +49,15 @@ RERAISE_EQ = 0.82
 CALL_MARGIN = 0.09
 # Extra equity demanded per unit of our stack committed. The whole defence
 # against a raising war: putting in half our stack costs half of this.
-RAISE_RISK = 0.18
-CALL_RISK = 0.20
+# Measured over every graded match: hands where we voluntarily committed 60% or
+# more of our stack went 2-16, an 11% win rate, for -484 chips, while the other
+# 319 hands together were +47. We are not unlucky in those spots, we are getting
+# it in badly — the opponent's big bets are far stronger than the range model
+# credits. These prices are deliberately steep: the term is `RISK x (chips in /
+# stack)`, so it is negligible on an ordinary call and heavy on one that plays
+# for a stack. A hand that genuinely cannot lose is exempt via `risk_free`.
+RAISE_RISK = 0.40
+CALL_RISK = 0.55
 # How sharply each bet/raise of theirs concentrates their range onto the numbers
 # that are strong *under the rule this table is using*. Replaces phase 1's
 # "they hold a high number" ladder, which only made sense under the standard rule.
@@ -63,9 +70,16 @@ RANGE_TRUST = 0.85
 # attempt at all.
 LEG_TARGET_DELTA = 25
 # Pot fractions for our own bets, by strength.
-SIZE_STRONG = 0.90  # a pair, or a 13 that missed
-SIZE_VALUE = 0.62
-SIZE_THIN = 0.38
+#
+# Sized up deliberately. Across every graded match we win 60-75% of showdowns —
+# hand selection is not the problem — but the pots we WIN average 10 to 16 chips
+# while the pots we LOSE average 22 to 33. We were winning small and losing big,
+# which loses money even at a 60% win rate. The opponent folds only 15-22% of the
+# time, so they are a caller: against a caller the answer to "they keep paying"
+# is to charge more, not to bet less often.
+SIZE_STRONG = 1.15  # overbet — a hand that is way ahead should build the pot
+SIZE_VALUE = 0.85
+SIZE_THIN = 0.45
 SIZE_BLUFF = 0.45
 # How often we fire a bluff at a pot nobody wants. Enough that our bets are not
 # a tell; low enough that it does not become the losing half of the strategy.
