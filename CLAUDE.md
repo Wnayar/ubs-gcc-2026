@@ -2,7 +2,7 @@
 
 One-day competition (2026-08-22, Singapore). UBS releases ONE product statement in
 phases of increasing complexity on their "controller" platform. Each phase: save the
-statement PDF to docs/phases/phase-N/, implement it in this service, deploy, submit
+statement PDF to docs/phases/<challenge>/, implement it in this service, deploy, submit
 our base URL to the controller, which runs test cases and scores us on a leaderboard.
 Security, reliability and product judgment are scored, not just correctness.
 
@@ -10,7 +10,8 @@ Security, reliability and product judgment are scored, not just correctness.
 - `app/main.py` — FastAPI app; each phase adds a router in `app/routers/`, mounted here
 - `app/reqlog.py` — middleware logging every request/response (ring buffer + stdout JSON lines)
 - `GET /debug/requests?token=$DEBUG_TOKEN` — see exactly what the grader sent us and what we replied
-- `docs/phases/phase-N/` — statement PDF + notes.md per phase (copy TEMPLATE.md)
+- `docs/phases/<challenge>/` — statement PDF + notes.md, one folder per statement,
+  named after the challenge (`tool-box-1`, not `phase-4`); copy TEMPLATE.md
 - `docs/decisions.md` — change/decision log, kept current for Product Owner check-ins
 - `docs/entry-challenge/` — the qualifying-round problem and our solution, for style reference
 - `LINKS.md` — deployed service URL(s); if we ever split into multiple services, every service's URL goes there, one line per service labelled with its challenge

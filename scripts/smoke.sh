@@ -32,3 +32,13 @@ check "ghost-chains transactions (statement example)" \
 # leave no smoke-test state behind in the graph the grader will use
 check "ghost-chains reset (cleanup)" -X POST "$BASE/ghost-chains/reset" \
   -H 'Content-Type: application/json' -d '{"clearTransactions": true}'
+
+check "mcp tools/list (the address tool-box tries first)" \
+  -X POST "$BASE/mcp/" -H 'Content-Type: application/json' \
+  -H 'Accept: application/json, text/event-stream' \
+  -d '{"jsonrpc": "2.0", "id": 1, "method": "tools/list"}'
+check "mcp calculate" \
+  -X POST "$BASE/mcp" -H 'Content-Type: application/json' \
+  -H 'Accept: application/json, text/event-stream' \
+  -d '{"jsonrpc": "2.0", "id": 2, "method": "tools/call",
+       "params": {"name": "calculate", "arguments": {"expression": "2 + 2"}}}'

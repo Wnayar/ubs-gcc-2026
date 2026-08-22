@@ -22,16 +22,17 @@ phase's endpoints, and debug locally, never on Render.
 
 ## 2. File it
 
-- Determine the next phase number N: look at existing `docs/phases/phase-*` folders
-  (ignore TEMPLATE.md); N = highest + 1, or 1 if none.
-- `mkdir -p docs/phases/phase-N` and MOVE (not copy) the PDF to
-  `docs/phases/phase-N/statement.pdf` so the inbox stays clean.
+- Name the folder after the challenge, not a phase number — take the name from
+  the statement itself (a PDF called `tool-box-1.pdf` becomes `tool-box-1`).
+  Numbered `phase-N` folders are older ones; do not extend that scheme.
+- `mkdir -p docs/phases/<name>` and MOVE (not copy) the PDF to
+  `docs/phases/<name>/statement.pdf` so the inbox stays clean.
 
 ## 3. Read and extract
 
 Read the entire PDF with the Read tool (use `pages` in ≤20-page chunks until you have
 read every page — never skim or stop early; late pages often carry edge cases and
-scoring rules). Then write `docs/phases/phase-N/notes.md` starting from
+scoring rules). Then write `docs/phases/<name>/notes.md` starting from
 `docs/phases/TEMPLATE.md`, filled in with:
 
 - every required endpoint: method, path, request/response JSON shape
@@ -57,14 +58,14 @@ If a new test passes before any implementation exists, it is testing nothing —
 
 - Create `app/routers/phaseN.py` in the style of the existing phase routers
   (e.g. `app/routers/phase1.py`):
-  pydantic models for request/response, an `APIRouter(tags=["phase-N"])`.
+  pydantic models for request/response, an `APIRouter(tags=["<name>"])`.
 - Mount it in `app/main.py` next to the `# phase routers get added here` comment.
 - Validate inputs strictly; never 500 on bad input (security/reliability are scored).
 - Iterate with `pytest` until the ENTIRE suite is green — all phases, not just this one.
 
 ## 6. Log and hand off — do NOT push
 
-- Append one line to `docs/decisions.md`: what phase N required, what was shipped,
+- Append one line to `docs/decisions.md`: what the challenge required, what was shipped,
   and any judgment calls.
 - Then STOP and give the user a summary containing:
   1. what the phase requires (one paragraph) and the endpoints you added
