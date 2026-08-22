@@ -5,8 +5,8 @@
   **not** changed, and it never mentions legs, so `leg_number`/`total_legs` are new
   fields added for this phase)
 - **Endpoints required:** `POST /move` — same endpoint as phase 1, no new route
-- **Submitted to controller:** yes — attempt 1 (100/400) and attempt 2 (200/400)
-- **Score:** **200/400** on attempt 2. Attempt 3 fixes below, not yet submitted.
+- **Submitted to controller:** yes — attempts scored 100 → 200 → **300** / 400
+- **Score:** **300/400** on attempt 3. Attempt-4 fixes below, not yet submitted.
 
 ## What phase 2 adds
 
@@ -294,3 +294,51 @@ into a bad rule. Not shipped.
   times the evidence a showdown-only view gives.
 - **`cinnabar` missed by 18 chips.** Nothing diagnostic in the log; it read 0.84 standard
   and simply did not get there.
+
+
+## Attempt 3 — 300/400
+
+| leg | table | final delta | cleared (+25)? |
+|---|---|---|---|
+| 1 | verdigris | +79 | **yes** |
+| 2 | cinnabar | +133 (busted them in 11 hands) | **yes** |
+| 3 | amaranth | +19 (peaked +48) | no — **missed by 6 chips** |
+| 4 | obsidian | **+39** | **yes** |
+
+**Obsidian flipped from −162 to +39** — exactly the leg the seed was supposed to fix, and
+it went from 0.46 confidence to fully identified. The seed loop is working: 87 observed
+showdowns became 131.
+
+### Amaranth, finally identified
+
+Amaranth is the last failing leg and it was the one table nothing explained. With 26
+showdowns, two facts stood out and no ordering by size accounts for either:
+
+- **`7 beats 8`, twice, at two different community numbers** — and a 7 never lost.
+- **`13` and `12` split a pot**, so those two are equal strength.
+
+`a 7 beats everything, then a pair beats any non-pair, then numbers in bands of two`
+explains **26 of 26**. Adding a "lucky number" family (one candidate per number, with and
+without banding) lets the posterior find it rather than us naming it, and it now reads
+**`lucky7_band2` at 0.97**.
+
+Two checks before trusting it. Seat bias exists in the data (14 wins to 8) but "seat 0
+always wins" explains only 14 of 22 decided hands, so position is not the rule. And the
+banding half is independently corroborated — cinnabar split a 13 against a 12 back in
+attempt 1, so grouped decks are a real feature of this event, not a curve fit.
+
+The 7-specialness still rests on **only two hands**, which is why it is a hypothesis with
+a prior rather than a hard-coded mapping. If a later attempt contradicts it, the posterior
+will move.
+
+### Where the four tables now stand
+
+| table | rule | confidence | explains |
+|---|---|---|---|
+| verdigris | a pair beats any non-pair, then higher | 0.97 | 41/43 |
+| cinnabar | a pair beats any non-pair, then higher | 0.86 | 21/23 |
+| amaranth | a 7 beats everything, then a pair, then bands of two | 0.97 | **26/26** |
+| obsidian | a pair *loses* to any non-pair, then lower wins | 1.00 | 38/39 |
+
+Cost of the larger hypothesis set: 58 rules after dedupe, and a `/move` still answers in
+**10 ms** against a 5-second budget.

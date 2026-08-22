@@ -102,6 +102,22 @@ def _rules() -> tuple[Rule, ...]:
                 f"numbers grouped into bands of {width}, LOWER band wins",
                 (lambda w, o: lambda n, c: (-((n + o) // w),))(width, offset),
             ))
+    # "One number beats everything." Amaranth showed a 7 beating an 8 twice, at two
+    # different community numbers, and a 7 never lost — which no ordering by size
+    # explains. Paired with banding (that table also split a 13 against a 12) it
+    # accounts for all 27 of its showdowns. Every number gets a candidate so the
+    # evidence picks the lucky one rather than us naming it.
+    for lucky in range(1, DECK + 1):
+        spec.append((
+            f"lucky{lucky}",
+            f"a {lucky} beats everything, then a pair, then higher wins",
+            (lambda k: lambda n, c: (n == k, n == c, n))(lucky),
+        ))
+        spec.append((
+            f"lucky{lucky}_band2",
+            f"a {lucky} beats everything, then a pair, then bands of two",
+            (lambda k: lambda n, c: (n == k, n == c, n // 2))(lucky),
+        ))
     return tuple(Rule(name, desc, key) for name, desc, key in spec)
 
 
