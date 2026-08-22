@@ -14,3 +14,28 @@ services:
         value: "3.12.3"
       - key: DEBUG_TOKEN
         generateValue: true
+
+  # Second service, pinned to this branch. A Blueprint takes the branch from
+  # HERE, not from whichever branch the file happens to live on — so a service
+  # created from this repo without this entry builds `main` and silently serves
+  # the old code no matter what is on showdown-phase-2.
+  #
+  # DEBUG_TOKEN below is `sync: false` rather than `generateValue: true` on
+  # purpose: generateValue mints a DIFFERENT token per service, so the value in
+  # the local .env would not authenticate against this one. Set it by hand in
+  # the dashboard to the same value the main service uses.
+  - type: web
+    name: ubs-gcc-2026-showdown
+    runtime: python
+    region: singapore
+    plan: free
+    branch: showdown-phase-2
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.3"
+      - key: DEBUG_TOKEN
+        sync: false

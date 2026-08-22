@@ -20,7 +20,17 @@ phase's endpoints, and debug locally, never on Render.
   Downloads, the home directory, or anywhere else for candidate PDFs, and never guess
   which file the user means — the statement must come explicitly from the user.
 
-## 2. File it
+## 2. Start a branch — never implement on main
+
+- Branch from up-to-date main, named after the challenge:
+  `git fetch origin && git checkout -b <challenge-name> origin/main`
+  (use the same name as the docs folder you'll create in step 3).
+- If the working tree already has uncommitted changes, STOP and ask the user what to
+  do with them before branching.
+- All work for this phase happens on this branch. Main only changes by merging the
+  finished branch — that's what keeps parallel phase work conflict-free.
+
+## 3. File it
 
 - Name the folder after the challenge, not a phase number — take the name from
   the statement itself (a PDF called `tool-box-1.pdf` becomes `tool-box-1`).
@@ -28,7 +38,7 @@ phase's endpoints, and debug locally, never on Render.
 - `mkdir -p docs/phases/<name>` and MOVE (not copy) the PDF to
   `docs/phases/<name>/statement.pdf` so the inbox stays clean.
 
-## 3. Read and extract
+## 4. Read and extract
 
 Read the entire PDF with the Read tool (use `pages` in ≤20-page chunks until you have
 read every page — never skim or stop early; late pages often carry edge cases and
@@ -42,9 +52,11 @@ scoring rules). Then write `docs/phases/<name>/notes.md` starting from
   interpretation — flag these to the user in your final summary so they can be
   raised with the challenge developers
 
-## 4. Tests first
+## 5. Tests first
 
-Create `tests/test_phaseN.py` following the style of `tests/test_smoke.py`
+Create `tests/test_<challenge>.py` (challenge name with underscores, e.g.
+`tests/test_tool_box_1.py` — the numbered `test_phaseN.py` files are older ones,
+do not extend that scheme) following the style of `tests/test_smoke.py`
 (FastAPI `TestClient` against `app.main.app`, no live server):
 
 - one test per worked example from the statement, asserting the exact expected output
@@ -54,16 +66,18 @@ Create `tests/test_phaseN.py` following the style of `tests/test_smoke.py`
 Run `pytest` and confirm the new tests FAIL and all existing tests still PASS.
 If a new test passes before any implementation exists, it is testing nothing — fix it.
 
-## 5. Implement
+## 6. Implement
 
-- Create `app/routers/phaseN.py` in the style of the existing phase routers
-  (e.g. `app/routers/phase1.py`):
+- Create `app/routers/<challenge>.py` (underscores) in the style of the existing
+  phase routers (e.g. `app/routers/toolbox.py`; the numbered `phaseN.py` routers
+  are older ones):
   pydantic models for request/response, an `APIRouter(tags=["<name>"])`.
-- Mount it in `app/main.py` next to the `# phase routers get added here` comment.
+- Do NOT edit `app/main.py` — it auto-discovers and mounts any module in
+  `app/routers/` that exposes a module-level `router`.
 - Validate inputs strictly; never 500 on bad input (security/reliability are scored).
 - Iterate with `pytest` until the ENTIRE suite is green — all phases, not just this one.
 
-## 6. Log and hand off — do NOT push
+## 7. Log and hand off — do NOT push
 
 - Append one line to `docs/decisions.md`: what the challenge required, what was shipped,
   and any judgment calls.
@@ -72,9 +86,17 @@ If a new test passes before any implementation exists, it is testing nothing —
   2. the assumptions/ambiguities they should double-check against the PDF
   3. pytest result (full suite)
   4. a proposed plain-description commit message (no AI-attribution lines)
-  5. the remaining manual steps: `git push`, wait ~2 min, `./scripts/smoke.sh <url>`,
-     check `/health` commit hash matches, submit URL to the controller.
+  5. the remaining manual steps, in this order:
+     - `git push -u origin <challenge-name>` (the branch, not main)
+     - optional preview: if a Render branch service exists for this branch it
+       auto-deploys — `./scripts/smoke.sh <branch-url>` there (see CLAUDE.md
+       "Branch preview servers"; branch URLs are NEVER submitted to the controller)
+     - merge to main: `git checkout main && git pull && git merge <challenge-name>
+       && git push` — this deploys the graded service (~2 min)
+     - `./scripts/smoke.sh <main-url>`, check `/health` commit hash matches
+     - submit the MAIN service URL to the controller
 
-Never push yourself unless the user explicitly says to. If the user says "push"
-after reviewing, commit with the proposed message and push, then remind them of the
-smoke-test and submission steps.
+Never push or merge yourself unless the user explicitly says to. If the user says
+"push" after reviewing, commit with the proposed message and push the branch; if they
+say "merge" or "ship", also do the merge-to-main step — then remind them of the
+smoke-test and submission steps either way.

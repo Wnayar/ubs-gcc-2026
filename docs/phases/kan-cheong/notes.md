@@ -5,7 +5,8 @@
   is the documented reference copy and the file is untracked in git)
 - **Endpoints required:** `POST /kan-cheong-delivery-driver`
 - **Submitted to controller:** yes
-- **Score:** 92/100 on five straight runs; no-cycling fix (below) awaiting run 6
+- **Score:** 92/100 on five straight runs. The no-cycling change made after run 5 is
+  **reverted** — it was measured and cannot be the missing 8 (see "Sixth investigation").
 
 > **Reading the PDF:** every code block is clipped on the right by the print-to-PDF
 > (`base_duration_sec` values, the batch response line). The full text *is* in the PDF
@@ -568,6 +569,9 @@ looks like; and a no-cycling reference is the only reading under which the
 straightforward implementations every other team runs (all scoring 100) agree with the
 grader on everything.
 
+> **Superseded.** The diagnosis below was checked quantitatively and does not hold —
+> see "Sixth investigation". `CYCLE_SEARCH` is back to `True`.
+
 **The change:** `CYCLE_SEARCH = False` in `kan_cheong.py` makes the greedy pass's
 answer final, matching that reference (verified: exactly the pre-measured 123 answers
 change on the run-5 batch, nothing else). The statement-exact search is one flag away
@@ -580,3 +584,90 @@ hypothesis is wrong: flip the flag back to True and we are back at 92.
   graded run. See above.
 - The statement's example-3 cycling answer, faithfully implemented, appears to be
   exactly what the reference disagrees with — see the fifth graded run.
+
+
+## Sixth investigation — the no-cycling diagnosis is dead
+
+Re-opened on the question "which edge cases are we failing?". Conclusion: **none that
+we can find in the graded batches**, and the run-5 fix was a gamble against a known
+score. `CYCLE_SEARCH` is back to `True`.
+
+### The statement, from source
+
+The PDF is a browser print of a `zero-md` page, which is why every code block is
+clipped. The page loads its own markdown, and that is fetchable unclipped:
+
+```
+https://num-squared-f5d96ca37ab3.herokuapp.com/kan-cheong-delivery-driver   (HTML shell)
+https://num-squared-f5d96ca37ab3.herokuapp.com/static/kan-cheong-delivery-driver.md   (9,674 B)
+```
+
+Worth doing on every phase — it is the same trick that found the full Adaptive API
+Gateway rules. Here it changed nothing: the markdown matches these notes clause for
+clause. **There is no hidden rule.** Whatever we are losing, the statement does not
+mention it.
+
+### Our answers are right
+
+- An independent solver (`(node, time)` Dijkstra, no shared code with the router)
+  reproduces **all 1000 answers on both captured batches**, run 3 and run 5.
+- An **uncapped, unseeded, exhaustive** `(node, time)` search confirms the top 20 cases
+  by weight — **65% of the batch** — are optimal. `MAX_TIMES_PER_NODE` and the deadline
+  never bind.
+- Non-unique optimal routes exist in only ~2% of cases, so path tie-breaking cannot be
+  worth 8 either.
+
+### No reading of the statement costs 8%
+
+Every alternative reading, scored on both batches, under weightings from uniform
+per-case (`p=0`) to fully size-proportional (`p=1`, weight = nodes+edges+obstructions):
+
+| reading | p=0 (run3/run5) | p=0.25 | p=1 |
+|---|---|---|---|
+| no cycling | 12.0 / 12.3 | 10.2 / 10.9 | 1.8 / 2.7 |
+| entry-only factor | 14.5 / 14.0 | 14.3 / 12.7 | 16.0 / 3.8 |
+| obstructions bidirectional | 15.6 / 13.6 | 15.2 / 13.1 | 13.4 / 11.9 |
+| `start == end` -> null | 8.6 / 7.3 | 8.9 / 7.8 | 2.9 / 3.4 |
+| waiting allowed / enter a blocked arc | 8.9 / 10.2 | 6.7 / 8.0 | 0.8 / 1.5 |
+| `speed_factor > 1` clamped | 3.5 / 3.0 | 4.3 / 3.2 | 10.8 / 1.3 |
+| overlaps multiply | 3.4 / 4.1 | 2.6 / 3.3 | 0.4 / 0.6 |
+| no stranding | 1.2 / 0.9 | 1.2 / 0.8 | 0.3 / 0.2 |
+| window end inclusive | 0.2 / 0.1 | 0.2 / 0.1 | 0.0 / 0.0 |
+
+**Nothing lands at 8.0% on both runs at any exponent.** Two further facts pin it down:
+
+- Five *identical* scores on five *different* random batches require a stable fraction.
+  The `p=1` column swings wildly between runs (a couple of huge cases dominate: the top
+  20 cases hold 65% of the weight), so heavy size-weighting cannot produce a constant
+  92. Only `p≈0` is stable across runs.
+- At `p≈0`, no-cycling costs 12.3% — we would have been scoring ~88, not 92. So the
+  grader's reference **does** cycle, or cycling is not what we lose.
+
+`start == end -> null` is the nearest fit (7.3–8.9%) but was rejected: those cases are
+not a planted family (they are ordinary random graphs whose two coordinates coincide,
+spread across the same shapes as everything else), and any Dijkstra-shaped reference
+returns 0 for them, as we do.
+
+### Where the points probably are: a request we never saw
+
+`CAPTURES` kept **one** batch and ignored anything under **20 cases**. If the grader
+sends a small probe batch — the statement's four examples, say — alongside the big one,
+it was graded and thrown away unseen, every run. That is now the leading explanation,
+because the 1000-case batches we *did* capture are answered correctly.
+
+**Every request is now captured, whatever its size**, keeping the last 6. The next
+graded run will show whether there is a second request. If there is, it is also the one
+place where `CYCLE_SEARCH = False` would have hurt most: it fails the statement's own
+example 3.
+
+### Also fixed
+
+- An `edge_id` that is not a string (a JSON number) silently dropped the whole edge,
+  which can turn a solvable case into a null answer. Ids are now accepted as strings or
+  integers and echoed back exactly as they arrived.
+
+### Verification
+
+Both captured batches replayed through the restored build reproduce the recorded
+known-92 live responses **byte for byte** (0/1000 differences each), in 0.36 s and
+0.20 s against the statement's 10 s. Full suite: 389 passed.

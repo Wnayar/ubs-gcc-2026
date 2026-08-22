@@ -35,22 +35,24 @@ from app.routers.debug import _check as _check_debug_token
 router = APIRouter(tags=["kan-cheong"])
 
 # The statement's example 3 demands cycling (bounce on a side edge until a
-# blocking window clears), and our A* finds those routes. But five graded runs
-# on five fresh batches all scored exactly 92/100, every alternative reading of
-# the statement measures nowhere near the missing 8%, and all 123 cases where
-# the A* beat a plain no-cycling Dijkstra on the captured run-5 batch verify
-# correct by exhaustive enumeration — so the loss is not a bug and not a
-# window/rounding convention. The one reading left that fits both the stable 92
-# AND every other team scoring 100 with straightforward implementations: the
-# grader's reference is an earliest-arrival Dijkstra that skips blocked arcs
-# and never cycles, contradicting its own example 3. 115 of the 123 divergent
-# cases are a planted example-3-shaped family ((3,3,1): blocked direct edge,
-# slow alternative, helper edge sized to exactly fill the window) present in
-# similar volume every run — a near-constant slice, which is what a constant 92
-# looks like. With this flag off we return the greedy route, matching that
-# reference; flip to True to restore statement-exact behaviour (tests cover
-# both). See docs/phases/kan-cheong/notes.md, fifth graded run.
-CYCLE_SEARCH = False
+# blocking window clears), and our A* finds those routes.
+#
+# Run 5 shipped this as False on the theory that the grader's reference is a
+# plain no-cycling Dijkstra. That theory is now measured and dead. Scoring the
+# two captured graded batches (run 3 and run 5, 1000 cases each) against every
+# alternative reading of the statement, under weightings from uniform-per-case
+# to fully size-proportional, no-cycling costs 12.3% of cases / 2.7% of weight
+# - it lands nowhere near the missing 8% under any weighting, so it cannot be
+# what a stable 92 is made of. Meanwhile cycling=True is the configuration that
+# actually scored 92 on five runs, and False makes us fail the statement's own
+# worked example 3. Turning it off was an untested gamble against a known 92.
+#
+# What the same measurement does show: our answers are right. An independent
+# solver sharing no code with this one reproduces all 1000 answers on both
+# batches, and an uncapped exhaustive (node, time) search confirms the top 20
+# cases by weight - 65% of the batch - are optimal. So the missing points are
+# very probably not in the batch we captured at all; see notes.md.
+CYCLE_SEARCH = True
 
 # the statement allows 10 s for the whole batch; leave room for JSON in and out
 BATCH_BUDGET_SEC = 8.0
@@ -62,16 +64,18 @@ MAX_STATES = 400_000
 MAX_TIMES_PER_NODE = 24
 
 # The shared request log clips bodies at 4 KB and the grader's batch is 3 MB, so
-# a graded run leaves nothing to diagnose with. Keeping the last few graded
-# batches whole (gzipped) is how the 1000-case run in graded-runs/ was captured.
+# a graded run leaves nothing to diagnose with. Keeping the last few requests
+# whole (gzipped) is how the 1000-case runs in graded-runs/ were captured.
 #
-# On while the score is still unexplained: the grader generates a fresh batch every
-# run, so a run that is not captured is gone. Measured cost is ~150 ms on a request
-# that takes ~5 s of the statement's 10 s cutoff - worth it for the diagnosis, and
-# only one batch is kept. Set KAN_CHEONG_CAPTURE=0 to turn it off once we stop
-# needing it; a batch that times out scores zero for every case in it.
-CAPTURES: deque = deque(maxlen=1)
-CAPTURE_MIN_CASES = 20
+# EVERY request is now kept, whatever its size. The old filter only captured
+# batches of 20+ cases, which means a small probe batch - the statement's four
+# examples, say - would have been graded and thrown away unseen. That is the
+# leading remaining explanation for the missing 8 points, because the 1000-case
+# batches we did capture are answered correctly (notes.md, sixth investigation),
+# so the next graded run has to be able to show us a second request if there is
+# one. Measured cost is ~150 ms on a ~5 s request, and a batch that times out
+# scores zero for every case in it. Set KAN_CHEONG_CAPTURE=0 to turn it off.
+CAPTURES: deque = deque(maxlen=6)
 
 
 def _capturing() -> bool:
@@ -211,7 +215,10 @@ class Case:
                 base = _number(edge["base_duration_sec"])
             except (TypeError, KeyError, ValueError):
                 continue
-            if not isinstance(edge_id, str) or base < 0:
+            # any JSON scalar can be an edge id; it is echoed back as given
+            if isinstance(edge_id, bool) or not isinstance(edge_id, (str, int)):
+                continue
+            if base < 0:
                 continue
             self.nodes.update((node1, node2))
             # edges are bidirectional with the same base duration either way
@@ -492,7 +499,7 @@ def kan_cheong_delivery_driver(batch: dict[str, Any]) -> dict[str, Any]:
         if better is not None:
             answers[case_id] = _answer(case, *better)
 
-    if len(batch) >= CAPTURE_MIN_CASES and _capturing():
+    if _capturing():
         try:
             CAPTURES.append(
                 {
@@ -510,7 +517,7 @@ def kan_cheong_delivery_driver(batch: dict[str, Any]) -> dict[str, Any]:
 
 @router.get("/debug/kan-cheong/captures")
 def captures(token: str | None = None) -> list[dict[str, Any]]:
-    """What graded batches we still hold, newest last."""
+    """Every request we still hold, newest last - small probe batches included."""
     _check_debug_token(token)
     return [
         {

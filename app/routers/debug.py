@@ -3,6 +3,7 @@ import os
 from fastapi import APIRouter, Header, HTTPException
 
 from app.reqlog import RECENT
+from app.showdown_rules import learned_summary, observations_dump
 from app.showdown_rules import learned_summary
 
 router = APIRouter(prefix="/debug", tags=["debug"])
@@ -47,3 +48,24 @@ async def showdown_rules(
     """
     _check(token or x_debug_token)
     return learned_summary()
+
+
+@router.get("/showdown-rules")
+async def showdown_rules(token: str | None = None,
+                         x_debug_token: str | None = Header(default=None)):
+    """What each `table_rule` codename looks like so far."""
+    _check(token or x_debug_token)
+    return learned_summary()
+
+
+@router.get("/showdown-observations")
+async def showdown_observations(token: str | None = None,
+                                x_debug_token: str | None = Header(default=None)):
+    """Every showdown we hold, shaped exactly like app/data/showdown_seed.json.
+
+    Harvest after an attempt and commit it: the codename mapping is fixed for the
+    whole event, so those showdowns are still evidence next attempt — but
+    in-process memory dies with the dyno, and every deploy restarts it.
+    """
+    _check(token or x_debug_token)
+    return observations_dump()

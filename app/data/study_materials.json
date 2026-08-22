@@ -1,0 +1,2747 @@
+{
+ "source": "https://tool-box-2591eaa24fa3.herokuapp.com/study-materials",
+ "fetched_utc": "2026-08-22T03:29:18+00:00",
+ "encoding": "o200k_base",
+ "documents": [
+  {
+   "id": 1,
+   "title": "The Meridian Trench Research Station",
+   "url": "https://tool-box-2591eaa24fa3.herokuapp.com/study-materials/1",
+   "header": {
+    "text": "From: The Meridian Trench Research Station",
+    "tokens": 8
+   },
+   "sections": [
+    {
+     "heading": {
+      "text": "## Overview",
+      "tokens": 2
+     },
+     "prefix": "[The Meridian Trench Research Station — Overview] ",
+     "paragraphs": [
+      {
+       "text": "The Meridian Trench Research Station is a permanently crewed deep-sea outpost built into the wall of an abyssal rift far from any shipping lane. The main habitat rests at a depth of 6,214 meters below the surface, anchored to a basalt shelf by twelve titanium struts. A smaller storage annex, used for spare parts and preserved samples, sits nearby at a shallower 6,050 meters, tethered to the main hull by a reinforced access tunnel. The station was assembled in sections lowered from a surface barge over the course of several weeks and has operated continuously since its completion.",
+       "tokens": 123,
+       "passage_tokens": 133,
+       "sentences": [
+        {
+         "text": "The Meridian Trench Research Station is a permanently crewed deep-sea outpost built into the wall of an abyssal rift far from any shipping lane.",
+         "tokens": 32,
+         "passage_tokens": 42
+        },
+        {
+         "text": "The main habitat rests at a depth of 6,214 meters below the surface, anchored to a basalt shelf by twelve titanium struts.",
+         "tokens": 28,
+         "passage_tokens": 38
+        },
+        {
+         "text": "A smaller storage annex, used for spare parts and preserved samples, sits nearby at a shallower 6,050 meters, tethered to the main hull by a reinforced access tunnel.",
+         "tokens": 37,
+         "passage_tokens": 47
+        },
+        {
+         "text": "The station was assembled in sections lowered from a surface barge over the course of several weeks and has operated continuously since its completion.",
+         "tokens": 26,
+         "passage_tokens": 36
+        }
+       ]
+      },
+      {
+       "text": "Dr. Ansel Kovrith has served as station director since the facility's founding, overseeing both the scientific program and the day-to-day operations of the habitat. Kovrith reports to the surface program office on a fixed schedule and holds final authority over any decision to curtail external dive activity. A rotating deputy director assists with logistics but does not hold independent authority over dive suspensions.",
+       "tokens": 78,
+       "passage_tokens": 88,
+       "sentences": [
+        {
+         "text": "Dr. Ansel Kovrith has served as station director since the facility's founding, overseeing both the scientific program and the day-to-day operations of the habitat.",
+         "tokens": 33,
+         "passage_tokens": 43
+        },
+        {
+         "text": "Kovrith reports to the surface program office on a fixed schedule and holds final authority over any decision to curtail external dive activity.",
+         "tokens": 28,
+         "passage_tokens": 37
+        },
+        {
+         "text": "A rotating deputy director assists with logistics but does not hold independent authority over dive suspensions.",
+         "tokens": 18,
+         "passage_tokens": 28
+        }
+       ]
+      },
+      {
+       "text": "The station broadcasts under the radio call sign Umbral Seven on the primary hailing frequency reserved for the trench program. A secondary, rarely used backup channel answers to the call sign Umbral Two, reserved strictly for emergency traffic when the primary transmitter is offline. Surface vessels transiting the area are briefed to expect only the primary designation during routine contact windows.",
+       "tokens": 71,
+       "passage_tokens": 81,
+       "sentences": [
+        {
+         "text": "The station broadcasts under the radio call sign Umbral Seven on the primary hailing frequency reserved for the trench program.",
+         "tokens": 23,
+         "passage_tokens": 33
+        },
+        {
+         "text": "A secondary, rarely used backup channel answers to the call sign Umbral Two, reserved strictly for emergency traffic when the primary transmitter is offline.",
+         "tokens": 28,
+         "passage_tokens": 38
+        },
+        {
+         "text": "Surface vessels transiting the area are briefed to expect only the primary designation during routine contact windows.",
+         "tokens": 20,
+         "passage_tokens": 30
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "heading": {
+      "text": "## Staffing Roster",
+      "tokens": 4
+     },
+     "prefix": "[The Meridian Trench Research Station — Staffing Roster] ",
+     "paragraphs": [
+      {
+       "text": "Crew levels at the station are tracked closely by the deputy director's office. The station maintains a resident population of forty-one scientists and technicians, spread across three rotating shifts so the habitat is never left unstaffed. During changeover periods, when incoming and outgoing crews briefly overlap before the outgoing group departs on the surface barge, occupancy can spike to forty-six individuals for no more than a single day. Historical logs show that occupancy has never exceeded fifty-two, the theoretical safety ceiling set by the life-support engineers during initial commissioning.",
+       "tokens": 107,
+       "passage_tokens": 119,
+       "sentences": [
+        {
+         "text": "Crew levels at the station are tracked closely by the deputy director's office.",
+         "tokens": 15,
+         "passage_tokens": 27
+        },
+        {
+         "text": "The station maintains a resident population of forty-one scientists and technicians, spread across three rotating shifts so the habitat is never left unstaffed.",
+         "tokens": 28,
+         "passage_tokens": 40
+        },
+        {
+         "text": "During changeover periods, when incoming and outgoing crews briefly overlap before the outgoing group departs on the surface barge, occupancy can spike to forty-six individuals for no more than a single day.",
+         "tokens": 39,
+         "passage_tokens": 51
+        },
+        {
+         "text": "Historical logs show that occupancy has never exceeded fifty-two, the theoretical safety ceiling set by the life-support engineers during initial commissioning.",
+         "tokens": 25,
+         "passage_tokens": 37
+        }
+       ]
+      },
+      {
+       "text": "Staff are organized into four working groups: the Biology working group, the Geology working group, the Systems Engineering working group, and the Life Support working group. Each working group elects its own shift lead, who reports to the deputy director rather than directly to Kovrith, keeping the director's attention focused on program-level decisions.",
+       "tokens": 67,
+       "passage_tokens": 79,
+       "sentences": [
+        {
+         "text": "Staff are organized into four working groups: the Biology working group, the Geology working group, the Systems Engineering working group, and the Life Support working group.",
+         "tokens": 32,
+         "passage_tokens": 44
+        },
+        {
+         "text": "Each working group elects its own shift lead, who reports to the deputy director rather than directly to Kovrith, keeping the director's attention focused on program-level decisions.",
+         "tokens": 35,
+         "passage_tokens": 47
+        }
+       ]
+      },
+      {
+       "text": "New arrivals undergo a mandatory pressure acclimation period before beginning any duties. Veteran staff mentor incoming crew through their first rotation, and mentorship pairings are logged in the station's onboarding ledger for reference during later performance reviews. Meals are prepared on a communal rotation basis, with every working group taking a turn staffing the galley for one week out of every cycle.",
+       "tokens": 71,
+       "passage_tokens": 83,
+       "sentences": [
+        {
+         "text": "New arrivals undergo a mandatory pressure acclimation period before beginning any duties.",
+         "tokens": 14,
+         "passage_tokens": 26
+        },
+        {
+         "text": "Veteran staff mentor incoming crew through their first rotation, and mentorship pairings are logged in the station's onboarding ledger for reference during later performance reviews.",
+         "tokens": 30,
+         "passage_tokens": 41
+        },
+        {
+         "text": "Meals are prepared on a communal rotation basis, with every working group taking a turn staffing the galley for one week out of every cycle.",
+         "tokens": 28,
+         "passage_tokens": 40
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "heading": {
+      "text": "## Equipment Maintenance Logs",
+      "tokens": 4
+     },
+     "prefix": "[The Meridian Trench Research Station — Equipment Maintenance Logs] ",
+     "paragraphs": [
+      {
+       "text": "The submersible fleet is the responsibility of the Systems Engineering working group. The station's primary submersible is named the Halcyon Drift, a twin-hulled craft used for extended excursions beyond the range of the tethered dive cages. A second, older craft kept in reserve for emergencies is informally called the Halberd Drift by the crew, though it has not been deployed on an active mission in several seasons and is maintained purely as a contingency vehicle. Confusing the two names in a mission log is considered a minor but recurring paperwork error among newer technicians.",
+       "tokens": 116,
+       "passage_tokens": 128,
+       "sentences": [
+        {
+         "text": "The submersible fleet is the responsibility of the Systems Engineering working group.",
+         "tokens": 15,
+         "passage_tokens": 27
+        },
+        {
+         "text": "The station's primary submersible is named the Halcyon Drift, a twin-hulled craft used for extended excursions beyond the range of the tethered dive cages.",
+         "tokens": 35,
+         "passage_tokens": 47
+        },
+        {
+         "text": "A second, older craft kept in reserve for emergencies is informally called the Halberd Drift by the crew, though it has not been deployed on an active mission in several seasons and is maintained purely as a contingency vehicle.",
+         "tokens": 45,
+         "passage_tokens": 57
+        },
+        {
+         "text": "Confusing the two names in a mission log is considered a minor but recurring paperwork error among newer technicians.",
+         "tokens": 21,
+         "passage_tokens": 33
+        }
+       ]
+      },
+      {
+       "text": "Routine maintenance on the primary craft includes a full hull inspection, a review of ballast tank integrity, and a check of the manipulator arm's hydraulic seals. Maintenance technicians log every inspection in a bound ledger kept in the equipment bay rather than in the digital system, a holdover practice from the station's earliest years that persists despite repeated proposals to digitize it.",
+       "tokens": 72,
+       "passage_tokens": 84,
+       "sentences": [
+        {
+         "text": "Routine maintenance on the primary craft includes a full hull inspection, a review of ballast tank integrity, and a check of the manipulator arm's hydraulic seals.",
+         "tokens": 31,
+         "passage_tokens": 43
+        },
+        {
+         "text": "Maintenance technicians log every inspection in a bound ledger kept in the equipment bay rather than in the digital system, a holdover practice from the station's earliest years that persists despite repeated proposals to digitize it.",
+         "tokens": 41,
+         "passage_tokens": 53
+        }
+       ]
+      },
+      {
+       "text": "Spare parts for the submersible fleet are stored in the annex rather than the main habitat, both to conserve space and to keep flammable lubricants away from the crew's living quarters. Technicians retrieve parts via the access tunnel, logging each withdrawal against the annex inventory sheet so that resupply requests can be planned around actual consumption rather than guesswork. The Pellucid Shelf observation post is reached from the marker listed as STOP_04, which the survey office treats as its permanent station for that transect.",
+       "tokens": 103,
+       "passage_tokens": 114,
+       "sentences": [
+        {
+         "text": "Spare parts for the submersible fleet are stored in the annex rather than the main habitat, both to conserve space and to keep flammable lubricants away from the crew's living quarters.",
+         "tokens": 39,
+         "passage_tokens": 50
+        },
+        {
+         "text": "Technicians retrieve parts via the access tunnel, logging each withdrawal against the annex inventory sheet so that resupply requests can be planned around actual consumption rather than guesswork.",
+         "tokens": 33,
+         "passage_tokens": 45
+        },
+        {
+         "text": "The Pellucid Shelf observation post is reached from the marker listed as STOP_04, which the survey office treats as its permanent station for that transect.",
+         "tokens": 31,
+         "passage_tokens": 43
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "heading": {
+      "text": "## Incident Reports",
+      "tokens": 3
+     },
+     "prefix": "[The Meridian Trench Research Station — Incident Reports] ",
+     "paragraphs": [
+      {
+       "text": "Two unrelated incidents were logged in close succession this past autumn. An oxygen scrubber failure occurred on 2 November, prompting an emergency ventilation drill that cleared the affected module within eleven minutes. Investigators later traced the failure to a corroded valve seat rather than any fault in the scrubber's filtration media, and the valve design was subsequently flagged for review across the rest of the habitat's air-handling systems.",
+       "tokens": 83,
+       "passage_tokens": 94,
+       "sentences": [
+        {
+         "text": "Two unrelated incidents were logged in close succession this past autumn.",
+         "tokens": 12,
+         "passage_tokens": 23
+        },
+        {
+         "text": "An oxygen scrubber failure occurred on 2 November, prompting an emergency ventilation drill that cleared the affected module within eleven minutes.",
+         "tokens": 25,
+         "passage_tokens": 36
+        },
+        {
+         "text": "Investigators later traced the failure to a corroded valve seat rather than any fault in the scrubber's filtration media, and the valve design was subsequently flagged for review across the rest of the habitat's air-handling systems.",
+         "tokens": 46,
+         "passage_tokens": 57
+        }
+       ]
+      },
+      {
+       "text": "A separate, unrelated incident on 9 November involved a minor flooding event in the storage annex after a gasket failure during a routine pressure test; no injuries resulted, and the annex was resealed within a single shift. Crew sometimes conflate the two November incidents in casual conversation, though the maintenance logs treat them as entirely distinct events with separate root-cause findings.",
+       "tokens": 72,
+       "passage_tokens": 83,
+       "sentences": [
+        {
+         "text": "A separate, unrelated incident on 9 November involved a minor flooding event in the storage annex after a gasket failure during a routine pressure test; no injuries resulted, and the annex was resealed within a single shift.",
+         "tokens": 43,
+         "passage_tokens": 54
+        },
+        {
+         "text": "Crew sometimes conflate the two November incidents in casual conversation, though the maintenance logs treat them as entirely distinct events with separate root-cause findings.",
+         "tokens": 29,
+         "passage_tokens": 40
+        }
+       ]
+      },
+      {
+       "text": "Any incident that results in a habitat-wide alert must be documented in a formal report within forty-eight hours, reviewed by the deputy director, and forwarded to the surface program office before the following resupply cycle. Reports that miss this window are flagged for a compliance review during the director's next quarterly assessment. The Wraithmoor Escarpment survey line is worked from the marker recorded as STOP_02, the only berth on that wall rated for extended tethered work.",
+       "tokens": 93,
+       "passage_tokens": 104,
+       "sentences": [
+        {
+         "text": "Any incident that results in a habitat-wide alert must be documented in a formal report within forty-eight hours, reviewed by the deputy director, and forwarded to the surface program office before the following resupply cycle.",
+         "tokens": 41,
+         "passage_tokens": 52
+        },
+        {
+         "text": "Reports that miss this window are flagged for a compliance review during the director's next quarterly assessment.",
+         "tokens": 19,
+         "passage_tokens": 30
+        },
+        {
+         "text": "The Wraithmoor Escarpment survey line is worked from the marker recorded as STOP_02, the only berth on that wall rated for extended tethered work.",
+         "tokens": 33,
+         "passage_tokens": 44
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "heading": {
+      "text": "## Supply Schedule",
+      "tokens": 3
+     },
+     "prefix": "[The Meridian Trench Research Station — Supply Schedule] ",
+     "paragraphs": [
+      {
+       "text": "Logistics for the station revolve entirely around the resupply cycle. The resupply vessel docks at the station once every 19 days, carrying fresh provisions, replacement parts, and outgoing sample shipments bound for surface laboratories. A secondary, unscheduled resupply run can be requested in an emergency, but crew are trained to treat this as an exceptional measure reserved for genuine shortages rather than routine restocking.",
+       "tokens": 79,
+       "passage_tokens": 89,
+       "sentences": [
+        {
+         "text": "Logistics for the station revolve entirely around the resupply cycle.",
+         "tokens": 13,
+         "passage_tokens": 23
+        },
+        {
+         "text": "The resupply vessel docks at the station once every 19 days, carrying fresh provisions, replacement parts, and outgoing sample shipments bound for surface laboratories.",
+         "tokens": 30,
+         "passage_tokens": 41
+        },
+        {
+         "text": "A secondary, unscheduled resupply run can be requested in an emergency, but crew are trained to treat this as an exceptional measure reserved for genuine shortages rather than routine restocking.",
+         "tokens": 36,
+         "passage_tokens": 47
+        }
+       ]
+      },
+      {
+       "text": "Provisions are calculated against the resident population plus a fixed safety margin, so that a single missed resupply cycle does not force immediate rationing. Perishable goods are prioritized for early distribution to the galley, while non-perishable stock is rotated into the annex according to a strict first-in, first-out policy tracked by the inventory sheet.",
+       "tokens": 68,
+       "passage_tokens": 79,
+       "sentences": [
+        {
+         "text": "Provisions are calculated against the resident population plus a fixed safety margin, so that a single missed resupply cycle does not force immediate rationing.",
+         "tokens": 29,
+         "passage_tokens": 40
+        },
+        {
+         "text": "Perishable goods are prioritized for early distribution to the galley, while non-perishable stock is rotated into the annex according to a strict first-in, first-out policy tracked by the inventory sheet.",
+         "tokens": 39,
+         "passage_tokens": 50
+        }
+       ]
+      },
+      {
+       "text": "Outgoing sample shipments are packed in insulated containers rated for the pressure differential encountered during ascent, and each container is sealed and logged by a Systems Engineering technician before being loaded onto the resupply vessel for its return trip to the surface. Survey craft bound for the Sablefin Vent Field are dispatched from the tender berth logged as STOP_01 in the trench survey register.",
+       "tokens": 72,
+       "passage_tokens": 84,
+       "sentences": [
+        {
+         "text": "Outgoing sample shipments are packed in insulated containers rated for the pressure differential encountered during ascent, and each container is sealed and logged by a Systems Engineering technician before being loaded onto the resupply vessel for its return trip to the surface.",
+         "tokens": 45,
+         "passage_tokens": 57
+        },
+        {
+         "text": "Survey craft bound for the Sablefin Vent Field are dispatched from the tender berth logged as STOP_01 in the trench survey register.",
+         "tokens": 27,
+         "passage_tokens": 38
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "heading": {
+      "text": "## Calibration Procedures",
+      "tokens": 3
+     },
+     "prefix": "[The Meridian Trench Research Station — Calibration Procedures] ",
+     "paragraphs": [
+      {
+       "text": "Acoustic calibration work is scheduled well in advance and logged by array. The Kesterline array was recalibrated on 14 March, restoring full sensitivity to the outer hydrophone ring after several weeks of gradually degrading signal quality. The array's inner ring, sometimes confused with the outer ring in casual shorthand, was not part of this recalibration and remains on its normal annual schedule. A separate acoustic sub-array, the Halberd sub-array, underwent unrelated routine maintenance on 12 March, two days before the Kesterline work began, and crew logs from that week occasionally mix up the two dates.",
+       "tokens": 122,
+       "passage_tokens": 132,
+       "sentences": [
+        {
+         "text": "Acoustic calibration work is scheduled well in advance and logged by array.",
+         "tokens": 14,
+         "passage_tokens": 24
+        },
+        {
+         "text": "The Kesterline array was recalibrated on 14 March, restoring full sensitivity to the outer hydrophone ring after several weeks of gradually degrading signal quality.",
+         "tokens": 32,
+         "passage_tokens": 43
+        },
+        {
+         "text": "The array's inner ring, sometimes confused with the outer ring in casual shorthand, was not part of this recalibration and remains on its normal annual schedule.",
+         "tokens": 31,
+         "passage_tokens": 42
+        },
+        {
+         "text": "A separate acoustic sub-array, the Halberd sub-array, underwent unrelated routine maintenance on 12 March, two days before the Kesterline work began, and crew logs from that week occasionally mix up the two dates.",
+         "tokens": 45,
+         "passage_tokens": 56
+        }
+       ]
+      },
+      {
+       "text": "During array calibration, technicians torque the hydrophone housing's gasket to 12 newton-meters exactly, balancing a reliable seal against the risk of cracking the housing. Technicians use a calibrated torque wrench dedicated solely to this task, stored in a labeled case in the equipment bay, and log the applied torque value in the maintenance ledger alongside the technician's initials.",
+       "tokens": 72,
+       "passage_tokens": 83,
+       "sentences": [
+        {
+         "text": "During array calibration, technicians torque the hydrophone housing's gasket to 12 newton-meters exactly, balancing a reliable seal against the risk of cracking the housing.",
+         "tokens": 33,
+         "passage_tokens": 44
+        },
+        {
+         "text": "Technicians use a calibrated torque wrench dedicated solely to this task, stored in a labeled case in the equipment bay, and log the applied torque value in the maintenance ledger alongside the technician's initials.",
+         "tokens": 39,
+         "passage_tokens": 50
+        }
+       ]
+      },
+      {
+       "text": "Any deviation of more than half a newton-meter from the specified torque triggers a mandatory re-seat of the gasket before the array can be returned to service. Over-torquing is treated as more serious than under-torquing, since the housing material is more prone to hairline cracking than to a slow leak.",
+       "tokens": 65,
+       "passage_tokens": 76,
+       "sentences": [
+        {
+         "text": "Any deviation of more than half a newton-meter from the specified torque triggers a mandatory re-seat of the gasket before the array can be returned to service.",
+         "tokens": 31,
+         "passage_tokens": 42
+        },
+        {
+         "text": "Over-torquing is treated as more serious than under-torquing, since the housing material is more prone to hairline cracking than to a slow leak.",
+         "tokens": 34,
+         "passage_tokens": 45
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "heading": {
+      "text": "## Dive Protocols",
+      "tokens": 4
+     },
+     "prefix": "[The Meridian Trench Research Station — Dive Protocols] ",
+     "paragraphs": [
+      {
+       "text": "Excursion limits are set jointly by the life-support and medical staff. Divers are restricted to a maximum excursion time of 47 minutes per dive, a limit set after reviewing prior seasons of physiological data. A separate, more conservative limit of 35 minutes applies to any diver still within their first month of active rotation, regardless of experience gained at other facilities.",
+       "tokens": 71,
+       "passage_tokens": 83,
+       "sentences": [
+        {
+         "text": "Excursion limits are set jointly by the life-support and medical staff.",
+         "tokens": 14,
+         "passage_tokens": 26
+        },
+        {
+         "text": "Divers are restricted to a maximum excursion time of 47 minutes per dive, a limit set after reviewing prior seasons of physiological data.",
+         "tokens": 26,
+         "passage_tokens": 38
+        },
+        {
+         "text": "A separate, more conservative limit of 35 minutes applies to any diver still within their first month of active rotation, regardless of experience gained at other facilities.",
+         "tokens": 31,
+         "passage_tokens": 43
+        }
+       ]
+      },
+      {
+       "text": "Every dive requires a minimum of two divers and one surface-side monitor tracking both divers' vital signs and remaining air supply throughout the excursion. A dive is aborted immediately if either diver's oxygen reserve drops below a preset threshold, regardless of how close the pair is to completing their assigned task.",
+       "tokens": 57,
+       "passage_tokens": 69,
+       "sentences": [
+        {
+         "text": "Every dive requires a minimum of two divers and one surface-side monitor tracking both divers' vital signs and remaining air supply throughout the excursion.",
+         "tokens": 27,
+         "passage_tokens": 39
+        },
+        {
+         "text": "A dive is aborted immediately if either diver's oxygen reserve drops below a preset threshold, regardless of how close the pair is to completing their assigned task.",
+         "tokens": 30,
+         "passage_tokens": 42
+        }
+       ]
+      },
+      {
+       "text": "Post-dive debriefs are logged alongside the maintenance ledger entries for that day, cross-referencing any equipment used during the excursion so that wear patterns can be tracked over time. Divers who exceed their allotted excursion time by even a few minutes are required to undergo a supplementary medical check before their next scheduled dive, a rule enforced without exception regardless of rank or seniority.",
+       "tokens": 74,
+       "passage_tokens": 86,
+       "sentences": [
+        {
+         "text": "Post-dive debriefs are logged alongside the maintenance ledger entries for that day, cross-referencing any equipment used during the excursion so that wear patterns can be tracked over time.",
+         "tokens": 36,
+         "passage_tokens": 48
+        },
+        {
+         "text": "Divers who exceed their allotted excursion time by even a few minutes are required to undergo a supplementary medical check before their next scheduled dive, a rule enforced without exception regardless of rank or seniority.",
+         "tokens": 38,
+         "passage_tokens": 50
+        }
+       ]
+      },
+      {
+       "text": "The station's dive schedule is planned a full cycle in advance and posted in the equipment bay, giving every working group visibility into upcoming excursions so that maintenance and staffing needs can be coordinated well ahead of time. Sediment sampling at the Corbel Slide is staged from the berth carried in the register as STOP_03, which is kept clear of tether traffic during working hours.",
+       "tokens": 74,
+       "passage_tokens": 86,
+       "sentences": [
+        {
+         "text": "The station's dive schedule is planned a full cycle in advance and posted in the equipment bay, giving every working group visibility into upcoming excursions so that maintenance and staffing needs can be coordinated well ahead of time.",
+         "tokens": 41,
+         "passage_tokens": 53
+        },
+        {
+         "text": "Sediment sampling at the Corbel Slide is staged from the berth carried in the register as STOP_03, which is kept clear of tether traffic during working hours.",
+         "tokens": 33,
+         "passage_tokens": 45
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "title": "Ashgrove Metropolitan Transit Authority",
+   "url": "https://tool-box-2591eaa24fa3.herokuapp.com/study-materials/2",
+   "header": {
+    "text": "From: Ashgrove Metropolitan Transit Authority",
+    "tokens": 8
+   },
+   "sections": [
+    {
+     "heading": {
+      "text": "## Network Overview",
+      "tokens": 3
+     },
+     "prefix": "[Ashgrove Metropolitan Transit Authority — Network Overview] ",
+     "paragraphs": [
+      {
+       "text": "The Ashgrove Metropolitan Transit Authority coordinates light rail, bus rapid transit, and paratransit services across the Ashgrove conurbation and its outer commuter belt. The network is organized around five color-coded lines: the Amber Line, the Cobalt Line, the Russet Line, the Willowmere Line, and the Foxglove Line, each managed by a dedicated line supervisor who reports to the operations directorate rather than directly to the Director-General. Ridership has grown steadily since the network's last major expansion, and the authority publishes quarterly ridership figures alongside a public performance dashboard that tracks on-time arrivals across every line.",
+       "tokens": 128,
+       "passage_tokens": 139,
+       "sentences": [
+        {
+         "text": "The Ashgrove Metropolitan Transit Authority coordinates light rail, bus rapid transit, and paratransit services across the Ashgrove conurbation and its outer commuter belt.",
+         "tokens": 35,
+         "passage_tokens": 46
+        },
+        {
+         "text": "The network is organized around five color-coded lines: the Amber Line, the Cobalt Line, the Russet Line, the Willowmere Line, and the Foxglove Line, each managed by a dedicated line supervisor who reports to the operations directorate rather than directly to the Director-General.",
+         "tokens": 58,
+         "passage_tokens": 69
+        },
+        {
+         "text": "Ridership has grown steadily since the network's last major expansion, and the authority publishes quarterly ridership figures alongside a public performance dashboard that tracks on-time arrivals across every line.",
+         "tokens": 35,
+         "passage_tokens": 46
+        }
+       ]
+      },
+      {
+       "text": "Planning documents occasionally reference partnerships with unrelated ventures, including a since-lapsed data-sharing arrangement with a remote deep-sea research station that once borrowed the authority's satellite uplink for emergency backup communications during a storm season years ago. No operational connection between the two organizations remains today, though the arrangement is still cited in archived board minutes as an example of unusual cross-sector cooperation. Riders occasionally ask whether the authority still maintains any undersea infrastructure, and staff are trained to clarify that the network's entire footprint is confined to surface rail and roadway corridors.",
+       "tokens": 108,
+       "passage_tokens": 119,
+       "sentences": [
+        {
+         "text": "Planning documents occasionally reference partnerships with unrelated ventures, including a since-lapsed data-sharing arrangement with a remote deep-sea research station that once borrowed the authority's satellite uplink for emergency backup communications during a storm season years ago.",
+         "tokens": 45,
+         "passage_tokens": 56
+        },
+        {
+         "text": "No operational connection between the two organizations remains today, though the arrangement is still cited in archived board minutes as an example of unusual cross-sector cooperation.",
+         "tokens": 29,
+         "passage_tokens": 40
+        },
+        {
+         "text": "Riders occasionally ask whether the authority still maintains any undersea infrastructure, and staff are trained to clarify that the network's entire footprint is confined to surface rail and roadway corridors.",
+         "tokens": 35,
+         "passage_tokens": 45
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "heading": {
+      "text": "## Leadership and Governance",
+      "tokens": 4
+     },
+     "prefix": "[Ashgrove Metropolitan Transit Authority — Leadership and Governance] ",
+     "paragraphs": [
+      {
+       "text": "Dorian Fenwick has served as Director-General of the transit authority since its founding charter was signed. Fenwick oversees fare policy, safety compliance, and long-term capital planning for the entire system, delegating day-to-day line operations to a deputy operations officer. That deputy does not hold independent authority over service suspensions and must escalate any network-wide disruption to the Director-General's office before a public announcement is issued. A contractor once misspelled the name as \"Doran Fenwyck\" on a signage proof, an error that became a running joke among the print shop staff.",
+       "tokens": 117,
+       "passage_tokens": 129,
+       "sentences": [
+        {
+         "text": "Dorian Fenwick has served as Director-General of the transit authority since its founding charter was signed.",
+         "tokens": 20,
+         "passage_tokens": 32
+        },
+        {
+         "text": "Fenwick oversees fare policy, safety compliance, and long-term capital planning for the entire system, delegating day-to-day line operations to a deputy operations officer.",
+         "tokens": 32,
+         "passage_tokens": 44
+        },
+        {
+         "text": "That deputy does not hold independent authority over service suspensions and must escalate any network-wide disruption to the Director-General's office before a public announcement is issued.",
+         "tokens": 31,
+         "passage_tokens": 43
+        },
+        {
+         "text": "A contractor once misspelled the name as \"Doran Fenwyck\" on a signage proof, an error that became a running joke among the print shop staff.",
+         "tokens": 34,
+         "passage_tokens": 46
+        }
+       ]
+      },
+      {
+       "text": "The authority's governing board meets on a fixed quarterly schedule and reviews performance metrics, capital expenditure requests, and any pending fare policy revisions before they take effect. Board members are appointed by the regional transportation council rather than elected, and terms run for a fixed period before rotation. A separate advisory panel, composed of rider representatives, offers non-binding feedback on service changes but holds no formal veto over board decisions.",
+       "tokens": 80,
+       "passage_tokens": 92,
+       "sentences": [
+        {
+         "text": "The authority's governing board meets on a fixed quarterly schedule and reviews performance metrics, capital expenditure requests, and any pending fare policy revisions before they take effect.",
+         "tokens": 31,
+         "passage_tokens": 43
+        },
+        {
+         "text": "Board members are appointed by the regional transportation council rather than elected, and terms run for a fixed period before rotation.",
+         "tokens": 23,
+         "passage_tokens": 35
+        },
+        {
+         "text": "A separate advisory panel, composed of rider representatives, offers non-binding feedback on service changes but holds no formal veto over board decisions.",
+         "tokens": 26,
+         "passage_tokens": 38
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "heading": {
+      "text": "## Staffing Roster",
+      "tokens": 4
+     },
+     "prefix": "[Ashgrove Metropolitan Transit Authority — Staffing Roster] ",
+     "paragraphs": [
+      {
+       "text": "The authority employs sixty-eight certified line drivers across its five color-coded lines. That figure excludes depot mechanics, dispatchers, and administrative staff, who are counted separately in the annual workforce report. During peak seasonal hiring, when trainee drivers are brought on ahead of the winter timetable change, the certified roster can temporarily swell to just over eighty individuals before attrition and graduation return it to its usual baseline. Historical staffing records show the certified driver roster has never fallen below fifty, the minimum threshold set by the safety directorate to guarantee full timetable coverage without relying on mandatory overtime.",
+       "tokens": 113,
+       "passage_tokens": 125,
+       "sentences": [
+        {
+         "text": "The authority employs sixty-eight certified line drivers across its five color-coded lines.",
+         "tokens": 15,
+         "passage_tokens": 27
+        },
+        {
+         "text": "That figure excludes depot mechanics, dispatchers, and administrative staff, who are counted separately in the annual workforce report.",
+         "tokens": 23,
+         "passage_tokens": 35
+        },
+        {
+         "text": "During peak seasonal hiring, when trainee drivers are brought on ahead of the winter timetable change, the certified roster can temporarily swell to just over eighty individuals before attrition and graduation return it to its usual baseline.",
+         "tokens": 41,
+         "passage_tokens": 53
+        },
+        {
+         "text": "Historical staffing records show the certified driver roster has never fallen below fifty, the minimum threshold set by the safety directorate to guarantee full timetable coverage without relying on mandatory overtime.",
+         "tokens": 34,
+         "passage_tokens": 46
+        }
+       ]
+      },
+      {
+       "text": "Drivers are organized into four crew pools: the Amber-Cobalt pool, the Russet pool, the Willowmere pool, and the Foxglove pool, each electing a senior crew representative who liaises with the deputy operations officer rather than with Fenwick directly, which keeps the Director-General's attention on system-wide policy rather than pool-level scheduling disputes. New drivers complete a mandatory supervised probation period before being certified to operate revenue service unaccompanied, and veteran drivers are paired with trainees during this period under a formal mentorship log kept by the training office.",
+       "tokens": 112,
+       "passage_tokens": 124,
+       "sentences": [
+        {
+         "text": "Drivers are organized into four crew pools: the Amber-Cobalt pool, the Russet pool, the Willowmere pool, and the Foxglove pool, each electing a senior crew representative who liaises with the deputy operations officer rather than with Fenwick directly, which keeps the Director-General's attention on system-wide policy rather than pool-level scheduling disputes.",
+         "tokens": 71,
+         "passage_tokens": 83
+        },
+        {
+         "text": "New drivers complete a mandatory supervised probation period before being certified to operate revenue service unaccompanied, and veteran drivers are paired with trainees during this period under a formal mentorship log kept by the training office.",
+         "tokens": 41,
+         "passage_tokens": 53
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "heading": {
+      "text": "## Line Timetables",
+      "tokens": 5
+     },
+     "prefix": "[Ashgrove Metropolitan Transit Authority — Line Timetables] ",
+     "paragraphs": [
+      {
+       "text": "Weekday service on the busiest corridor, the Cobalt Line, runs at intervals timed to match commuter demand during the morning and evening peaks, with wider gaps during the midday off-peak window. The Cobalt Line, the network's busiest corridor, stretches thirty-four point two kilometers from its northern terminus to its southern depot loop. Engineers use that distance as the benchmark whenever they model end-to-end travel times for the rest of the network. Shorter feeder corridors, including the Foxglove Line at just under nine kilometers, connect outlying neighborhoods to the Cobalt Line's intermediate stations rather than running directly into the central terminal.",
+       "tokens": 127,
+       "passage_tokens": 140,
+       "sentences": [
+        {
+         "text": "Weekday service on the busiest corridor, the Cobalt Line, runs at intervals timed to match commuter demand during the morning and evening peaks, with wider gaps during the midday off-peak window.",
+         "tokens": 39,
+         "passage_tokens": 52
+        },
+        {
+         "text": "The Cobalt Line, the network's busiest corridor, stretches thirty-four point two kilometers from its northern terminus to its southern depot loop.",
+         "tokens": 28,
+         "passage_tokens": 41
+        },
+        {
+         "text": "Engineers use that distance as the benchmark whenever they model end-to-end travel times for the rest of the network.",
+         "tokens": 23,
+         "passage_tokens": 35
+        },
+        {
+         "text": "Shorter feeder corridors, including the Foxglove Line at just under nine kilometers, connect outlying neighborhoods to the Cobalt Line's intermediate stations rather than running directly into the central terminal.",
+         "tokens": 38,
+         "passage_tokens": 51
+        }
+       ]
+      },
+      {
+       "text": "Weekend timetables across all five lines are consolidated onto a single reduced schedule to conserve rolling stock availability for maintenance windows, and holiday timetables follow yet another reduced pattern published separately each year. Riders are advised to consult the authority's published timetable app rather than relying on posted schedules at older stations, since several platform boards have not been updated since the last major timetable revision. The Verity Observatory is served by STOP_05 on the Russet Line; the nearer Amber Line platform was closed to passengers during the last timetable revision.",
+       "tokens": 106,
+       "passage_tokens": 119,
+       "sentences": [
+        {
+         "text": "Weekend timetables across all five lines are consolidated onto a single reduced schedule to conserve rolling stock availability for maintenance windows, and holiday timetables follow yet another reduced pattern published separately each year.",
+         "tokens": 39,
+         "passage_tokens": 52
+        },
+        {
+         "text": "Riders are advised to consult the authority's published timetable app rather than relying on posted schedules at older stations, since several platform boards have not been updated since the last major timetable revision.",
+         "tokens": 37,
+         "passage_tokens": 49
+        },
+        {
+         "text": "The Verity Observatory is served by STOP_05 on the Russet Line; the nearer Amber Line platform was closed to passengers during the last timetable revision.",
+         "tokens": 31,
+         "passage_tokens": 44
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "heading": {
+      "text": "## Depot Maintenance Schedules",
+      "tokens": 5
+     },
+     "prefix": "[Ashgrove Metropolitan Transit Authority — Depot Maintenance Schedules] ",
+     "paragraphs": [
+      {
+       "text": "Brackenhill assumed responsibility for servicing the eastern loop after the original servicing depot, Thornwick Yard, was placed into a multi-year structural refit. The transition was phased over several months to avoid any lapse in overnight maintenance coverage for the Cobalt and Foxglove lines. A third facility, Ferrow Sidings, continues to handle only overflow storage and does not perform any servicing work, a distinction that newer dispatchers sometimes overlook when routing out-of-service trainsets for repair.",
+       "tokens": 96,
+       "passage_tokens": 109,
+       "sentences": [
+        {
+         "text": "Brackenhill assumed responsibility for servicing the eastern loop after the original servicing depot, Thornwick Yard, was placed into a multi-year structural refit.",
+         "tokens": 30,
+         "passage_tokens": 43
+        },
+        {
+         "text": "The transition was phased over several months to avoid any lapse in overnight maintenance coverage for the Cobalt and Foxglove lines.",
+         "tokens": 25,
+         "passage_tokens": 38
+        },
+        {
+         "text": "A third facility, Ferrow Sidings, continues to handle only overflow storage and does not perform any servicing work, a distinction that newer dispatchers sometimes overlook when routing out-of-service trainsets for repair.",
+         "tokens": 41,
+         "passage_tokens": 54
+        }
+       ]
+      },
+      {
+       "text": "Routine depot maintenance includes a full undercarriage inspection, a brake-shoe wear check, and a pantograph alignment survey performed on a rotating cycle so that no single trainset misses more than one inspection type per cycle. Maintenance technicians log every inspection in the depot's digital asset system, a marked departure from an older paper-ledger practice that the authority phased out network-wide several years ago. Spare parts for the rolling stock fleet are stored at Ferrow Sidings rather than at either active servicing depot, both to conserve floor space at the working depots and to keep bulk lubricant stock away from active maintenance bays.",
+       "tokens": 122,
+       "passage_tokens": 135,
+       "sentences": [
+        {
+         "text": "Routine depot maintenance includes a full undercarriage inspection, a brake-shoe wear check, and a pantograph alignment survey performed on a rotating cycle so that no single trainset misses more than one inspection type per cycle.",
+         "tokens": 44,
+         "passage_tokens": 57
+        },
+        {
+         "text": "Maintenance technicians log every inspection in the depot's digital asset system, a marked departure from an older paper-ledger practice that the authority phased out network-wide several years ago.",
+         "tokens": 34,
+         "passage_tokens": 47
+        },
+        {
+         "text": "Spare parts for the rolling stock fleet are stored at Ferrow Sidings rather than at either active servicing depot, both to conserve floor space at the working depots and to keep bulk lubricant stock away from active maintenance bays.",
+         "tokens": 45,
+         "passage_tokens": 57
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "heading": {
+      "text": "## Rolling Stock Specifications",
+      "tokens": 4
+     },
+     "prefix": "[Ashgrove Metropolitan Transit Authority — Rolling Stock Specifications] ",
+     "paragraphs": [
+      {
+       "text": "The Cobalt Line's premium limited-stop service uses a trainset officially designated the Wrenfield-Class. This low-floor articulated unit replaced an older fleet nearing the end of its service life. An earlier prototype variant, informally called the Wrenwood-Class by depot staff because of the near-identical name, was never approved for revenue service and exists only as a single static display unit at the authority's heritage exhibit. Confusing the two names on a maintenance work order is considered a minor but recurring clerical error among newer technicians.",
+       "tokens": 107,
+       "passage_tokens": 119,
+       "sentences": [
+        {
+         "text": "The Cobalt Line's premium limited-stop service uses a trainset officially designated the Wrenfield-Class.",
+         "tokens": 21,
+         "passage_tokens": 33
+        },
+        {
+         "text": "This low-floor articulated unit replaced an older fleet nearing the end of its service life.",
+         "tokens": 17,
+         "passage_tokens": 29
+        },
+        {
+         "text": "An earlier prototype variant, informally called the Wrenwood-Class by depot staff because of the near-identical name, was never approved for revenue service and exists only as a single static display unit at the authority's heritage exhibit.",
+         "tokens": 46,
+         "passage_tokens": 58
+        },
+        {
+         "text": "Confusing the two names on a maintenance work order is considered a minor but recurring clerical error among newer technicians.",
+         "tokens": 23,
+         "passage_tokens": 35
+        }
+       ]
+      },
+      {
+       "text": "Braking system calibration on the flagship fleet requires the caliper clamping bolts to be torqued to nine newton-meters exactly. This specification balances secure clamping force against the risk of warping the caliper housing over repeated thermal cycles. Technicians use a dedicated calibrated torque wrench stored in a labeled case at each servicing depot, and the applied torque value is logged in the maintenance ledger alongside the technician's initials for every brake service. Any deviation of more than half a newton-meter from the specified torque triggers a mandatory recheck before the trainset can be released back into revenue service.",
+       "tokens": 120,
+       "passage_tokens": 132,
+       "sentences": [
+        {
+         "text": "Braking system calibration on the flagship fleet requires the caliper clamping bolts to be torqued to nine newton-meters exactly.",
+         "tokens": 28,
+         "passage_tokens": 40
+        },
+        {
+         "text": "This specification balances secure clamping force against the risk of warping the caliper housing over repeated thermal cycles.",
+         "tokens": 22,
+         "passage_tokens": 34
+        },
+        {
+         "text": "Technicians use a dedicated calibrated torque wrench stored in a labeled case at each servicing depot, and the applied torque value is logged in the maintenance ledger alongside the technician's initials for every brake service.",
+         "tokens": 39,
+         "passage_tokens": 51
+        },
+        {
+         "text": "Any deviation of more than half a newton-meter from the specified torque triggers a mandatory recheck before the trainset can be released back into revenue service.",
+         "tokens": 31,
+         "passage_tokens": 43
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "heading": {
+      "text": "## Fare Policy Revisions",
+      "tokens": 5
+     },
+     "prefix": "[Ashgrove Metropolitan Transit Authority — Fare Policy Revisions] ",
+     "paragraphs": [
+      {
+       "text": "The most recent fare policy revision set the daily fare cap for unlimited travel at four pounds ninety. This replaced a tiered per-journey structure that riders had long complained was difficult to predict before boarding, and applies across all five lines. The cap applies automatically once a rider's contactless payments reach the threshold within a single service day, and any further taps on that day are recorded but not charged. An earlier draft of the revision had proposed a slightly higher cap before the board scaled it back following public consultation feedback.",
+       "tokens": 104,
+       "passage_tokens": 117,
+       "sentences": [
+        {
+         "text": "The most recent fare policy revision set the daily fare cap for unlimited travel at four pounds ninety.",
+         "tokens": 19,
+         "passage_tokens": 32
+        },
+        {
+         "text": "This replaced a tiered per-journey structure that riders had long complained was difficult to predict before boarding, and applies across all five lines.",
+         "tokens": 29,
+         "passage_tokens": 42
+        },
+        {
+         "text": "The cap applies automatically once a rider's contactless payments reach the threshold within a single service day, and any further taps on that day are recorded but not charged.",
+         "tokens": 33,
+         "passage_tokens": 46
+        },
+        {
+         "text": "An earlier draft of the revision had proposed a slightly higher cap before the board scaled it back following public consultation feedback.",
+         "tokens": 23,
+         "passage_tokens": 36
+        }
+       ]
+      },
+      {
+       "text": "Concession fares for eligible riders remain set at a fixed discount off the standard cap rather than a separate flat rate, a structural choice the authority says simplifies back-end reconciliation with the regional transportation council's subsidy program. Fare policy revisions are reviewed on a rolling basis by the governing board, though the authority has committed to giving riders at least sixty days' public notice before any future cap adjustment takes effect. Riders for the Ashgrove Botanical Conservatory alight at STOP_06, which the authority signs as the conservatory's only step-free entrance.",
+       "tokens": 109,
+       "passage_tokens": 122,
+       "sentences": [
+        {
+         "text": "Concession fares for eligible riders remain set at a fixed discount off the standard cap rather than a separate flat rate, a structural choice the authority says simplifies back-end reconciliation with the regional transportation council's subsidy program.",
+         "tokens": 42,
+         "passage_tokens": 55
+        },
+        {
+         "text": "Fare policy revisions are reviewed on a rolling basis by the governing board, though the authority has committed to giving riders at least sixty days' public notice before any future cap adjustment takes effect.",
+         "tokens": 37,
+         "passage_tokens": 50
+        },
+        {
+         "text": "Riders for the Ashgrove Botanical Conservatory alight at STOP_06, which the authority signs as the conservatory's only step-free entrance.",
+         "tokens": 31,
+         "passage_tokens": 43
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "heading": {
+      "text": "## Incident Reports",
+      "tokens": 3
+     },
+     "prefix": "[Ashgrove Metropolitan Transit Authority — Incident Reports] ",
+     "paragraphs": [
+      {
+       "text": "A signal relay fault on the Russet Line caused cascading delays across the network on the fifth of January. Emergency responders isolated the affected junction and rerouted several services onto the Cobalt Line's shared track segment for the remainder of the morning peak. Investigators later traced the fault to a corroded contact plate rather than any software fault in the signaling system, and the plate design was flagged for review across every relay cabinet of the same vintage. A separate, unrelated near-miss incident on the third of January, two days earlier, involved a maintenance vehicle briefly fouling an active track before being cleared, and crew logs from that week occasionally conflate the two January incidents in casual conversation despite entirely separate root-cause findings.",
+       "tokens": 145,
+       "passage_tokens": 156,
+       "sentences": [
+        {
+         "text": "A signal relay fault on the Russet Line caused cascading delays across the network on the fifth of January.",
+         "tokens": 21,
+         "passage_tokens": 32
+        },
+        {
+         "text": "Emergency responders isolated the affected junction and rerouted several services onto the Cobalt Line's shared track segment for the remainder of the morning peak.",
+         "tokens": 28,
+         "passage_tokens": 39
+        },
+        {
+         "text": "Investigators later traced the fault to a corroded contact plate rather than any software fault in the signaling system, and the plate design was flagged for review across every relay cabinet of the same vintage.",
+         "tokens": 40,
+         "passage_tokens": 51
+        },
+        {
+         "text": "A separate, unrelated near-miss incident on the third of January, two days earlier, involved a maintenance vehicle briefly fouling an active track before being cleared, and crew logs from that week occasionally conflate the two January incidents in casual conversation despite entirely separate root-cause findings.",
+         "tokens": 56,
+         "passage_tokens": 67
+        }
+       ]
+      },
+      {
+       "text": "Any incident that triggers a network-wide service alert must be documented in a formal report within twenty-four hours, reviewed by the deputy operations officer, and forwarded to the governing board before its next scheduled meeting. Reports that miss this window are flagged for a compliance review during the Director-General's next quarterly assessment, mirroring escalation practices used by other infrastructure operators in the region, including, according to one archived memo, an isolated research outpost far offshore that follows a similarly strict reporting window for its own habitat-wide alerts. Marrowgate Market is served by STOP_07, a stop the authority staffs with additional platform crew on market mornings.",
+       "tokens": 126,
+       "passage_tokens": 137,
+       "sentences": [
+        {
+         "text": "Any incident that triggers a network-wide service alert must be documented in a formal report within twenty-four hours, reviewed by the deputy operations officer, and forwarded to the governing board before its next scheduled meeting.",
+         "tokens": 40,
+         "passage_tokens": 51
+        },
+        {
+         "text": "Reports that miss this window are flagged for a compliance review during the Director-General's next quarterly assessment, mirroring escalation practices used by other infrastructure operators in the region, including, according to one archived memo, an isolated research outpost far offshore that follows a similarly strict reporting window for its own habitat-wide alerts.",
+         "tokens": 62,
+         "passage_tokens": 73
+        },
+        {
+         "text": "Marrowgate Market is served by STOP_07, a stop the authority staffs with additional platform crew on market mornings.",
+         "tokens": 24,
+         "passage_tokens": 35
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "heading": {
+      "text": "## Driver Shift Protocols",
+      "tokens": 5
+     },
+     "prefix": "[Ashgrove Metropolitan Transit Authority — Driver Shift Protocols] ",
+     "paragraphs": [
+      {
+       "text": "Continuous single-segment driving time is capped at fifty-eight minutes per shift block before a mandatory break is required. That limit was set after a fatigue study commissioned jointly by the safety directorate and the drivers' representative body. A separate, more conservative limit of forty minutes applies to any driver still within their first month of certified revenue service, regardless of experience gained operating other transit systems previously. Every shift block requires a relief driver to be available at the depot in case a scheduled driver is unable to complete an assigned run, ensuring no service is cancelled solely for want of coverage.",
+       "tokens": 114,
+       "passage_tokens": 127,
+       "sentences": [
+        {
+         "text": "Continuous single-segment driving time is capped at fifty-eight minutes per shift block before a mandatory break is required.",
+         "tokens": 22,
+         "passage_tokens": 35
+        },
+        {
+         "text": "That limit was set after a fatigue study commissioned jointly by the safety directorate and the drivers' representative body.",
+         "tokens": 22,
+         "passage_tokens": 35
+        },
+        {
+         "text": "A separate, more conservative limit of forty minutes applies to any driver still within their first month of certified revenue service, regardless of experience gained operating other transit systems previously.",
+         "tokens": 33,
+         "passage_tokens": 46
+        },
+        {
+         "text": "Every shift block requires a relief driver to be available at the depot in case a scheduled driver is unable to complete an assigned run, ensuring no service is cancelled solely for want of coverage.",
+         "tokens": 37,
+         "passage_tokens": 50
+        }
+       ]
+      },
+      {
+       "text": "Drivers who exceed their allotted continuous segment by even a few minutes due to unavoidable delay are required to log the overrun and undergo a brief fatigue check before their next scheduled shift, a rule enforced without exception regardless of seniority. Shift rosters are published a full timetable cycle in advance and posted at every depot, giving each crew pool visibility into upcoming assignments so that rest-day coverage can be arranged well ahead of time. The Halloway Aquatic Centre is served by STOP_08, which replaced an older kerbside halt when the centre's east wing opened.",
+       "tokens": 113,
+       "passage_tokens": 126,
+       "sentences": [
+        {
+         "text": "Drivers who exceed their allotted continuous segment by even a few minutes due to unavoidable delay are required to log the overrun and undergo a brief fatigue check before their next scheduled shift, a rule enforced without exception regardless of seniority.",
+         "tokens": 45,
+         "passage_tokens": 58
+        },
+        {
+         "text": "Shift rosters are published a full timetable cycle in advance and posted at every depot, giving each crew pool visibility into upcoming assignments so that rest-day coverage can be arranged well ahead of time.",
+         "tokens": 38,
+         "passage_tokens": 51
+        },
+        {
+         "text": "The Halloway Aquatic Centre is served by STOP_08, which replaced an older kerbside halt when the centre's east wing opened.",
+         "tokens": 30,
+         "passage_tokens": 43
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "heading": {
+      "text": "## Network Operations Identifier",
+      "tokens": 4
+     },
+     "prefix": "[Ashgrove Metropolitan Transit Authority — Network Operations Identifier] ",
+     "paragraphs": [
+      {
+       "text": "The authority's central control room communicates with field crews under the operations call sign Fantail Nine on the primary dispatch frequency shared by all five lines. A secondary, rarely used backup channel answers to the call sign Fantail Two, reserved strictly for major incident traffic when the primary dispatch frequency is congested or offline. Field crews are briefed to expect only the primary designation during routine contact windows, and confusion between the two designations during a drill several seasons ago prompted a refresher bulletin reminding staff of the distinction.",
+       "tokens": 102,
+       "passage_tokens": 114,
+       "sentences": [
+        {
+         "text": "The authority's central control room communicates with field crews under the operations call sign Fantail Nine on the primary dispatch frequency shared by all five lines.",
+         "tokens": 29,
+         "passage_tokens": 41
+        },
+        {
+         "text": "A secondary, rarely used backup channel answers to the call sign Fantail Two, reserved strictly for major incident traffic when the primary dispatch frequency is congested or offline.",
+         "tokens": 33,
+         "passage_tokens": 45
+        },
+        {
+         "text": "Field crews are briefed to expect only the primary designation during routine contact windows, and confusion between the two designations during a drill several seasons ago prompted a refresher bulletin reminding staff of the distinction.",
+         "tokens": 40,
+         "passage_tokens": 52
+        }
+       ]
+      },
+      {
+       "text": "This dispatch protocol is reviewed annually, and any change to either call sign requires sign-off from the operations directorate before it takes effect.",
+       "tokens": 27,
+       "passage_tokens": 39,
+       "sentences": [
+        {
+         "text": "This dispatch protocol is reviewed annually, and any change to either call sign requires sign-off from the operations directorate before it takes effect.",
+         "tokens": 27,
+         "passage_tokens": 39
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "title": "Velmara Compound Phase II Trial Record",
+   "url": "https://tool-box-2591eaa24fa3.herokuapp.com/study-materials/3",
+   "header": {
+    "text": "From: Velmara Compound Phase II Trial Record",
+    "tokens": 10
+   },
+   "sections": [
+    {
+     "heading": {
+      "text": "## Overview",
+      "tokens": 2
+     },
+     "prefix": "[Velmara Compound Phase II Trial Record — Overview] ",
+     "paragraphs": [
+      {
+       "text": "The Velmara Phase II Trial Record documents the ongoing evaluation of the investigational compound Velmara, developed by the fictional sponsor Thornquist Biotherapeutics for use in chronic joint inflammation. The compound is a small-molecule inhibitor delivered by subcutaneous injection rather than as an oral tablet, a delivery route chosen after early formulation work showed poor absorption when taken by mouth. The Phase II program follows an earlier Phase I safety study conducted on a much smaller volunteer group, and the current protocol expands enrollment substantially while retaining the same core dosing chemistry.",
+       "tokens": 108,
+       "passage_tokens": 120,
+       "sentences": [
+        {
+         "text": "The Velmara Phase II Trial Record documents the ongoing evaluation of the investigational compound Velmara, developed by the fictional sponsor Thornquist Biotherapeutics for use in chronic joint inflammation.",
+         "tokens": 38,
+         "passage_tokens": 50
+        },
+        {
+         "text": "The compound is a small-molecule inhibitor delivered by subcutaneous injection rather than as an oral tablet, a delivery route chosen after early formulation work showed poor absorption when taken by mouth.",
+         "tokens": 36,
+         "passage_tokens": 48
+        },
+        {
+         "text": "The Phase II program follows an earlier Phase I safety study conducted on a much smaller volunteer group, and the current protocol expands enrollment substantially while retaining the same core dosing chemistry.",
+         "tokens": 34,
+         "passage_tokens": 46
+        }
+       ]
+      },
+      {
+       "text": "Three clinical sites participate in the current phase, each operating under its own site number while reporting into a shared central database maintained by the sponsor's clinical operations group. Site Four is located in the town of Bellhaven, Site Nine is located in the coastal town of Corrimal Bay, and Site Twelve serves as the trial's coordinating hub for the study. Staff at all three sites use identical case report forms so that data entered at one location can be merged cleanly with records from the others during the sponsor's periodic audits.",
+       "tokens": 104,
+       "passage_tokens": 116,
+       "sentences": [
+        {
+         "text": "Three clinical sites participate in the current phase, each operating under its own site number while reporting into a shared central database maintained by the sponsor's clinical operations group.",
+         "tokens": 32,
+         "passage_tokens": 44
+        },
+        {
+         "text": "Site Four is located in the town of Bellhaven, Site Nine is located in the coastal town of Corrimal Bay, and Site Twelve serves as the trial's coordinating hub for the study.",
+         "tokens": 38,
+         "passage_tokens": 50
+        },
+        {
+         "text": "Staff at all three sites use identical case report forms so that data entered at one location can be merged cleanly with records from the others during the sponsor's periodic audits.",
+         "tokens": 34,
+         "passage_tokens": 46
+        }
+       ]
+      },
+      {
+       "text": "Planning documents occasionally reference unrelated ventures the sponsor has partnered with in the past, including a since-lapsed logistics arrangement with a regional transit authority that once helped ferry frozen sample shipments between depots during a courier shortage years ago. No operational connection between the trial and that transit network remains today, and staff are trained to clarify that the sponsor's activities are confined entirely to clinical research.",
+       "tokens": 75,
+       "passage_tokens": 87,
+       "sentences": [
+        {
+         "text": "Planning documents occasionally reference unrelated ventures the sponsor has partnered with in the past, including a since-lapsed logistics arrangement with a regional transit authority that once helped ferry frozen sample shipments between depots during a courier shortage years ago.",
+         "tokens": 44,
+         "passage_tokens": 56
+        },
+        {
+         "text": "No operational connection between the trial and that transit network remains today, and staff are trained to clarify that the sponsor's activities are confined entirely to clinical research.",
+         "tokens": 31,
+         "passage_tokens": 43
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "heading": {
+      "text": "## Trial Leadership",
+      "tokens": 3
+     },
+     "prefix": "[Velmara Compound Phase II Trial Record — Trial Leadership] ",
+     "paragraphs": [
+      {
+       "text": "Dr. Reva Sandoval, based at Site Four, holds primary responsibility for running the Velmara clinical study and has done so since the protocol's initial approval. Sandoval reports quarterly progress summaries to the sponsor's clinical operations group and holds final authority over any decision to pause enrollment at a given site. A rotating protocol coordinator assists with day-to-day paperwork but does not hold independent authority over enrollment pauses.",
+       "tokens": 82,
+       "passage_tokens": 95,
+       "sentences": [
+        {
+         "text": "Dr. Reva Sandoval, based at Site Four, holds primary responsibility for running the Velmara clinical study and has done so since the protocol's initial approval.",
+         "tokens": 34,
+         "passage_tokens": 47
+        },
+        {
+         "text": "Sandoval reports quarterly progress summaries to the sponsor's clinical operations group and holds final authority over any decision to pause enrollment at a given site.",
+         "tokens": 28,
+         "passage_tokens": 41
+        },
+        {
+         "text": "A rotating protocol coordinator assists with day-to-day paperwork but does not hold independent authority over enrollment pauses.",
+         "tokens": 20,
+         "passage_tokens": 33
+        }
+       ]
+      },
+      {
+       "text": "Dr. Callum Beckett serves as sub-investigator at Site Nine, overseeing the coastal cohort's dosing visits and adverse-event triage under Sandoval's overall direction. A separate physician with a similarly spelled name, Dr. Callan Beckwith, consulted briefly on the trial's original Phase I design but left the sponsor's roster before Phase II enrollment began and has no ongoing role in the current record-keeping. Confusing the two names in a case report form is considered a minor but recurring clerical error among newer data-entry staff.",
+       "tokens": 108,
+       "passage_tokens": 121,
+       "sentences": [
+        {
+         "text": "Dr. Callum Beckett serves as sub-investigator at Site Nine, overseeing the coastal cohort's dosing visits and adverse-event triage under Sandoval's overall direction.",
+         "tokens": 34,
+         "passage_tokens": 47
+        },
+        {
+         "text": "A separate physician with a similarly spelled name, Dr. Callan Beckwith, consulted briefly on the trial's original Phase I design but left the sponsor's roster before Phase II enrollment began and has no ongoing role in the current record-keeping.",
+         "tokens": 49,
+         "passage_tokens": 62
+        },
+        {
+         "text": "Confusing the two names in a case report form is considered a minor but recurring clerical error among newer data-entry staff.",
+         "tokens": 25,
+         "passage_tokens": 38
+        }
+       ]
+      },
+      {
+       "text": "The trial's data safety monitoring board is chaired by Dr. Imogen Vasquez, an independent reviewer with no direct role in patient care who convenes the board on a fixed quarterly schedule to review accumulating safety data. The board holds authority to recommend a full trial pause but cannot unilaterally halt enrollment without the sponsor's separate sign-off.",
+       "tokens": 69,
+       "passage_tokens": 82,
+       "sentences": [
+        {
+         "text": "The trial's data safety monitoring board is chaired by Dr. Imogen Vasquez, an independent reviewer with no direct role in patient care who convenes the board on a fixed quarterly schedule to review accumulating safety data.",
+         "tokens": 43,
+         "passage_tokens": 56
+        },
+        {
+         "text": "The board holds authority to recommend a full trial pause but cannot unilaterally halt enrollment without the sponsor's separate sign-off.",
+         "tokens": 26,
+         "passage_tokens": 39
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "heading": {
+      "text": "## Cohort Structure",
+      "tokens": 4
+     },
+     "prefix": "[Velmara Compound Phase II Trial Record — Cohort Structure] ",
+     "paragraphs": [
+      {
+       "text": "Participants are divided into three dosing cohorts based on baseline disease severity, with each cohort following an identical visit schedule but a distinct titration path toward the maintenance dose. Cohort assignment is determined at screening and is not altered later in the study regardless of how a participant's symptoms evolve during treatment.",
+       "tokens": 58,
+       "passage_tokens": 72,
+       "sentences": [
+        {
+         "text": "Participants are divided into three dosing cohorts based on baseline disease severity, with each cohort following an identical visit schedule but a distinct titration path toward the maintenance dose.",
+         "tokens": 32,
+         "passage_tokens": 46
+        },
+        {
+         "text": "Cohort assignment is determined at screening and is not altered later in the study regardless of how a participant's symptoms evolve during treatment.",
+         "tokens": 27,
+         "passage_tokens": 40
+        }
+       ]
+      },
+      {
+       "text": "Site Nine, based in the coastal town of Corrimal Bay, enrolled thirty-seven participants during the initial recruitment window, ahead of a later protocol amendment. A separate, smaller recruitment push at the same site several months afterward added a handful of additional participants under the amended eligibility criteria, though those late arrivals are tracked in a distinct enrollment ledger from the earlier group.",
+       "tokens": 71,
+       "passage_tokens": 85,
+       "sentences": [
+        {
+         "text": "Site Nine, based in the coastal town of Corrimal Bay, enrolled thirty-seven participants during the initial recruitment window, ahead of a later protocol amendment.",
+         "tokens": 30,
+         "passage_tokens": 44
+        },
+        {
+         "text": "A separate, smaller recruitment push at the same site several months afterward added a handful of additional participants under the amended eligibility criteria, though those late arrivals are tracked in a distinct enrollment ledger from the earlier group.",
+         "tokens": 41,
+         "passage_tokens": 55
+        }
+       ]
+      },
+      {
+       "text": "Eligibility screening excludes any volunteer with a recent history of unrelated autoimmune therapy, since prior immune modulation could confound the trial's safety signal. Screening visits are scheduled within fourteen days of a volunteer's initial inquiry, giving the site coordinator enough lead time to review bloodwork before the first dosing visit is booked. The Bellhaven Infusion Suite occupies the premises recorded in the sponsor's facilities register as STOP_09, a leased floor shared with no other study.",
+       "tokens": 90,
+       "passage_tokens": 104,
+       "sentences": [
+        {
+         "text": "Eligibility screening excludes any volunteer with a recent history of unrelated autoimmune therapy, since prior immune modulation could confound the trial's safety signal.",
+         "tokens": 27,
+         "passage_tokens": 41
+        },
+        {
+         "text": "Screening visits are scheduled within fourteen days of a volunteer's initial inquiry, giving the site coordinator enough lead time to review bloodwork before the first dosing visit is booked.",
+         "tokens": 34,
+         "passage_tokens": 47
+        },
+        {
+         "text": "The Bellhaven Infusion Suite occupies the premises recorded in the sponsor's facilities register as STOP_09, a leased floor shared with no other study.",
+         "tokens": 30,
+         "passage_tokens": 44
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "heading": {
+      "text": "## Dosing Schedule",
+      "tokens": 4
+     },
+     "prefix": "[Velmara Compound Phase II Trial Record — Dosing Schedule] ",
+     "paragraphs": [
+      {
+       "text": "Dosing under the amended protocol began on 3 June, replacing the original titration schedule that had been used during the initial pilot cohort. The amendment shortened the ramp-up period so participants reach the maintenance dose sooner, a change requested by the data safety monitoring board after reviewing early tolerability data.",
+       "tokens": 59,
+       "passage_tokens": 73,
+       "sentences": [
+        {
+         "text": "Dosing under the amended protocol began on 3 June, replacing the original titration schedule that had been used during the initial pilot cohort.",
+         "tokens": 28,
+         "passage_tokens": 42
+        },
+        {
+         "text": "The amendment shortened the ramp-up period so participants reach the maintenance dose sooner, a change requested by the data safety monitoring board after reviewing early tolerability data.",
+         "tokens": 31,
+         "passage_tokens": 45
+        }
+       ]
+      },
+      {
+       "text": "The maintenance dose was fixed at 240 milligrams, administered as a single subcutaneous injection at every scheduled dosing visit for the remainder of the study. The pilot cohort, dosed under the original schedule before the amendment, had instead received a lower 180 milligram dose that the board judged insufficiently effective during its first interim review. A third, intermediate dose of 210 milligrams was briefly considered during protocol drafting but was dropped before any participant received it.",
+       "tokens": 92,
+       "passage_tokens": 106,
+       "sentences": [
+        {
+         "text": "The maintenance dose was fixed at 240 milligrams, administered as a single subcutaneous injection at every scheduled dosing visit for the remainder of the study.",
+         "tokens": 30,
+         "passage_tokens": 44
+        },
+        {
+         "text": "The pilot cohort, dosed under the original schedule before the amendment, had instead received a lower 180 milligram dose that the board judged insufficiently effective during its first interim review.",
+         "tokens": 37,
+         "passage_tokens": 51
+        },
+        {
+         "text": "A third, intermediate dose of 210 milligrams was briefly considered during protocol drafting but was dropped before any participant received it.",
+         "tokens": 25,
+         "passage_tokens": 39
+        }
+       ]
+      },
+      {
+       "text": "Participants return for follow-up bloodwork every 21 days throughout the maintenance phase, a cadence chosen to catch any delayed liver enzyme elevation before it becomes clinically significant. An earlier draft of the protocol had proposed a wider fourteen-day gap between visits before the safety board tightened the interval during protocol review. Investigational product is dispensed from the Thornquist Central Pharmacy, whose facilities-register entry is STOP_11, staffed by two pharmacists on rotation.",
+       "tokens": 87,
+       "passage_tokens": 101,
+       "sentences": [
+        {
+         "text": "Participants return for follow-up bloodwork every 21 days throughout the maintenance phase, a cadence chosen to catch any delayed liver enzyme elevation before it becomes clinically significant.",
+         "tokens": 32,
+         "passage_tokens": 46
+        },
+        {
+         "text": "An earlier draft of the protocol had proposed a wider fourteen-day gap between visits before the safety board tightened the interval during protocol review.",
+         "tokens": 26,
+         "passage_tokens": 40
+        },
+        {
+         "text": "Investigational product is dispensed from the Thornquist Central Pharmacy, whose facilities-register entry is STOP_11, staffed by two pharmacists on rotation.",
+         "tokens": 29,
+         "passage_tokens": 43
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "heading": {
+      "text": "## Adverse Event Logs",
+      "tokens": 5
+     },
+     "prefix": "[Velmara Compound Phase II Trial Record — Adverse Event Logs] ",
+     "paragraphs": [
+      {
+       "text": "A serious adverse event, a grade three hepatic enzyme elevation, was reported at the coastal Site Nine on 11 August. It prompted an immediate dose hold for the affected participant pending further bloodwork. Investigators later traced the elevation to a transient reaction rather than any lasting liver injury, and the participant resumed dosing at a reduced level several weeks afterward under close monitoring.",
+       "tokens": 72,
+       "passage_tokens": 87,
+       "sentences": [
+        {
+         "text": "A serious adverse event, a grade three hepatic enzyme elevation, was reported at the coastal Site Nine on 11 August.",
+         "tokens": 24,
+         "passage_tokens": 39
+        },
+        {
+         "text": "It prompted an immediate dose hold for the affected participant pending further bloodwork.",
+         "tokens": 15,
+         "passage_tokens": 30
+        },
+        {
+         "text": "Investigators later traced the elevation to a transient reaction rather than any lasting liver injury, and the participant resumed dosing at a reduced level several weeks afterward under close monitoring.",
+         "tokens": 33,
+         "passage_tokens": 48
+        }
+       ]
+      },
+      {
+       "text": "A separate, unrelated adverse event on 4 August involved a mild injection-site reaction at Site Four that resolved without treatment within a single day; no dose adjustment was required. Staff sometimes conflate the two August events in casual conversation during site visits, though the safety database treats them as entirely distinct entries with separate causality assessments.",
+       "tokens": 65,
+       "passage_tokens": 80,
+       "sentences": [
+        {
+         "text": "A separate, unrelated adverse event on 4 August involved a mild injection-site reaction at Site Four that resolved without treatment within a single day; no dose adjustment was required.",
+         "tokens": 34,
+         "passage_tokens": 49
+        },
+        {
+         "text": "Staff sometimes conflate the two August events in casual conversation during site visits, though the safety database treats them as entirely distinct entries with separate causality assessments.",
+         "tokens": 31,
+         "passage_tokens": 46
+        }
+       ]
+      },
+      {
+       "text": "Any adverse event classified as serious must be documented in a formal report within twenty-four hours, reviewed by the data safety monitoring board, and forwarded to the sponsor's clinical operations group before the next scheduled board meeting. Reports that miss this window are flagged for a compliance review during the sponsor's next quarterly audit.",
+       "tokens": 61,
+       "passage_tokens": 76,
+       "sentences": [
+        {
+         "text": "Any adverse event classified as serious must be documented in a formal report within twenty-four hours, reviewed by the data safety monitoring board, and forwarded to the sponsor's clinical operations group before the next scheduled board meeting.",
+         "tokens": 42,
+         "passage_tokens": 57
+        },
+        {
+         "text": "Reports that miss this window are flagged for a compliance review during the sponsor's next quarterly audit.",
+         "tokens": 19,
+         "passage_tokens": 34
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "heading": {
+      "text": "## Site Investigators",
+      "tokens": 4
+     },
+     "prefix": "[Velmara Compound Phase II Trial Record — Site Investigators] ",
+     "paragraphs": [
+      {
+       "text": "Each site maintains its own delegation log naming every staff member authorized to perform trial-related procedures, countersigned by the site's principal investigator before any new team member can dose a participant. Delegation logs are reviewed during the sponsor's periodic monitoring visits alongside source documents and drug accountability records.",
+       "tokens": 55,
+       "passage_tokens": 69,
+       "sentences": [
+        {
+         "text": "Each site maintains its own delegation log naming every staff member authorized to perform trial-related procedures, countersigned by the site's principal investigator before any new team member can dose a participant.",
+         "tokens": 35,
+         "passage_tokens": 49
+        },
+        {
+         "text": "Delegation logs are reviewed during the sponsor's periodic monitoring visits alongside source documents and drug accountability records.",
+         "tokens": 20,
+         "passage_tokens": 34
+        }
+       ]
+      },
+      {
+       "text": "Site Twelve, the trial's coordinating hub, stores frozen biological samples on behalf of the other two sites and operates out of the Aldermoor Clinical Center. It ships consolidated sample batches to the sponsor's central laboratory on a fixed monthly schedule, and technicians there log every incoming sample against a chain-of-custody sheet so that provenance can be traced back to the originating site and visit. Screening visits for the coastal cohort are conducted at the Corrimal Bay Screening Annex, entered in the facilities register as STOP_10, with overflow appointments referred inland.",
+       "tokens": 109,
+       "passage_tokens": 123,
+       "sentences": [
+        {
+         "text": "Site Twelve, the trial's coordinating hub, stores frozen biological samples on behalf of the other two sites and operates out of the Aldermoor Clinical Center.",
+         "tokens": 31,
+         "passage_tokens": 45
+        },
+        {
+         "text": "It ships consolidated sample batches to the sponsor's central laboratory on a fixed monthly schedule, and technicians there log every incoming sample against a chain-of-custody sheet so that provenance can be traced back to the originating site and visit.",
+         "tokens": 46,
+         "passage_tokens": 60
+        },
+        {
+         "text": "Screening visits for the coastal cohort are conducted at the Corrimal Bay Screening Annex, entered in the facilities register as STOP_10, with overflow appointments referred inland.",
+         "tokens": 33,
+         "passage_tokens": 46
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "heading": {
+      "text": "## Protocol Amendments",
+      "tokens": 4
+     },
+     "prefix": "[Velmara Compound Phase II Trial Record — Protocol Amendments] ",
+     "paragraphs": [
+      {
+       "text": "The most recent protocol amendment raised the withdrawal threshold for alanine aminotransferase. Any participant whose alanine aminotransferase, a liver enzyme, exceeds 260 units per liter is withdrawn from dosing pending review by the safety board. The prior threshold, used before the amendment, had been set lower and was judged overly conservative after review of the pilot cohort's bloodwork.",
+       "tokens": 76,
+       "passage_tokens": 90,
+       "sentences": [
+        {
+         "text": "The most recent protocol amendment raised the withdrawal threshold for alanine aminotransferase.",
+         "tokens": 17,
+         "passage_tokens": 31
+        },
+        {
+         "text": "Any participant whose alanine aminotransferase, a liver enzyme, exceeds 260 units per liter is withdrawn from dosing pending review by the safety board.",
+         "tokens": 31,
+         "passage_tokens": 45
+        },
+        {
+         "text": "The prior threshold, used before the amendment, had been set lower and was judged overly conservative after review of the pilot cohort's bloodwork.",
+         "tokens": 28,
+         "passage_tokens": 42
+        }
+       ]
+      },
+      {
+       "text": "An earlier draft of the same amendment had proposed a threshold of 300 units per liter before the board scaled it back following further review of the pilot cohort's laboratory trends. The amendment also clarified rescue-medication rules for participants experiencing breakthrough joint pain during the titration period.",
+       "tokens": 54,
+       "passage_tokens": 68,
+       "sentences": [
+        {
+         "text": "An earlier draft of the same amendment had proposed a threshold of 300 units per liter before the board scaled it back following further review of the pilot cohort's laboratory trends.",
+         "tokens": 34,
+         "passage_tokens": 48
+        },
+        {
+         "text": "The amendment also clarified rescue-medication rules for participants experiencing breakthrough joint pain during the titration period.",
+         "tokens": 20,
+         "passage_tokens": 34
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "heading": {
+      "text": "## Interim Analyses",
+      "tokens": 4
+     },
+     "prefix": "[Velmara Compound Phase II Trial Record — Interim Analyses] ",
+     "paragraphs": [
+      {
+       "text": "Each infusion visit requires a post-dose observation period capped at 90 minutes before a participant may be discharged from the clinic. A separate, shorter observation window of sixty minutes applies to participants who have already completed at least three uneventful dosing visits without any reaction. Participants who develop symptoms during observation are held past the standard window until a site physician clears them for discharge.",
+       "tokens": 73,
+       "passage_tokens": 87,
+       "sentences": [
+        {
+         "text": "Each infusion visit requires a post-dose observation period capped at 90 minutes before a participant may be discharged from the clinic.",
+         "tokens": 24,
+         "passage_tokens": 38
+        },
+        {
+         "text": "A separate, shorter observation window of sixty minutes applies to participants who have already completed at least three uneventful dosing visits without any reaction.",
+         "tokens": 28,
+         "passage_tokens": 42
+        },
+        {
+         "text": "Participants who develop symptoms during observation are held past the standard window until a site physician clears them for discharge.",
+         "tokens": 21,
+         "passage_tokens": 35
+        }
+       ]
+      },
+      {
+       "text": "An interim efficacy analysis conducted midway through the maintenance phase reviewed pooled bloodwork from all three sites without unblinding individual treatment assignments, a standard safeguard meant to preserve the study's statistical integrity. The analysis was conducted by an independent statistician under a separate confidentiality agreement from the site investigators.",
+       "tokens": 57,
+       "passage_tokens": 71,
+       "sentences": [
+        {
+         "text": "An interim efficacy analysis conducted midway through the maintenance phase reviewed pooled bloodwork from all three sites without unblinding individual treatment assignments, a standard safeguard meant to preserve the study's statistical integrity.",
+         "tokens": 38,
+         "passage_tokens": 52
+        },
+        {
+         "text": "The analysis was conducted by an independent statistician under a separate confidentiality agreement from the site investigators.",
+         "tokens": 19,
+         "passage_tokens": 33
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "heading": {
+      "text": "## Data Management",
+      "tokens": 3
+     },
+     "prefix": "[Velmara Compound Phase II Trial Record — Data Management] ",
+     "paragraphs": [
+      {
+       "text": "The trial operates under the internal tracking code VLM-204-B, referenced on every case report form and every sample label generated across the three participating sites. An earlier internal code, VLM-204-A, was retired when the protocol amendment took effect, though a handful of legacy samples still bear the older label in the central laboratory's archive.",
+       "tokens": 69,
+       "passage_tokens": 82,
+       "sentences": [
+        {
+         "text": "The trial operates under the internal tracking code VLM-204-B, referenced on every case report form and every sample label generated across the three participating sites.",
+         "tokens": 31,
+         "passage_tokens": 44
+        },
+        {
+         "text": "An earlier internal code, VLM-204-A, was retired when the protocol amendment took effect, though a handful of legacy samples still bear the older label in the central laboratory's archive.",
+         "tokens": 38,
+         "passage_tokens": 51
+        }
+       ]
+      },
+      {
+       "text": "Every dosing visit is logged in the sponsor's electronic data capture system rather than on paper, a departure from the paper-ledger practice used during the earlier Phase I study. Site coordinators are required to complete data entry within forty-eight hours of a visit so that safety signals can be reviewed promptly by the monitoring board. Frozen specimens are consolidated at the Velmara Sample Repository, listed in the facilities register as STOP_12, where the backup freezers are also housed.",
+       "tokens": 94,
+       "passage_tokens": 107,
+       "sentences": [
+        {
+         "text": "Every dosing visit is logged in the sponsor's electronic data capture system rather than on paper, a departure from the paper-ledger practice used during the earlier Phase I study.",
+         "tokens": 34,
+         "passage_tokens": 47
+        },
+        {
+         "text": "Site coordinators are required to complete data entry within forty-eight hours of a visit so that safety signals can be reviewed promptly by the monitoring board.",
+         "tokens": 29,
+         "passage_tokens": 42
+        },
+        {
+         "text": "Frozen specimens are consolidated at the Velmara Sample Repository, listed in the facilities register as STOP_12, where the backup freezers are also housed.",
+         "tokens": 31,
+         "passage_tokens": 44
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "heading": {
+      "text": "## Follow-Up Protocol",
+      "tokens": 4
+     },
+     "prefix": "[Velmara Compound Phase II Trial Record — Follow-Up Protocol] ",
+     "paragraphs": [
+      {
+       "text": "Participants who complete the full maintenance phase are invited into a long-term extension study that continues dosing under the same 240 milligram regimen without further titration. Extension participants return for bloodwork on the same twenty-one day cadence established during the core maintenance phase, preserving continuity of the safety monitoring already in place.",
+       "tokens": 61,
+       "passage_tokens": 75,
+       "sentences": [
+        {
+         "text": "Participants who complete the full maintenance phase are invited into a long-term extension study that continues dosing under the same 240 milligram regimen without further titration.",
+         "tokens": 31,
+         "passage_tokens": 45
+        },
+        {
+         "text": "Extension participants return for bloodwork on the same twenty-one day cadence established during the core maintenance phase, preserving continuity of the safety monitoring already in place.",
+         "tokens": 30,
+         "passage_tokens": 44
+        }
+       ]
+      },
+      {
+       "text": "The sponsor's clinical operations group publishes a consolidated safety summary after each board meeting, circulated to all site investigators regardless of which site contributed the underlying data. This practice mirrors reporting habits used by other clinical operations groups in the region, including, according to one archived memo, a deep-sea research program that follows a similarly strict internal reporting window for its own equipment incidents.",
+       "tokens": 73,
+       "passage_tokens": 87,
+       "sentences": [
+        {
+         "text": "The sponsor's clinical operations group publishes a consolidated safety summary after each board meeting, circulated to all site investigators regardless of which site contributed the underlying data.",
+         "tokens": 30,
+         "passage_tokens": 44
+        },
+        {
+         "text": "This practice mirrors reporting habits used by other clinical operations groups in the region, including, according to one archived memo, a deep-sea research program that follows a similarly strict internal reporting window for its own equipment incidents.",
+         "tokens": 43,
+         "passage_tokens": 57
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "title": "Hollowlight Engine Technical Handbook",
+   "url": "https://tool-box-2591eaa24fa3.herokuapp.com/study-materials/4",
+   "header": {
+    "text": "From: Hollowlight Engine Technical Handbook",
+    "tokens": 7
+   },
+   "sections": [
+    {
+     "heading": {
+      "text": "## Overview",
+      "tokens": 2
+     },
+     "prefix": "[Hollowlight Engine Technical Handbook — Overview] ",
+     "paragraphs": [
+      {
+       "text": "The Hollowlight Engine is a fictional cross-platform game engine built by an internal tools group for its studio's own productions and a small number of licensing partners. It bundles a modular rendering pipeline, a deterministic physics solver, an embedded scripting virtual machine, and a proprietary asset pipeline used to prepare source art for shipping builds. The engine has shipped under a single continuous version line since its earliest internal release, with every milestone tracked in a changelog maintained by the tools team.",
+       "tokens": 93,
+       "passage_tokens": 103,
+       "sentences": [
+        {
+         "text": "The Hollowlight Engine is a fictional cross-platform game engine built by an internal tools group for its studio's own productions and a small number of licensing partners.",
+         "tokens": 31,
+         "passage_tokens": 41
+        },
+        {
+         "text": "It bundles a modular rendering pipeline, a deterministic physics solver, an embedded scripting virtual machine, and a proprietary asset pipeline used to prepare source art for shipping builds.",
+         "tokens": 32,
+         "passage_tokens": 42
+        },
+        {
+         "text": "The engine has shipped under a single continuous version line since its earliest internal release, with every milestone tracked in a changelog maintained by the tools team.",
+         "tokens": 30,
+         "passage_tokens": 40
+        }
+       ]
+      },
+      {
+       "text": "Planning documents occasionally reference partnerships with unrelated organizations, including a since-lapsed licensing arrangement with a regional transit authority that once evaluated the engine's simulation tools for a fare-modeling prototype years ago. No operational connection between the engine and that transit network remains today, and engineering staff are trained to clarify that Hollowlight's usage is confined entirely to game and simulation titles.",
+       "tokens": 72,
+       "passage_tokens": 82,
+       "sentences": [
+        {
+         "text": "Planning documents occasionally reference partnerships with unrelated organizations, including a since-lapsed licensing arrangement with a regional transit authority that once evaluated the engine's simulation tools for a fare-modeling prototype years ago.",
+         "tokens": 38,
+         "passage_tokens": 48
+        },
+        {
+         "text": "No operational connection between the engine and that transit network remains today, and engineering staff are trained to clarify that Hollowlight's usage is confined entirely to game and simulation titles.",
+         "tokens": 34,
+         "passage_tokens": 44
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "heading": {
+      "text": "## Leadership and Team Structure",
+      "tokens": 5
+     },
+     "prefix": "[Hollowlight Engine Technical Handbook — Leadership and Team Structure] ",
+     "paragraphs": [
+      {
+       "text": "Perrin Ashwicke has served as lead architect of the Hollowlight Engine since the project's founding, overseeing the rendering, physics, and tools teams from a single technical roadmap. Ashwicke reports quarterly milestones to the studio's executive producer and holds final authority over any decision to freeze a subsystem ahead of a shipping title's certification pass. A rotating engineering manager assists with day-to-day scheduling but does not hold independent authority over subsystem freezes.",
+       "tokens": 88,
+       "passage_tokens": 100,
+       "sentences": [
+        {
+         "text": "Perrin Ashwicke has served as lead architect of the Hollowlight Engine since the project's founding, overseeing the rendering, physics, and tools teams from a single technical roadmap.",
+         "tokens": 36,
+         "passage_tokens": 48
+        },
+        {
+         "text": "Ashwicke reports quarterly milestones to the studio's executive producer and holds final authority over any decision to freeze a subsystem ahead of a shipping title's certification pass.",
+         "tokens": 32,
+         "passage_tokens": 45
+        },
+        {
+         "text": "A rotating engineering manager assists with day-to-day scheduling but does not hold independent authority over subsystem freezes.",
+         "tokens": 20,
+         "passage_tokens": 33
+        }
+       ]
+      },
+      {
+       "text": "A former contributor to the engine's earliest prototype was credited in an old internal wiki as Perrin Ashworth due to a transcription error, and that name has no ongoing role in the project despite its similarity to the current lead architect's.",
+       "tokens": 47,
+       "passage_tokens": 60,
+       "sentences": [
+        {
+         "text": "A former contributor to the engine's earliest prototype was credited in an old internal wiki as Perrin Ashworth due to a transcription error, and that name has no ongoing role in the project despite its similarity to the current lead architect's.",
+         "tokens": 47,
+         "passage_tokens": 60
+        }
+       ]
+      },
+      {
+       "text": "The core engine group maintains thirty-two engineers working simultaneously across its four teams: Rendering, Physics, Tools, and Netcode. During a title's final certification crunch, temporary contractor support can swell the group to just under fifty individuals before it returns to its usual baseline once certification passes. Historical staffing records show the core group has never fallen below eighteen engineers, the minimum headcount studio leadership considers viable for sustaining the engine's release cadence.",
+       "tokens": 86,
+       "passage_tokens": 99,
+       "sentences": [
+        {
+         "text": "The core engine group maintains thirty-two engineers working simultaneously across its four teams: Rendering, Physics, Tools, and Netcode.",
+         "tokens": 25,
+         "passage_tokens": 38
+        },
+        {
+         "text": "During a title's final certification crunch, temporary contractor support can swell the group to just under fifty individuals before it returns to its usual baseline once certification passes.",
+         "tokens": 31,
+         "passage_tokens": 44
+        },
+        {
+         "text": "Historical staffing records show the core group has never fallen below eighteen engineers, the minimum headcount studio leadership considers viable for sustaining the engine's release cadence.",
+         "tokens": 30,
+         "passage_tokens": 43
+        }
+       ]
+      },
+      {
+       "text": "Each of the four teams elects its own technical lead, who reports to the rotating engineering manager rather than directly to Ashwicke, keeping the lead architect's attention focused on roadmap-level decisions rather than day-to-day team scheduling.",
+       "tokens": 46,
+       "passage_tokens": 59,
+       "sentences": [
+        {
+         "text": "Each of the four teams elects its own technical lead, who reports to the rotating engineering manager rather than directly to Ashwicke, keeping the lead architect's attention focused on roadmap-level decisions rather than day-to-day team scheduling.",
+         "tokens": 46,
+         "passage_tokens": 59
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "heading": {
+      "text": "## Rendering Subsystem",
+      "tokens": 4
+     },
+     "prefix": "[Hollowlight Engine Technical Handbook — Rendering Subsystem] ",
+     "paragraphs": [
+      {
+       "text": "The Duskcast Renderer handles real-time lighting, shadowing, and post-processing for every shipping title built on Hollowlight. The renderer's reworked deferred lighting path is internally called the Emberline path. The Emberline lighting path first shipped in Release 14 of the Hollowlight Engine.",
+       "tokens": 58,
+       "passage_tokens": 70,
+       "sentences": [
+        {
+         "text": "The Duskcast Renderer handles real-time lighting, shadowing, and post-processing for every shipping title built on Hollowlight.",
+         "tokens": 25,
+         "passage_tokens": 37
+        },
+        {
+         "text": "The renderer's reworked deferred lighting path is internally called the Emberline path.",
+         "tokens": 16,
+         "passage_tokens": 28
+        },
+        {
+         "text": "The Emberline lighting path first shipped in Release 14 of the Hollowlight Engine.",
+         "tokens": 17,
+         "passage_tokens": 29
+        }
+       ]
+      },
+      {
+       "text": "Release 13, the version immediately before it, still shipped with the older forward-lit pipeline as the only lighting option available. Release 15 followed shortly afterward with stability fixes for the new lighting path but introduced no rendering features of its own. A planning document for a future Release 16 proposes a ray-traced reflection pass, though that work remains unscheduled as of this handbook's writing.",
+       "tokens": 78,
+       "passage_tokens": 90,
+       "sentences": [
+        {
+         "text": "Release 13, the version immediately before it, still shipped with the older forward-lit pipeline as the only lighting option available.",
+         "tokens": 25,
+         "passage_tokens": 37
+        },
+        {
+         "text": "Release 15 followed shortly afterward with stability fixes for the new lighting path but introduced no rendering features of its own.",
+         "tokens": 23,
+         "passage_tokens": 35
+        },
+        {
+         "text": "A planning document for a future Release 16 proposes a ray-traced reflection pass, though that work remains unscheduled as of this handbook's writing.",
+         "tokens": 30,
+         "passage_tokens": 42
+        }
+       ]
+      },
+      {
+       "text": "The Duskcast Renderer enforces a 512 megabytes per-frame texture memory ceiling on the baseline console target. The high-end desktop target instead permits a more generous 768 megabytes of per-frame texture memory. The mobile target is capped at a stricter 256 megabytes of per-frame texture memory to preserve battery life on handheld hardware. Exceeding the baseline console allowance during a certification pass triggers an automatic build failure rather than a warning, a policy adopted after a shipped title once exhausted console memory mid-mission. Performance capture sessions are booked into the Hollowlight Capture Stage, which the facilities sheet identifies as STOP_13, booked a fortnight ahead during production crunch.",
+       "tokens": 135,
+       "passage_tokens": 147,
+       "sentences": [
+        {
+         "text": "The Duskcast Renderer enforces a 512 megabytes per-frame texture memory ceiling on the baseline console target.",
+         "tokens": 23,
+         "passage_tokens": 35
+        },
+        {
+         "text": "The high-end desktop target instead permits a more generous 768 megabytes of per-frame texture memory.",
+         "tokens": 20,
+         "passage_tokens": 32
+        },
+        {
+         "text": "The mobile target is capped at a stricter 256 megabytes of per-frame texture memory to preserve battery life on handheld hardware.",
+         "tokens": 26,
+         "passage_tokens": 38
+        },
+        {
+         "text": "Exceeding the baseline console allowance during a certification pass triggers an automatic build failure rather than a warning, a policy adopted after a shipped title once exhausted console memory mid-mission.",
+         "tokens": 36,
+         "passage_tokens": 48
+        },
+        {
+         "text": "Performance capture sessions are booked into the Hollowlight Capture Stage, which the facilities sheet identifies as STOP_13, booked a fortnight ahead during production crunch.",
+         "tokens": 30,
+         "passage_tokens": 42
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "heading": {
+      "text": "## Physics Subsystem",
+      "tokens": 4
+     },
+     "prefix": "[Hollowlight Engine Technical Handbook — Physics Subsystem] ",
+     "paragraphs": [
+      {
+       "text": "Gameplay simulation on Hollowlight relies on the Ferrolight Solver for deterministic rigid-body physics across every supported platform. An older component, once called the Ferroglass system, handled rigid-body physics before this replacement arrived, and is now kept only for regression comparisons against archived replay data. Confusing the two component names in an internal bug report is considered a minor but recurring error among newer physics engineers.",
+       "tokens": 78,
+       "passage_tokens": 90,
+       "sentences": [
+        {
+         "text": "Gameplay simulation on Hollowlight relies on the Ferrolight Solver for deterministic rigid-body physics across every supported platform.",
+         "tokens": 22,
+         "passage_tokens": 34
+        },
+        {
+         "text": "An older component, once called the Ferroglass system, handled rigid-body physics before this replacement arrived, and is now kept only for regression comparisons against archived replay data.",
+         "tokens": 33,
+         "passage_tokens": 45
+        },
+        {
+         "text": "Confusing the two component names in an internal bug report is considered a minor but recurring error among newer physics engineers.",
+         "tokens": 23,
+         "passage_tokens": 35
+        }
+       ]
+      },
+      {
+       "text": "The physics team tunes collision response separately from the solver's core integration step, letting designers adjust bounce and friction behavior per title without touching the underlying simulation math. Replay determinism is validated nightly against a fixed suite of recorded matches to catch any unintended drift introduced by recent changes. Physics regression runs are executed on the Determinism Test Rig, housed in the bay the facilities sheet identifies as STOP_14, on hardware kept at a fixed driver revision.",
+       "tokens": 89,
+       "passage_tokens": 101,
+       "sentences": [
+        {
+         "text": "The physics team tunes collision response separately from the solver's core integration step, letting designers adjust bounce and friction behavior per title without touching the underlying simulation math.",
+         "tokens": 31,
+         "passage_tokens": 43
+        },
+        {
+         "text": "Replay determinism is validated nightly against a fixed suite of recorded matches to catch any unintended drift introduced by recent changes.",
+         "tokens": 23,
+         "passage_tokens": 35
+        },
+        {
+         "text": "Physics regression runs are executed on the Determinism Test Rig, housed in the bay the facilities sheet identifies as STOP_14, on hardware kept at a fixed driver revision.",
+         "tokens": 35,
+         "passage_tokens": 47
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "heading": {
+      "text": "## Audio and Scripting",
+      "tokens": 5
+     },
+     "prefix": "[Hollowlight Engine Technical Handbook — Audio and Scripting] ",
+     "paragraphs": [
+      {
+       "text": "Runtime audio mixing on Hollowlight is handled by the Cindertide Audio subsystem, which supports dynamic music layering driven by gameplay state without requiring a dedicated audio programmer on every title. Gameplay logic itself is authored against the Larkspur VM, an embedded scripting virtual machine that sandboxes title-specific code away from the core engine so a scripting fault cannot crash the renderer or physics solver.",
+       "tokens": 76,
+       "passage_tokens": 89,
+       "sentences": [
+        {
+         "text": "Runtime audio mixing on Hollowlight is handled by the Cindertide Audio subsystem, which supports dynamic music layering driven by gameplay state without requiring a dedicated audio programmer on every title.",
+         "tokens": 36,
+         "passage_tokens": 49
+        },
+        {
+         "text": "Gameplay logic itself is authored against the Larkspur VM, an embedded scripting virtual machine that sandboxes title-specific code away from the core engine so a scripting fault cannot crash the renderer or physics solver.",
+         "tokens": 40,
+         "passage_tokens": 53
+        }
+       ]
+      },
+      {
+       "text": "Networked titles route traffic through the Tallowmere Netcode layer, which handles client prediction and server reconciliation independently of the Larkspur VM's gameplay scripts, so a scripting bug in one title cannot desynchronize a networked match. Licensed source recordings are held in the Hollowlight Audio Vault, the room the facilities sheet identifies as STOP_16, which requires a signed loan slip to enter.",
+       "tokens": 79,
+       "passage_tokens": 92,
+       "sentences": [
+        {
+         "text": "Networked titles route traffic through the Tallowmere Netcode layer, which handles client prediction and server reconciliation independently of the Larkspur VM's gameplay scripts, so a scripting bug in one title cannot desynchronize a networked match.",
+         "tokens": 47,
+         "passage_tokens": 60
+        },
+        {
+         "text": "Licensed source recordings are held in the Hollowlight Audio Vault, the room the facilities sheet identifies as STOP_16, which requires a signed loan slip to enter.",
+         "tokens": 32,
+         "passage_tokens": 45
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "heading": {
+      "text": "## Build Pipeline",
+      "tokens": 3
+     },
+     "prefix": "[Hollowlight Engine Technical Handbook — Build Pipeline] ",
+     "paragraphs": [
+      {
+       "text": "Source art bound for shipping builds is prepared by the Mossgate Pipeline, which converts raw assets into the engine's proprietary runtime formats and validates them against per-platform budgets before a certification build. The Ashfall Build System orchestrates the compilation and packaging steps once the Mossgate Pipeline finishes validating an asset batch, and the two systems are frequently confused by newer tools engineers despite handling entirely separate stages of production.",
+       "tokens": 79,
+       "passage_tokens": 90,
+       "sentences": [
+        {
+         "text": "Source art bound for shipping builds is prepared by the Mossgate Pipeline, which converts raw assets into the engine's proprietary runtime formats and validates them against per-platform budgets before a certification build.",
+         "tokens": 37,
+         "passage_tokens": 48
+        },
+        {
+         "text": "The Ashfall Build System orchestrates the compilation and packaging steps once the Mossgate Pipeline finishes validating an asset batch, and the two systems are frequently confused by newer tools engineers despite handling entirely separate stages of production.",
+         "tokens": 42,
+         "passage_tokens": 53
+        }
+       ]
+      },
+      {
+       "text": "The Hollowlight automated regression suite executes every six hours during active production milestones. During ordinary development weeks between milestones, that same regression suite instead runs on a much looser every-twelve-hours schedule. The tighter milestone-period cadence is meant to catch regressions before they accumulate ahead of a certification submission. Overnight bakes are dispatched to the Asset Pipeline Farm, whose machine room is recorded on the facilities sheet as STOP_15, cooled separately from the rest of the floor.",
+       "tokens": 93,
+       "passage_tokens": 104,
+       "sentences": [
+        {
+         "text": "The Hollowlight automated regression suite executes every six hours during active production milestones.",
+         "tokens": 15,
+         "passage_tokens": 26
+        },
+        {
+         "text": "During ordinary development weeks between milestones, that same regression suite instead runs on a much looser every-twelve-hours schedule.",
+         "tokens": 24,
+         "passage_tokens": 35
+        },
+        {
+         "text": "The tighter milestone-period cadence is meant to catch regressions before they accumulate ahead of a certification submission.",
+         "tokens": 20,
+         "passage_tokens": 31
+        },
+        {
+         "text": "Overnight bakes are dispatched to the Asset Pipeline Farm, whose machine room is recorded on the facilities sheet as STOP_15, cooled separately from the rest of the floor.",
+         "tokens": 35,
+         "passage_tokens": 45
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "heading": {
+      "text": "## Asset Budgets",
+      "tokens": 4
+     },
+     "prefix": "[Hollowlight Engine Technical Handbook — Asset Budgets] ",
+     "paragraphs": [
+      {
+       "text": "Character rigs authored for Hollowlight shipping titles are capped at a maximum of ninety bones per skeleton, a limit set jointly by the animation and rendering teams to keep skinning costs predictable across the full range of supported hardware. Environment artists instead work against a separate budget of forty thousand triangles per streaming cell, a figure tracked automatically by the Mossgate Pipeline during asset validation.",
+       "tokens": 72,
+       "passage_tokens": 84,
+       "sentences": [
+        {
+         "text": "Character rigs authored for Hollowlight shipping titles are capped at a maximum of ninety bones per skeleton, a limit set jointly by the animation and rendering teams to keep skinning costs predictable across the full range of supported hardware.",
+         "tokens": 43,
+         "passage_tokens": 55
+        },
+        {
+         "text": "Environment artists instead work against a separate budget of forty thousand triangles per streaming cell, a figure tracked automatically by the Mossgate Pipeline during asset validation.",
+         "tokens": 29,
+         "passage_tokens": 41
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "heading": {
+      "text": "## Changelog",
+      "tokens": 3
+     },
+     "prefix": "[Hollowlight Engine Technical Handbook — Changelog] ",
+     "paragraphs": [
+      {
+       "text": "A minor cosmetic issue in the heads-up display was logged and patched on 2 September, affecting only the health indicator's fade timing under certain frame-rate conditions. An animation blending regression was fixed on 8 September, after characters were observed sliding between locomotion states. Engineers occasionally conflate the two September changelog fixes in casual conversation, though the changelog treats them as entirely distinct entries with separate root-cause notes.",
+       "tokens": 84,
+       "passage_tokens": 95,
+       "sentences": [
+        {
+         "text": "A minor cosmetic issue in the heads-up display was logged and patched on 2 September, affecting only the health indicator's fade timing under certain frame-rate conditions.",
+         "tokens": 32,
+         "passage_tokens": 43
+        },
+        {
+         "text": "An animation blending regression was fixed on 8 September, after characters were observed sliding between locomotion states.",
+         "tokens": 21,
+         "passage_tokens": 32
+        },
+        {
+         "text": "Engineers occasionally conflate the two September changelog fixes in casual conversation, though the changelog treats them as entirely distinct entries with separate root-cause notes.",
+         "tokens": 32,
+         "passage_tokens": 42
+        }
+       ]
+      },
+      {
+       "text": "Any regression that blocks a certification submission must be documented in a formal changelog entry within twelve hours, reviewed by the relevant team lead, and forwarded to Ashwicke before the next scheduled build review. Entries that miss this window are flagged for follow-up during the lead architect's next quarterly roadmap review.",
+       "tokens": 60,
+       "passage_tokens": 71,
+       "sentences": [
+        {
+         "text": "Any regression that blocks a certification submission must be documented in a formal changelog entry within twelve hours, reviewed by the relevant team lead, and forwarded to Ashwicke before the next scheduled build review.",
+         "tokens": 40,
+         "passage_tokens": 51
+        },
+        {
+         "text": "Entries that miss this window are flagged for follow-up during the lead architect's next quarterly roadmap review.",
+         "tokens": 20,
+         "passage_tokens": 31
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "heading": {
+      "text": "## Profiling Thresholds",
+      "tokens": 5
+     },
+     "prefix": "[Hollowlight Engine Technical Handbook — Profiling Thresholds] ",
+     "paragraphs": [
+      {
+       "text": "The render thread on the baseline console target carries a maximum budget of 11 milliseconds per frame before the Hollowlight profiler flags the frame as a spike requiring investigation. A separate, more lenient render-thread budget of 14 milliseconds applies to the desktop target, reflecting its generally faster hardware. Exceeding the console render-thread budget by even a fraction of a millisecond during a certification pass is treated as a blocking issue rather than a cosmetic warning.",
+       "tokens": 89,
+       "passage_tokens": 102,
+       "sentences": [
+        {
+         "text": "The render thread on the baseline console target carries a maximum budget of 11 milliseconds per frame before the Hollowlight profiler flags the frame as a spike requiring investigation.",
+         "tokens": 32,
+         "passage_tokens": 45
+        },
+        {
+         "text": "A separate, more lenient render-thread budget of 14 milliseconds applies to the desktop target, reflecting its generally faster hardware.",
+         "tokens": 25,
+         "passage_tokens": 38
+        },
+        {
+         "text": "Exceeding the console render-thread budget by even a fraction of a millisecond during a certification pass is treated as a blocking issue rather than a cosmetic warning.",
+         "tokens": 32,
+         "passage_tokens": 45
+        }
+       ]
+      },
+      {
+       "text": "A Hollowlight texture-streaming pass on the baseline console target is considered stalled once it runs longer than 9 seconds to complete. That stall threshold was set after players reported visible pop-in during fast traversal sequences on the console target. A separate, shorter warning threshold of 3 seconds surfaces a non-blocking profiler alert well before the stall threshold is reached, giving engineers advance notice of degrading streaming performance.",
+       "tokens": 80,
+       "passage_tokens": 93,
+       "sentences": [
+        {
+         "text": "A Hollowlight texture-streaming pass on the baseline console target is considered stalled once it runs longer than 9 seconds to complete.",
+         "tokens": 26,
+         "passage_tokens": 39
+        },
+        {
+         "text": "That stall threshold was set after players reported visible pop-in during fast traversal sequences on the console target.",
+         "tokens": 20,
+         "passage_tokens": 33
+        },
+        {
+         "text": "A separate, shorter warning threshold of 3 seconds surfaces a non-blocking profiler alert well before the stall threshold is reached, giving engineers advance notice of degrading streaming performance.",
+         "tokens": 34,
+         "passage_tokens": 47
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "heading": {
+      "text": "## Release Identifiers",
+      "tokens": 4
+     },
+     "prefix": "[Hollowlight Engine Technical Handbook — Release Identifiers] ",
+     "paragraphs": [
+      {
+       "text": "The current stable Hollowlight release stream carries the internal build tag Driftglass Nine. This tag is referenced on every certification report and every archived build log across all supported platforms. A secondary, rarely used tag, Driftglass Two, is reserved strictly for emergency hotfix builds when the primary stable stream is frozen ahead of a certification deadline. Engineers are briefed to expect only the primary tag during routine build reviews, and confusion between the two tags during a certification dry run last year prompted a refresher bulletin reminding staff of the distinction.",
+       "tokens": 105,
+       "passage_tokens": 117,
+       "sentences": [
+        {
+         "text": "The current stable Hollowlight release stream carries the internal build tag Driftglass Nine.",
+         "tokens": 16,
+         "passage_tokens": 28
+        },
+        {
+         "text": "This tag is referenced on every certification report and every archived build log across all supported platforms.",
+         "tokens": 18,
+         "passage_tokens": 30
+        },
+        {
+         "text": "A secondary, rarely used tag, Driftglass Two, is reserved strictly for emergency hotfix builds when the primary stable stream is frozen ahead of a certification deadline.",
+         "tokens": 32,
+         "passage_tokens": 44
+        },
+        {
+         "text": "Engineers are briefed to expect only the primary tag during routine build reviews, and confusion between the two tags during a certification dry run last year prompted a refresher bulletin reminding staff of the distinction.",
+         "tokens": 40,
+         "passage_tokens": 51
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "heading": {
+      "text": "## Documentation Maintenance",
+      "tokens": 3
+     },
+     "prefix": "[Hollowlight Engine Technical Handbook — Documentation Maintenance] ",
+     "paragraphs": [
+      {
+       "text": "This handbook is maintained by the tools team alongside the engine's changelog and is revised whenever a subsystem owner reports a change to team structure, budgets, or thresholds. Older revisions remain archived internally for reference but are not distributed outside the studio.",
+       "tokens": 48,
+       "passage_tokens": 59,
+       "sentences": [
+        {
+         "text": "This handbook is maintained by the tools team alongside the engine's changelog and is revised whenever a subsystem owner reports a change to team structure, budgets, or thresholds.",
+         "tokens": 33,
+         "passage_tokens": 44
+        },
+        {
+         "text": "Older revisions remain archived internally for reference but are not distributed outside the studio.",
+         "tokens": 15,
+         "passage_tokens": 26
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "title": "Thornmere Growers Cooperative Yearbook",
+   "url": "https://tool-box-2591eaa24fa3.herokuapp.com/study-materials/5",
+   "header": {
+    "text": "From: Thornmere Growers Cooperative Yearbook",
+    "tokens": 9
+   },
+   "sections": [
+    {
+     "heading": {
+      "text": "## Overview",
+      "tokens": 2
+     },
+     "prefix": "[Thornmere Growers Cooperative Yearbook — Overview] ",
+     "paragraphs": [
+      {
+       "text": "The Thornmere Growers Cooperative is a member-owned agricultural collective spanning four adjoining parishes, coordinating shared harvesting equipment, refrigerated storage, and produce grading on behalf of its member households. The cooperative was chartered by a small group of smallholders who wished to pool the cost of machinery and cold storage that no single holding could justify alone, and its shared facilities have expanded gradually in the years since. Each parish elects a parish representative who sits on the cooperative's governing board alongside the chair and the equipment officer.",
+       "tokens": 102,
+       "passage_tokens": 114,
+       "sentences": [
+        {
+         "text": "The Thornmere Growers Cooperative is a member-owned agricultural collective spanning four adjoining parishes, coordinating shared harvesting equipment, refrigerated storage, and produce grading on behalf of its member households.",
+         "tokens": 36,
+         "passage_tokens": 48
+        },
+        {
+         "text": "The cooperative was chartered by a small group of smallholders who wished to pool the cost of machinery and cold storage that no single holding could justify alone, and its shared facilities have expanded gradually in the years since.",
+         "tokens": 43,
+         "passage_tokens": 55
+        },
+        {
+         "text": "Each parish elects a parish representative who sits on the cooperative's governing board alongside the chair and the equipment officer.",
+         "tokens": 23,
+         "passage_tokens": 35
+        }
+       ]
+      },
+      {
+       "text": "Planning documents occasionally reference partnerships with unrelated ventures, including a since-lapsed arrangement with a regional pharmaceutical sponsor that once rented spare cold-storage capacity during a logistics shortfall affecting its own frozen sample shipments. No operational connection between the cooperative and that sponsor remains today, and cooperative staff are trained to clarify that its storage bays are reserved strictly for member produce.",
+       "tokens": 69,
+       "passage_tokens": 81,
+       "sentences": [
+        {
+         "text": "Planning documents occasionally reference partnerships with unrelated ventures, including a since-lapsed arrangement with a regional pharmaceutical sponsor that once rented spare cold-storage capacity during a logistics shortfall affecting its own frozen sample shipments.",
+         "tokens": 39,
+         "passage_tokens": 51
+        },
+        {
+         "text": "No operational connection between the cooperative and that sponsor remains today, and cooperative staff are trained to clarify that its storage bays are reserved strictly for member produce.",
+         "tokens": 30,
+         "passage_tokens": 42
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "heading": {
+      "text": "## Leadership and Governance",
+      "tokens": 4
+     },
+     "prefix": "[Thornmere Growers Cooperative Yearbook — Leadership and Governance] ",
+     "paragraphs": [
+      {
+       "text": "Cordelia Vance has presided over the cooperative's governing board as its elected chair since the founding charter was first signed by the original smallholders. Vance sets the agenda for every quarterly board meeting and holds final authority over any decision to suspend a member's access to shared equipment for unpaid dues. A former board clerk mistakenly recorded the chair's surname as Vane in an early handwritten ledger, a spelling error that has no bearing on any current record.",
+       "tokens": 91,
+       "passage_tokens": 105,
+       "sentences": [
+        {
+         "text": "Cordelia Vance has presided over the cooperative's governing board as its elected chair since the founding charter was first signed by the original smallholders.",
+         "tokens": 30,
+         "passage_tokens": 44
+        },
+        {
+         "text": "Vance sets the agenda for every quarterly board meeting and holds final authority over any decision to suspend a member's access to shared equipment for unpaid dues.",
+         "tokens": 30,
+         "passage_tokens": 44
+        },
+        {
+         "text": "A former board clerk mistakenly recorded the chair's surname as Vane in an early handwritten ledger, a spelling error that has no bearing on any current record.",
+         "tokens": 31,
+         "passage_tokens": 45
+        }
+       ]
+      },
+      {
+       "text": "A rotating deputy administrator assists the chair with correspondence and dues collection but does not hold independent authority over rota disputes between members, which must instead be referred to the full board for resolution. A separate advisory panel, made up of non-voting associate members, offers feedback on proposed rota changes but holds no formal veto over decisions the governing board has already reached.",
+       "tokens": 70,
+       "passage_tokens": 84,
+       "sentences": [
+        {
+         "text": "A rotating deputy administrator assists the chair with correspondence and dues collection but does not hold independent authority over rota disputes between members, which must instead be referred to the full board for resolution.",
+         "tokens": 36,
+         "passage_tokens": 50
+        },
+        {
+         "text": "A separate advisory panel, made up of non-voting associate members, offers feedback on proposed rota changes but holds no formal veto over decisions the governing board has already reached.",
+         "tokens": 34,
+         "passage_tokens": 48
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "heading": {
+      "text": "## Membership Roster",
+      "tokens": 4
+     },
+     "prefix": "[Thornmere Growers Cooperative Yearbook — Membership Roster] ",
+     "paragraphs": [
+      {
+       "text": "The cooperative currently counts fifty-four member households holding active growing shares, spread unevenly across its four parish blocs. During the busiest weeks of the autumn harvest, when seasonal casual labor is brought in to help with picking, the number of people working under the cooperative's banner can swell well beyond that figure before returning to its usual baseline once the harvest concludes. Membership records show the roll of shareholding households has never dropped below thirty, the floor the founding charter requires before the cooperative would need to dissolve and redistribute its shared assets.",
+       "tokens": 104,
+       "passage_tokens": 118,
+       "sentences": [
+        {
+         "text": "The cooperative currently counts fifty-four member households holding active growing shares, spread unevenly across its four parish blocs.",
+         "tokens": 22,
+         "passage_tokens": 36
+        },
+        {
+         "text": "During the busiest weeks of the autumn harvest, when seasonal casual labor is brought in to help with picking, the number of people working under the cooperative's banner can swell well beyond that figure before returning to its usual baseline once the harvest concludes.",
+         "tokens": 48,
+         "passage_tokens": 62
+        },
+        {
+         "text": "Membership records show the roll of shareholding households has never dropped below thirty, the floor the founding charter requires before the cooperative would need to dissolve and redistribute its shared assets.",
+         "tokens": 34,
+         "passage_tokens": 48
+        }
+       ]
+      },
+      {
+       "text": "Members are grouped into four parish blocs: the Cross Furlong bloc, the Hazelbourne bloc, the Sedge Vale bloc, and the Old Kiln bloc, each electing its own parish representative who reports to the deputy administrator rather than directly to the chair. New members undergo a mandatory one-season probation before gaining full voting rights on rota and grading matters, and veteran members mentor incoming smallholders through their first harvest under a formal pairing log kept in the deputy's office.",
+       "tokens": 95,
+       "passage_tokens": 109,
+       "sentences": [
+        {
+         "text": "Members are grouped into four parish blocs: the Cross Furlong bloc, the Hazelbourne bloc, the Sedge Vale bloc, and the Old Kiln bloc, each electing its own parish representative who reports to the deputy administrator rather than directly to the chair.",
+         "tokens": 53,
+         "passage_tokens": 67
+        },
+        {
+         "text": "New members undergo a mandatory one-season probation before gaining full voting rights on rota and grading matters, and veteran members mentor incoming smallholders through their first harvest under a formal pairing log kept in the deputy's office.",
+         "tokens": 42,
+         "passage_tokens": 56
+        }
+       ]
+      },
+      {
+       "text": "Josiah Pell, one of the cooperative's founding smallholders, farms forty-two acres at the Cross Furlong holding under the cooperative's original charter terms. A neighboring smallholder with a similarly spelled name, Josiah Pelling, joined the cooperative only two seasons ago and farms an unrelated plot in the Hazelbourne bloc, and the two names are frequently confused on dues correspondence by newer office volunteers.",
+       "tokens": 80,
+       "passage_tokens": 94,
+       "sentences": [
+        {
+         "text": "Josiah Pell, one of the cooperative's founding smallholders, farms forty-two acres at the Cross Furlong holding under the cooperative's original charter terms.",
+         "tokens": 32,
+         "passage_tokens": 46
+        },
+        {
+         "text": "A neighboring smallholder with a similarly spelled name, Josiah Pelling, joined the cooperative only two seasons ago and farms an unrelated plot in the Hazelbourne bloc, and the two names are frequently confused on dues correspondence by newer office volunteers.",
+         "tokens": 48,
+         "passage_tokens": 62
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "heading": {
+      "text": "## Equipment Sharing Rota",
+      "tokens": 5
+     },
+     "prefix": "[Thornmere Growers Cooperative Yearbook — Equipment Sharing Rota] ",
+     "paragraphs": [
+      {
+       "text": "The cooperative maintains a shared fleet of harvesting and drying machinery, coordinated by the equipment officer according to a rota published at the start of each season. The Bellwether Drier is reserved exclusively for late-season root crops under the current equipment rota, keeping it separate from the machinery used earlier in the year for soft fruit. An older unit, informally called the Bellwether Two by members despite carrying no official rota status, sits in reserve for emergencies and has not been started in several seasons.",
+       "tokens": 99,
+       "passage_tokens": 114,
+       "sentences": [
+        {
+         "text": "The cooperative maintains a shared fleet of harvesting and drying machinery, coordinated by the equipment officer according to a rota published at the start of each season.",
+         "tokens": 29,
+         "passage_tokens": 44
+        },
+        {
+         "text": "The Bellwether Drier is reserved exclusively for late-season root crops under the current equipment rota, keeping it separate from the machinery used earlier in the year for soft fruit.",
+         "tokens": 35,
+         "passage_tokens": 50
+        },
+        {
+         "text": "An older unit, informally called the Bellwether Two by members despite carrying no official rota status, sits in reserve for emergencies and has not been started in several seasons.",
+         "tokens": 35,
+         "passage_tokens": 50
+        }
+       ]
+      },
+      {
+       "text": "The shared potato harvester rotates between member holdings every eleven days during peak harvest weeks, according to the schedule the equipment officer circulates to every parish representative. Maintenance technicians log every servicing visit in a bound ledger kept in the equipment shed rather than a digital system, a holdover practice from the cooperative's earliest seasons that has resisted several proposals to digitize it. Spare belts and blades for the shared fleet are stored at the Old Kiln shed rather than at Cross Furlong, both to conserve space at the busier holding and to keep sharp spares away from casual foot traffic during harvest weeks. Shared harvesting equipment is signed out from the Cooperative Machinery Yard, recorded in the property schedule as STOP_19, against a signed rota slip.",
+       "tokens": 148,
+       "passage_tokens": 163,
+       "sentences": [
+        {
+         "text": "The shared potato harvester rotates between member holdings every eleven days during peak harvest weeks, according to the schedule the equipment officer circulates to every parish representative.",
+         "tokens": 31,
+         "passage_tokens": 46
+        },
+        {
+         "text": "Maintenance technicians log every servicing visit in a bound ledger kept in the equipment shed rather than a digital system, a holdover practice from the cooperative's earliest seasons that has resisted several proposals to digitize it.",
+         "tokens": 41,
+         "passage_tokens": 56
+        },
+        {
+         "text": "Spare belts and blades for the shared fleet are stored at the Old Kiln shed rather than at Cross Furlong, both to conserve space at the busier holding and to keep sharp spares away from casual foot traffic during harvest weeks.",
+         "tokens": 49,
+         "passage_tokens": 63
+        },
+        {
+         "text": "Shared harvesting equipment is signed out from the Cooperative Machinery Yard, recorded in the property schedule as STOP_19, against a signed rota slip.",
+         "tokens": 28,
+         "passage_tokens": 43
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "heading": {
+      "text": "## Grading Standards",
+      "tokens": 4
+     },
+     "prefix": "[Thornmere Growers Cooperative Yearbook — Grading Standards] ",
+     "paragraphs": [
+      {
+       "text": "Any grain delivery testing above eighteen percent moisture is automatically downgraded a full grade under the cooperative's grading standards. This threshold was set by the grading committee after a season in which several deliveries spoiled in storage despite passing a casual visual check. Produce testing within the moisture tolerance is instead graded on a separate scale according to size, color, and blemish count, assessed by hand by a trained grader stationed at the packing shed.",
+       "tokens": 85,
+       "passage_tokens": 99,
+       "sentences": [
+        {
+         "text": "Any grain delivery testing above eighteen percent moisture is automatically downgraded a full grade under the cooperative's grading standards.",
+         "tokens": 23,
+         "passage_tokens": 37
+        },
+        {
+         "text": "This threshold was set by the grading committee after a season in which several deliveries spoiled in storage despite passing a casual visual check.",
+         "tokens": 25,
+         "passage_tokens": 39
+        },
+        {
+         "text": "Produce testing within the moisture tolerance is instead graded on a separate scale according to size, color, and blemish count, assessed by hand by a trained grader stationed at the packing shed.",
+         "tokens": 37,
+         "passage_tokens": 51
+        }
+       ]
+      },
+      {
+       "text": "Graders rotate between the packing shed's two inspection stations on a weekly basis so that no single grader's judgment dominates an entire season's output. Disputed gradings can be escalated to a second grader for a binding re-check, though the original grader's notes remain attached to the delivery record regardless of the outcome of any re-check. Member produce is brought for assessment to the Thornmere Grading Hall, which the cooperative's property schedule records as STOP_17, open to members on grading days.",
+       "tokens": 101,
+       "passage_tokens": 115,
+       "sentences": [
+        {
+         "text": "Graders rotate between the packing shed's two inspection stations on a weekly basis so that no single grader's judgment dominates an entire season's output.",
+         "tokens": 29,
+         "passage_tokens": 43
+        },
+        {
+         "text": "Disputed gradings can be escalated to a second grader for a binding re-check, though the original grader's notes remain attached to the delivery record regardless of the outcome of any re-check.",
+         "tokens": 39,
+         "passage_tokens": 53
+        },
+        {
+         "text": "Member produce is brought for assessment to the Thornmere Grading Hall, which the cooperative's property schedule records as STOP_17, open to members on grading days.",
+         "tokens": 33,
+         "passage_tokens": 47
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "heading": {
+      "text": "## Cold-Storage Allocations",
+      "tokens": 6
+     },
+     "prefix": "[Thornmere Growers Cooperative Yearbook — Cold-Storage Allocations] ",
+     "paragraphs": [
+      {
+       "text": "The cooperative operates two refrigerated cold-stores, one at the eastern edge of the Cross Furlong bloc and one adjoining the packing shed at Old Kiln. A member who leaves a reserved cold-storage bay unused for ninety days forfeits that bay back to the shared pool without any right of appeal to the board. This policy was adopted after several bays sat idle for an entire off-season while other members waited on a lengthy allocation list.",
+       "tokens": 87,
+       "passage_tokens": 103,
+       "sentences": [
+        {
+         "text": "The cooperative operates two refrigerated cold-stores, one at the eastern edge of the Cross Furlong bloc and one adjoining the packing shed at Old Kiln.",
+         "tokens": 32,
+         "passage_tokens": 48
+        },
+        {
+         "text": "A member who leaves a reserved cold-storage bay unused for ninety days forfeits that bay back to the shared pool without any right of appeal to the board.",
+         "tokens": 31,
+         "passage_tokens": 47
+        },
+        {
+         "text": "This policy was adopted after several bays sat idle for an entire off-season while other members waited on a lengthy allocation list.",
+         "tokens": 24,
+         "passage_tokens": 40
+        }
+       ]
+      },
+      {
+       "text": "Perishable produce is prioritized for the nearer eastern store at Cross Furlong, while root crops intended for longer storage are routed instead to the Old Kiln facility according to the allocation ledger kept by the deputy administrator. Members requesting a bay swap between the two stores must submit the request in writing at least two weeks ahead of the change to allow the ledger to be updated before produce actually moves. Refrigerated allocations are held at the Netherfield Cold Store, entered in the property schedule as STOP_18, whose allocation is reviewed each season.",
+       "tokens": 107,
+       "passage_tokens": 123,
+       "sentences": [
+        {
+         "text": "Perishable produce is prioritized for the nearer eastern store at Cross Furlong, while root crops intended for longer storage are routed instead to the Old Kiln facility according to the allocation ledger kept by the deputy administrator.",
+         "tokens": 43,
+         "passage_tokens": 59
+        },
+        {
+         "text": "Members requesting a bay swap between the two stores must submit the request in writing at least two weeks ahead of the change to allow the ledger to be updated before produce actually moves.",
+         "tokens": 35,
+         "passage_tokens": 51
+        },
+        {
+         "text": "Refrigerated allocations are held at the Netherfield Cold Store, entered in the property schedule as STOP_18, whose allocation is reviewed each season.",
+         "tokens": 30,
+         "passage_tokens": 45
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "heading": {
+      "text": "## Incident Reports",
+      "tokens": 3
+     },
+     "prefix": "[Thornmere Growers Cooperative Yearbook — Incident Reports] ",
+     "paragraphs": [
+      {
+       "text": "A refrigeration compressor failure struck the eastern cold-store on 6 April, prompting an emergency ice delivery to save the season's stored apples. Investigators later traced the failure to a worn drive belt rather than any fault in the compressor's refrigerant circuit, and belts of the same batch were flagged for early replacement across both cold-stores.",
+       "tokens": 67,
+       "passage_tokens": 80,
+       "sentences": [
+        {
+         "text": "A refrigeration compressor failure struck the eastern cold-store on 6 April, prompting an emergency ice delivery to save the season's stored apples.",
+         "tokens": 27,
+         "passage_tokens": 40
+        },
+        {
+         "text": "Investigators later traced the failure to a worn drive belt rather than any fault in the compressor's refrigerant circuit, and belts of the same batch were flagged for early replacement across both cold-stores.",
+         "tokens": 40,
+         "passage_tokens": 53
+        }
+       ]
+      },
+      {
+       "text": "A separate, unrelated incident on 4 April involved a minor door-seal failure at the Old Kiln store that let warm air in overnight; no produce was lost, and the seal was replaced within a single morning. Office volunteers sometimes conflate the two April incidents in casual conversation, though the maintenance ledger treats them as entirely distinct events with separate root-cause findings.",
+       "tokens": 74,
+       "passage_tokens": 87,
+       "sentences": [
+        {
+         "text": "A separate, unrelated incident on 4 April involved a minor door-seal failure at the Old Kiln store that let warm air in overnight; no produce was lost, and the seal was replaced within a single morning.",
+         "tokens": 44,
+         "passage_tokens": 57
+        },
+        {
+         "text": "Office volunteers sometimes conflate the two April incidents in casual conversation, though the maintenance ledger treats them as entirely distinct events with separate root-cause findings.",
+         "tokens": 30,
+         "passage_tokens": 43
+        }
+       ]
+      },
+      {
+       "text": "Any incident that threatens stored produce must be documented in a formal report within twenty-four hours, reviewed by the deputy administrator, and forwarded to the board before its next scheduled meeting. Reports that miss this window are flagged for a compliance review during the chair's next quarterly assessment, mirroring reporting habits the cooperative's founding charter borrowed from other cooperative societies in the wider farming district.",
+       "tokens": 74,
+       "passage_tokens": 87,
+       "sentences": [
+        {
+         "text": "Any incident that threatens stored produce must be documented in a formal report within twenty-four hours, reviewed by the deputy administrator, and forwarded to the board before its next scheduled meeting.",
+         "tokens": 35,
+         "passage_tokens": 48
+        },
+        {
+         "text": "Reports that miss this window are flagged for a compliance review during the chair's next quarterly assessment, mirroring reporting habits the cooperative's founding charter borrowed from other cooperative societies in the wider farming district.",
+         "tokens": 39,
+         "passage_tokens": 52
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "heading": {
+      "text": "## Board Resolutions",
+      "tokens": 4
+     },
+     "prefix": "[Thornmere Growers Cooperative Yearbook — Board Resolutions] ",
+     "paragraphs": [
+      {
+       "text": "The board's resolution establishing the cooperative's shared drier rota was formally adopted on 21 May, following a unanimous vote of the seven sitting board members present that evening. An earlier draft resolution had proposed leaving drier scheduling entirely to informal arrangement between neighboring members, but the board rejected that draft after several scheduling conflicts arose during the prior season.",
+       "tokens": 68,
+       "passage_tokens": 82,
+       "sentences": [
+        {
+         "text": "The board's resolution establishing the cooperative's shared drier rota was formally adopted on 21 May, following a unanimous vote of the seven sitting board members present that evening.",
+         "tokens": 34,
+         "passage_tokens": 48
+        },
+        {
+         "text": "An earlier draft resolution had proposed leaving drier scheduling entirely to informal arrangement between neighboring members, but the board rejected that draft after several scheduling conflicts arose during the prior season.",
+         "tokens": 34,
+         "passage_tokens": 48
+        }
+       ]
+      },
+      {
+       "text": "Resolutions adopted by the board take effect at the start of the following season unless a two-thirds majority votes for immediate implementation, a threshold that has been invoked only rarely in the cooperative's history. Minutes from every board meeting are archived in the deputy's office and made available to any member household on request during regular office hours. Consignment loads are certified at the Harrowbeck Weighbridge, which the property schedule records as STOP_20, before they leave the parish.",
+       "tokens": 95,
+       "passage_tokens": 109,
+       "sentences": [
+        {
+         "text": "Resolutions adopted by the board take effect at the start of the following season unless a two-thirds majority votes for immediate implementation, a threshold that has been invoked only rarely in the cooperative's history.",
+         "tokens": 39,
+         "passage_tokens": 53
+        },
+        {
+         "text": "Minutes from every board meeting are archived in the deputy's office and made available to any member household on request during regular office hours.",
+         "tokens": 26,
+         "passage_tokens": 40
+        },
+        {
+         "text": "Consignment loads are certified at the Harrowbeck Weighbridge, which the property schedule records as STOP_20, before they leave the parish.",
+         "tokens": 30,
+         "passage_tokens": 44
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "heading": {
+      "text": "## Consignment Identifiers",
+      "tokens": 5
+     },
+     "prefix": "[Thornmere Growers Cooperative Yearbook — Consignment Identifiers] ",
+     "paragraphs": [
+      {
+       "text": "Every crate leaving the packing shed is stamped with the code Thornmere Nine, the cooperative's primary consignment designator recognized by buyers throughout the wider farming district. A secondary code, Thornmere Two, is reserved strictly for consignments held back for internal grading disputes and is never applied to produce actually released for sale. Packing shed staff are briefed to expect only the primary designator on outgoing paperwork, and a mix-up between the two codes during a busy delivery week last season prompted a refresher notice reminding staff of the distinction.",
+       "tokens": 106,
+       "passage_tokens": 121,
+       "sentences": [
+        {
+         "text": "Every crate leaving the packing shed is stamped with the code Thornmere Nine, the cooperative's primary consignment designator recognized by buyers throughout the wider farming district.",
+         "tokens": 32,
+         "passage_tokens": 47
+        },
+        {
+         "text": "A secondary code, Thornmere Two, is reserved strictly for consignments held back for internal grading disputes and is never applied to produce actually released for sale.",
+         "tokens": 31,
+         "passage_tokens": 46
+        },
+        {
+         "text": "Packing shed staff are briefed to expect only the primary designator on outgoing paperwork, and a mix-up between the two codes during a busy delivery week last season prompted a refresher notice reminding staff of the distinction.",
+         "tokens": 43,
+         "passage_tokens": 58
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "heading": {
+      "text": "## Yearbook Maintenance",
+      "tokens": 4
+     },
+     "prefix": "[Thornmere Growers Cooperative Yearbook — Yearbook Maintenance] ",
+     "paragraphs": [
+      {
+       "text": "This yearbook is compiled by the deputy administrator's office at the close of each season and revised whenever the board adopts a resolution affecting membership, grading, or storage policy. Older editions remain archived in the cooperative's records but are not circulated beyond the current membership roll.",
+       "tokens": 53,
+       "passage_tokens": 67,
+       "sentences": [
+        {
+         "text": "This yearbook is compiled by the deputy administrator's office at the close of each season and revised whenever the board adopts a resolution affecting membership, grading, or storage policy.",
+         "tokens": 34,
+         "passage_tokens": 48
+        },
+        {
+         "text": "Older editions remain archived in the cooperative's records but are not circulated beyond the current membership roll.",
+         "tokens": 19,
+         "passage_tokens": 33
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

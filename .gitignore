@@ -8,3 +8,6 @@ docs/inbox/*
 # grader batches pulled from /debug for diagnosis — this repo is public,
 # and these are UBS's test cases, not ours to publish
 docs/phases/kan-cheong/graded-runs/
+# tool-box run records pulled from the viewer API — UBS's questions and our
+# run token, not ours to publish
+docs/phases/tool-box-2/graded-runs/

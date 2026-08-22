@@ -221,10 +221,19 @@ def test_tool_list_is_within_the_advertised_limits():
 def test_every_advertised_tool_is_callable():
     for tool in result_of("tools/list")["tools"]:
         assert tool["name"] in {
+            # sheet 1 — "The Nursery"
             "get_my_name",
             "calculate",
             "identify_shape",
             "count_characters",
+            # sheet 2 — "School Days"
+            "retrieve",
+            "recall",
+            "recall_study_material",
+            "plan_route",
+            "route_cost",
+            "next_step_towards",
+            "find_location_code",
         }
 
 
