@@ -16,15 +16,20 @@ Two things drive the design (both derived in notes.md):
 """
 from __future__ import annotations
 
+import gzip
+import json
 import math
 import time as clock
 from bisect import bisect_right
+from collections import deque
 from datetime import datetime, timedelta, timezone
 from fractions import Fraction
 from heapq import heappop, heappush
 from typing import Any
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException, Response
+
+from app.routers.debug import _check as _check_debug_token
 
 router = APIRouter(tags=["kan-cheong"])
 
@@ -36,6 +41,13 @@ MAX_STATES = 400_000
 # only the most promising arrival times at each node are kept (A* pops in
 # increasing order, so these are the earliest-completing ones)
 MAX_TIMES_PER_NODE = 24
+
+# The shared request log clips bodies at 4 KB and the grader's batch is 3 MB, so
+# a graded run leaves nothing to diagnose with. Keep the last few graded batches
+# whole (gzipped, ~250 KB each) so a run that scores short can actually be
+# examined. Only real batches are kept - smoke tests and probes are not.
+CAPTURES: deque = deque(maxlen=3)
+CAPTURE_MIN_CASES = 20
 
 NO_ROUTE: dict[str, Any] = {
     "total_duration_sec": None,
@@ -451,4 +463,44 @@ def kan_cheong_delivery_driver(batch: dict[str, Any]) -> dict[str, Any]:
             continue  # keep whatever the first pass gave us
         if better is not None:
             answers[case_id] = _answer(case, *better)
+
+    if len(batch) >= CAPTURE_MIN_CASES:
+        try:
+            CAPTURES.append(
+                {
+                    "ts": datetime.now(timezone.utc).isoformat(timespec="milliseconds"),
+                    "cases": len(batch),
+                    "ms": round((clock.monotonic() - started) * 1000, 1),
+                    "request": gzip.compress(json.dumps(batch).encode(), 1),
+                    "response": gzip.compress(json.dumps(answers).encode(), 1),
+                }
+            )
+        except Exception:
+            pass  # diagnostics must never cost us the batch
     return answers
+
+
+@router.get("/debug/kan-cheong/captures")
+def captures(token: str | None = None) -> list[dict[str, Any]]:
+    """What graded batches we still hold, newest last."""
+    _check_debug_token(token)
+    return [
+        {
+            "index": i,
+            "ts": c["ts"],
+            "cases": c["cases"],
+            "ms": c["ms"],
+            "request_gz_bytes": len(c["request"]),
+            "response_gz_bytes": len(c["response"]),
+        }
+        for i, c in enumerate(CAPTURES)
+    ]
+
+
+@router.get("/debug/kan-cheong/capture/{index}")
+def capture(index: int, which: str = "request", token: str | None = None) -> Response:
+    """The whole batch, gzipped. curl it to a file and gunzip."""
+    _check_debug_token(token)
+    if not 0 <= index < len(CAPTURES) or which not in ("request", "response"):
+        raise HTTPException(status_code=404)
+    return Response(content=CAPTURES[index][which], media_type="application/gzip")

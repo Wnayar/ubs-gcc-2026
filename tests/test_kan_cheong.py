@@ -768,3 +768,46 @@ def test_hard_cases_get_the_budget_left_over_by_easy_ones():
     assert len(body) == len(batch)
     assert body["hard"]["total_duration_sec"] is not None
     assert elapsed < 10, f"batch took {elapsed:.1f}s, statement allows 10"
+
+
+def test_graded_batches_are_captured_whole_for_diagnosis():
+    # the shared request log clips at 4 KB and the grader's batch is 3 MB, so a
+    # run that scores short leaves nothing to examine. Keep real batches whole.
+    import gzip
+    import json as _json
+
+    from app.routers.kan_cheong import CAPTURES
+
+    CAPTURES.clear()
+    client.post(URL, json={"a": EXAMPLE_1, "b": EXAMPLE_1})  # too small to keep
+    assert client.get("/debug/kan-cheong/captures").json() == []
+
+    batch = {f"case_{i}": EXAMPLE_1 for i in range(25)}
+    client.post(URL, json=batch)
+    listing = client.get("/debug/kan-cheong/captures").json()
+    assert len(listing) == 1 and listing[0]["cases"] == 25
+
+    blob = client.get("/debug/kan-cheong/capture/0?which=request")
+    assert blob.status_code == 200
+    assert _json.loads(gzip.decompress(blob.content)) == batch
+
+    answers = _json.loads(
+        gzip.decompress(client.get("/debug/kan-cheong/capture/0?which=response").content)
+    )
+    assert answers["case_0"] == EXAMPLE_1_OUTPUT
+    assert client.get("/debug/kan-cheong/capture/9").status_code == 404
+    CAPTURES.clear()
+
+
+def test_capture_never_breaks_the_batch():
+    # diagnostics must not cost us a graded run
+    import app.routers.kan_cheong as module
+
+    original = module.gzip.compress
+    module.gzip.compress = lambda *a, **k: (_ for _ in ()).throw(RuntimeError("boom"))
+    try:
+        r = client.post(URL, json={f"case_{i}": EXAMPLE_1 for i in range(25)})
+        assert r.status_code == 200
+        assert r.json()["case_0"] == EXAMPLE_1_OUTPUT
+    finally:
+        module.gzip.compress = original
