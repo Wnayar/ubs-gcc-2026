@@ -5,8 +5,8 @@
   **not** changed, and it never mentions legs, so `leg_number`/`total_legs` are new
   fields added for this phase)
 - **Endpoints required:** `POST /move` — same endpoint as phase 1, no new route
-- **Submitted to controller:** yes — attempt 1, 2026-08-22 02:55Z
-- **Score:** **100** (1 of 4 legs cleared). Root-caused below; fixes not yet re-submitted.
+- **Submitted to controller:** yes — attempt 1 (100/400) and attempt 2 (200/400)
+- **Score:** **200/400** on attempt 2. Attempt 3 fixes below, not yet submitted.
 
 ## What phase 2 adds
 
@@ -241,3 +241,56 @@ After every attempt, harvest and commit, so each run starts from all prior evide
 curl -s "https://ubs-gcc-2026.onrender.com/debug/showdown-observations?token=$DEBUG_TOKEN" \
   > app/data/showdown_seed.json.new
 ```
+
+
+## Attempt 2 — 200/400
+
+| leg | table | final delta | cleared (+25)? |
+|---|---|---|---|
+| 1 | verdigris | **+102** | **yes** |
+| 2 | cinnabar | +7 | no — missed by 18 |
+| 3 | amaranth | **+199** (busted the opponent in 9 hands) | **yes** |
+| 4 | obsidian | **−162** | no |
+
+The seed worked: 45 observations became 87, and `obsidian` went from 0.46 confidence
+to **`antipair_low` at 1.00** — "a pair loses to any non-pair, then the lower number
+wins". `verdigris` and `cinnabar` both sit at 0.84 standard. Only `amaranth` is still
+unsettled, and its evidence is now internally inconsistent — no hypothesis clears 93%.
+
+### What lost the obsidian leg — and it was not the rule
+
+Hand 9 of 40. We held a **2** against a community **7**. Under `antipair_low` that is a
+monster: the opponent's 7 would pair and lose, and only a 1 beats us — about 88%. We
+raised to 42, then called 83 more, putting **135 of our 200 chips** in. The opponent held
+the 1. From −149 at hand 10 the leg never recovered.
+
+The rule read was right and the hand was a favourite. **The staking was wrong.** A leg is
+scored on clearing **+25**, not on maximising chips. Winning that pot would have cleared
+the target five times over — the upside was worthless — while losing it ended the leg. At
+88%, one hand in eight plays out exactly like this.
+
+**A stake cap was built for this and then rejected.** Capping the chips we will
+voluntarily put into one hand at `45 + 2.2 × (chips still needed)` does fix hand 9 in
+isolation — replayed against the real state it calls instead of raising to 42, and folds
+the 83, losing ~50 instead of 135. But measured over whole attempts on identical legs and
+seeds it **cost 18 to 88 points against every opponent**:
+
+| opponent | cap off | cap on |
+|---|---|---|
+| sane | 232 | 215 |
+| gaston | 302 | 215 |
+| rock | 222 | 158 |
+
+Folding the marginal-but-profitable spots the cap catches costs more than the occasional
+blow-up it prevents. The obsidian hand was a *well-played* 88% favourite that lost — one
+hand in eight does — and post-mortems on single hands are exactly how you talk yourself
+into a bad rule. Not shipped.
+
+### Still open
+
+- **`amaranth` is inconsistent.** Attempt 1 had `7 beating 8`; the fuller set has no
+  hypothesis above 93%. Its `/matches/` replay would settle it — that endpoint returns the
+  numbers dealt in *every* hand, including the ones that ended in a fold, which is several
+  times the evidence a showdown-only view gives.
+- **`cinnabar` missed by 18 chips.** Nothing diagnostic in the log; it read 0.84 standard
+  and simply did not get there.
