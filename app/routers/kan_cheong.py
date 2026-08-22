@@ -19,6 +19,7 @@ from __future__ import annotations
 import gzip
 import json
 import math
+import os
 import time as clock
 from bisect import bisect_right
 from collections import deque
@@ -43,11 +44,20 @@ MAX_STATES = 400_000
 MAX_TIMES_PER_NODE = 24
 
 # The shared request log clips bodies at 4 KB and the grader's batch is 3 MB, so
-# a graded run leaves nothing to diagnose with. Keep the last few graded batches
-# whole (gzipped, ~250 KB each) so a run that scores short can actually be
-# examined. Only real batches are kept - smoke tests and probes are not.
+# a graded run leaves nothing to diagnose with. Keeping the last few graded
+# batches whole (gzipped) is how the 1000-case run in graded-runs/ was captured.
+#
+# Off by default: re-serialising and gzipping a 3 MB batch measured ~30 ms here,
+# which is ~470 ms on Render at the ~16x we measured live - about 9% of a request
+# that already takes 5.1 s of the statement's 10 s hard cutoff, and a batch that
+# times out scores zero for every case in it. Set KAN_CHEONG_CAPTURE=1 to turn it
+# back on for a run that needs diagnosing.
 CAPTURES: deque = deque(maxlen=3)
 CAPTURE_MIN_CASES = 20
+
+
+def _capturing() -> bool:
+    return os.environ.get("KAN_CHEONG_CAPTURE", "").strip() not in ("", "0", "false", "False")
 
 NO_ROUTE: dict[str, Any] = {
     "total_duration_sec": None,
@@ -464,7 +474,7 @@ def kan_cheong_delivery_driver(batch: dict[str, Any]) -> dict[str, Any]:
         if better is not None:
             answers[case_id] = _answer(case, *better)
 
-    if len(batch) >= CAPTURE_MIN_CASES:
+    if len(batch) >= CAPTURE_MIN_CASES and _capturing():
         try:
             CAPTURES.append(
                 {

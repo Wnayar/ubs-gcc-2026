@@ -488,6 +488,57 @@ identical at 24, 96 and 512), and timezone handling is fine (three of the five r
 cases carry non-UTC offsets, and a string-comparison mismatch there would have cost far
 more than 8 points).
 
+## Third graded run — 92/100, and what it rules out
+
+Truncation moved the score 91 -> 92, not the ~9 that convention predicted, so the bulk of
+the loss was never rounding. The whole graded batch was pulled from
+`/debug/kan-cheong/capture/0` and kept in `graded-runs/`, which is **gitignored** — this
+repo is public and those are UBS's test cases, not ours to publish. Re-pull it by setting
+`KAN_CHEONG_CAPTURE=1` on the service and running the grader again. The batch is
+**1000 cases, 3.9 MB, answered in 5.10 s** (median case is 5 nodes / 6 edges / 1
+obstruction; the largest is 625 nodes / 1200 edges / 392 obstructions).
+
+**Our answers are correct under our reading of the statement.** All 1000 were re-checked
+against a clean-room reimplementation that shares no code with the router — a direct
+simulator for the 861 small cases, and an independent no-heuristic `(node, time)` Dijkstra
+for the other 139. **Zero disagreements.** The response is also structurally exact: every
+case id present, right types and key order, and `arrival_time` always equal to
+`start_time + total_duration_sec`.
+
+So the missing points are a reading of the statement that our implementation *and* our
+reference share. Every candidate was measured against the real batch, as a share of total
+weight (weight = nodes + edges + obstructions, since larger cases are worth more):
+
+| alternative reading | cases changed | weight |
+|---|---|---|
+| window end inclusive `[s, e]` (incl. zero-length windows) | 0 | 0.00% |
+| rounding: ceil / banker's / exact fraction | 0 | 0.00% |
+| overlapping windows multiply instead of most-restrictive | 34 | 0.40% |
+| a 0-factor window mid-arc forbids the traversal (no stranding) | 12 | 0.30% |
+| `start == end` returns null instead of 0 | 86 | 2.92% |
+| `speed_factor > 1` clamped to 1 | 35 | 10.76% |
+| obstructions apply in both directions | 156 | 13.42% |
+| factor fixed at entry, mid-traversal changes ignored | 145 | 16.00% |
+
+Nothing lands at 8%. The two readings closest in size are both contradicted by the
+statement: direction is explicit ("obstructions are directional... `edge.from -> edge.to`")
+and confirmed by Example 1, and mid-traversal change is the whole point of "only the
+remaining untraveled portion is affected". Clamping `speed_factor` is the only survivor
+near the right size, but the generator sends 1.5 and 2.0 as clean deliberate values
+(19.6% of all obstructions), so clamping would make its own choice pointless.
+
+Also checked and cleared:
+
+- **The 84 null answers are right.** Every one is a case where all arcs out of the start
+  are shut at departure — `case_6` is Example 4 almost verbatim, and the statement gives
+  the null response for exactly that.
+- **Path tie-breaking is already the natural choice.** Only 15 cases have more than one
+  optimal route (12 of them are 900-parallel-edge graphs answered by a single 10 s edge),
+  and in every one we already return the first-listed, lowest-numbered edge.
+- **Search bounds and deadlines are not biting.** Identical answers with the cap at 24,
+  96, 512 and unbounded; and emulating Render's ~16-30x slowdown, the budget can fall to
+  the equivalent of ~8 s before a single answer changes.
+
 ## Failed test cases and what fixed them
 
 - Rounding fractional durations up instead of truncating — cost ~8 points on the first

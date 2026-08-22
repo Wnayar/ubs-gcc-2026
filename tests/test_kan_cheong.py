@@ -770,7 +770,18 @@ def test_hard_cases_get_the_budget_left_over_by_easy_ones():
     assert elapsed < 10, f"batch took {elapsed:.1f}s, statement allows 10"
 
 
-def test_graded_batches_are_captured_whole_for_diagnosis():
+def test_capture_is_off_unless_asked_for():
+    # gzipping a 3 MB batch costs ~470 ms on Render, ~9% of a request that already
+    # uses half the statement's 10 s cutoff, and a timeout scores zero for the
+    # whole batch. So it stays off unless a run needs diagnosing.
+    from app.routers.kan_cheong import CAPTURES
+
+    CAPTURES.clear()
+    client.post(URL, json={f"case_{i}": EXAMPLE_1 for i in range(25)})
+    assert client.get("/debug/kan-cheong/captures").json() == []
+
+
+def test_graded_batches_are_captured_whole_when_enabled(monkeypatch):
     # the shared request log clips at 4 KB and the grader's batch is 3 MB, so a
     # run that scores short leaves nothing to examine. Keep real batches whole.
     import gzip
@@ -778,6 +789,7 @@ def test_graded_batches_are_captured_whole_for_diagnosis():
 
     from app.routers.kan_cheong import CAPTURES
 
+    monkeypatch.setenv("KAN_CHEONG_CAPTURE", "1")
     CAPTURES.clear()
     client.post(URL, json={"a": EXAMPLE_1, "b": EXAMPLE_1})  # too small to keep
     assert client.get("/debug/kan-cheong/captures").json() == []
@@ -799,10 +811,11 @@ def test_graded_batches_are_captured_whole_for_diagnosis():
     CAPTURES.clear()
 
 
-def test_capture_never_breaks_the_batch():
+def test_capture_never_breaks_the_batch(monkeypatch):
     # diagnostics must not cost us a graded run
     import app.routers.kan_cheong as module
 
+    monkeypatch.setenv("KAN_CHEONG_CAPTURE", "1")
     original = module.gzip.compress
     module.gzip.compress = lambda *a, **k: (_ for _ in ()).throw(RuntimeError("boom"))
     try:

@@ -5,3 +5,6 @@ docs/inbox/*
 .pytest_cache/
 .env
 *.pyc
+# grader batches pulled from /debug for diagnosis — this repo is public,
+# and these are UBS's test cases, not ours to publish
+docs/phases/kan-cheong/graded-runs/
