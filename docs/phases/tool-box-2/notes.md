@@ -214,9 +214,14 @@ Three tools added to the sheet-1 server, `app/routers/toolbox.py`:
 
 | tool | answers with |
 |---|---|
-| `recall_study_material(question)` | a **list** of verbatim passages, ≤ 900 tokens |
+| `retrieve(question)` — also `recall`, `recall_study_material` | **one text block holding a JSON array** of verbatim passages, ≤ 900 tokens |
+| `plan_route(map_id, from, to, max_moves?)` | the whole route as a JSON array of node names |
+| `route_cost(map_id, route \| from+to)` | one number |
 | `next_step_towards(map_id, current, destination, hops_left?)` | one node name |
 | `find_location_code(place)` | one marker, e.g. `STOP_07` |
+
+Eleven tools against the cap of 20. The three retrieval names are one function
+— see "Failed test cases" below for why there are three.
 
 ### Token counting with no tokeniser (`app/recall.py`)
 
@@ -326,10 +331,10 @@ from there instead of forbidding nodes on the strength of a stale one.
   so Part 3 works whether or not the android resolves the place first. This is
   deliberate belt-and-braces against the statement's "likeliest way to lose the
   points".
-- **A list is sent as one text content block per element**, which is what
-  "each element in the list has its own token count" describes. If they instead
-  expect a single JSON-encoded array in one block, the passages are still all
-  there and still under 1,200 tokens, but the shape differs. **Worth asking.**
+- ~~**A list is sent as one text content block per element**, which is what
+  "each element in the list has its own token count" describes.~~ **Wrong, and
+  it cost the whole run.** The grader joins our content blocks and parses the
+  joined text, so it must be **a JSON array inside one block**. See below.
 - **Passages are verbatim corpus text**, never summarised. A summary risks
   paraphrasing away the exact date or number the judge is looking for.
 - **We do not tell the android what to answer.** `recall_study_material`'s
@@ -344,12 +349,17 @@ from there instead of forbidding nodes on the strength of a stale one.
 ## Clarifications from challenge developers
 
 - Q: Is the study-material corpus the same for every team and stable across
-  runs, or is it regenerated? → A: …
+  runs, or is it regenerated? → A: … *(still open — the one unhedged risk)*
 - Q: For a tool returning "a list of strings" over MCP, do you read multiple
   text content blocks as the list, or do you expect one JSON array in a single
-  block? → A: …
+  block? → **Answered by run 1: one JSON array in a single block.** Multiple
+  blocks are joined and then parsed, so they read as a bare string.
 - Q: Does `sum(entry tolls)` include the toll on the journey's starting node? →
-  A: …
+  **Answered by the `travel-proportional` rule: no.** "The source node's toll is
+  never paid and the destination's always is."
+- Q: The statement says we choose our tool names, but the android reached for
+  `retrieve` unprompted and travel expects a whole route. Is there a canonical
+  tool shape you expect per problem set, and is it published anywhere? → A: …
 - Q: Page 7 says both "Eight problems" and "Ten problems" — the table sums to
   ten. Which is right? → A: …
 - Q: In Part 3, is the destination given as a place name from the study
@@ -357,4 +367,70 @@ from there instead of forbidding nodes on the strength of a stale one.
 
 ## Failed test cases and what fixed them
 
-- (none yet — not run against the grader)
+### Run 1 (`2f0b5d0d`, 2026-08-22 03:20 UTC) — **0/100**
+
+Stage 1 scored **100/100** in the same sitting, so the server, the transport
+and the tool surface were all fine. Stage 2 scored zero on all ten problems in
+18 seconds. Records saved (gitignored) in `graded-runs/`.
+
+Only **two** problems were ever asked. Everything else shows `blockedBy`:
+`problem-chain` ends a line the moment one problem scores nothing, and
+`problem-chain-dependency` never asks the School Trip until both lines have
+scored something. Two failures took all ten problems.
+
+**1. Retrieval — wrong response shape.** Our passages went back as one MCP text
+content block per passage. The grader joins the blocks and parses the joined
+text, so what arrived was one run-on string:
+
+> `From: Thornmere Growers Cooperative Yearbook## OverviewThe Thornmere Growers
+> Cooperative is a member-owned…`
+
+and the verdict was `fault: contestant` —
+
+> "Retrieval must return a JSON array of strings (nested arrays are accepted
+> and flattened)."
+
+**Fix:** one text block containing `json.dumps(passages)`. Passages are now
+self-contained (`[Document — Section] text`) instead of relying on separate
+header and heading elements that a join would smear together.
+
+**2. Retrieval — the android named a tool we did not have.** On attempts 1 and
+2 it called **`retrieve`** with `{"query": …}`; we had `recall_study_material`,
+so it got our "no such tool" error. Both are logged `fault: grader` and retried
+free, but they burned two of three attempts before the shape bug ate the third.
+
+**Fix:** the same function is now registered as `retrieve`, `recall` and
+`recall_study_material`.
+
+**3. Travel — our server was never called at all.** Three attempts, **zero
+calls**, verdict "No tool or answer could be found." The grader walks a journey
+through its own `_travel` wrapper, which takes a **whole route**
+(`{"route": ["B", "G", "H"]}`) and then checks each hop. `next_step_towards`
+hands back one node at a time, which does not fit that shape — the android had
+nothing it could use and gave up without calling us.
+
+**Fix:** `plan_route` returns the entire route as a JSON array, and
+`route_cost` returns the number the android submits as its answer.
+
+Re-checked against the real graded map from that run (13 nodes, all tolls zero,
+B → H): `plan_route` returns `["B","C","J","K","H"]` at cost 26.7, which equals
+a brute-force search over every simple path — full marks under
+`travel-proportional`. **The routing was never wrong; only its shape was.**
+
+### What the run viewer's own rule book says
+
+The viewer bundle carries the grader's rule definitions. The ones that bite:
+
+| rule | what it says |
+|---|---|
+| `retrieval-shape` | `["passage", "passage"]`. Nested arrays are flattened. An object, a bare string or `{"chunks": […]}` voids the question. |
+| `retrieval-budget` | 900 tokens, **summed per passage**, o200k_base — "you can count each passage as you select it and get the same number we do". Exactly what we bake in. |
+| `response-ceiling` | 1,200 tokens over the **whole serialised response**. "Fifteen passages of 60 tokens serialise to about 950; ninety of 10 tokens reach about 1,100." Chunk coarsely. |
+| `travel-proportional` | Points = optimal cost ÷ our cost. **"Tolls are charged on entry, so the source node's toll is never paid and the destination's always is"** — our model, confirmed. |
+| `travel-move` | Each hop adjacent, no revisit, inside the allowance. |
+| `problem-chain` | **Any** credit continues a line; the first problem of a line is the cheapest to answer and the dearest to get wrong. |
+| `grader-fault` | The android naming a tool we never exposed is their fault, retried free. |
+| `direct-call-refused` | For revision questions the android **cannot** call our retrieval tool directly; it goes through `_recall`. |
+
+Measured after the fix, over 28 questions: worst passage-sum **896/900**, worst
+serialised response **898/1,200**.
