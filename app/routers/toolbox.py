@@ -2,6 +2,7 @@
 
 sheet 1, "The Nursery"   (docs/phases/tool-box-1/): name, arithmetic, shapes.
 sheet 2, "School Days"   (docs/phases/tool-box-2/): recall, journeys, the trip.
+sheet 3, "Working Life"  (docs/phases/tool-box-3/): venues, diaries, the outing.
 
 Not a REST endpoint: the grader drives an LLM agent that speaks MCP to
 {teamUrl}/mcp and answers with whatever our tools hand it. On sheet 1 the agent
@@ -19,7 +20,7 @@ import re
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
 
-from app import graphroute, recall as recall_module
+from app import cityclock, graphroute, recall as recall_module
 from app.expr import ExpressionError, clean, evaluate, format_number
 from app.mcp import Server, ToolError, error, sse
 from app.pngshape import ImageError, classify
@@ -46,7 +47,10 @@ server = Server(
         "recall_study_material is different — it returns passages from your "
         "revision material for you to read and answer from. "
         "next_step_towards gives the next node to move to on a map, and "
-        "find_location_code turns a place name into its map marker."
+        "find_location_code turns a place name into its map marker. "
+        "For anything about your week: find_places_to_eat, find_meeting_time, "
+        "find_meeting_point, and plan_outing when you have to meet people and "
+        "then go on somewhere to eat."
     ),
 )
 
@@ -480,6 +484,313 @@ def find_location_code(arguments: dict) -> str:
 
 
 # --- transport -------------------------------------------------------------
+
+
+
+# --- sheet 3: working life -------------------------------------------------
+
+# The android is asked four things about a week it half-remembers: where it can
+# eat, when everyone is free, where to meet, and all three at once. Sheets 1 and
+# 2 settled how to answer: it repeats a tool result word for word and does not
+# check our work, so every tool here returns the finished answer in the shape
+# the question asks for and nothing else. The last two are the means rather than
+# the answer — they are there for an android that would rather look the raw day
+# up itself than trust a total it did not compute.
+
+
+def _plain_errors(function):
+    """A PlanError is a sentence for the android, not a stack trace."""
+
+    def wrapped(arguments: dict) -> str:
+        try:
+            return function(arguments)
+        except cityclock.PlanError as problem:
+            raise ToolError(str(problem)) from None
+
+    wrapped.__name__ = function.__name__
+    wrapped.__doc__ = function.__doc__
+    return wrapped
+
+
+def _day_argument(arguments: dict) -> str:
+    return cityclock.to_day(_text(arguments, "day", "weekday", "date", "on", "when"))
+
+
+def _minute_argument(arguments: dict, *keys: str) -> int | None:
+    for key in keys:
+        if key in arguments:
+            minute = cityclock.to_minutes(arguments[key])
+            if minute is not None:
+                return minute
+    return None
+
+
+def _people_argument(arguments: dict) -> list[str]:
+    for key in ("people", "guests", "friends", "with", "attendees", "persons",
+                "names", "who", "person"):
+        if key in arguments:
+            found = cityclock.to_people(arguments[key])
+            if found:
+                return found
+    return []
+
+
+def _point_argument(arguments: dict, *keys: str):
+    for key in keys:
+        if key in arguments:
+            point = cityclock.to_point(arguments[key])
+            if point is not None:
+                return point
+    return None
+
+
+_CLOCKS = re.compile(r"\d{1,2}(?::\d{2})?\s*(?:am|pm)?", re.IGNORECASE)
+
+
+def _range_argument(arguments: dict):
+    """"between 13:00 and 18:00", however the android chose to hand it over."""
+    earliest = _minute_argument(
+        arguments, "earliest", "earliest_time", "from", "after", "start",
+        "start_time", "not_before", "range_start", "between_start")
+    latest = _minute_argument(
+        arguments, "latest", "latest_time", "until", "to", "before", "end",
+        "end_time", "range_end", "between_end")
+    if earliest is None or latest is None:
+        written = _text(arguments, "between", "range", "window", "time_range")
+        if written:
+            marks = [cityclock.to_minutes(bit) for bit in _CLOCKS.findall(written)]
+            marks = [mark for mark in marks if mark is not None]
+            if len(marks) >= 2:
+                earliest = marks[0] if earliest is None else earliest
+                latest = marks[1] if latest is None else latest
+    return earliest, latest
+
+
+def _length_argument(arguments: dict) -> int:
+    length = _integer(arguments, "minutes", "duration", "duration_minutes",
+                      "length", "length_minutes", "for", "how_long")
+    if length is None:
+        return cityclock.HOUR
+    if 1 <= length <= 12:  # "a 2 hour window" rather than a 2 minute one
+        return length * cityclock.HOUR
+    return length
+
+
+DAY_PROPERTY = {"type": "string", "description": "A weekday name, for example 'Tuesday'."}
+PEOPLE_PROPERTY = {
+    "type": "array",
+    "items": {"type": "string"},
+    "description": "The friends to meet, for example ['ada', 'bram']. Leave "
+                   "yourself out — you are always counted.",
+}
+POSITION_PROPERTY = {
+    "type": "array",
+    "items": {"type": "integer"},
+    "description": "Where you are, as [x, y] with x first, for example [4, 5].",
+}
+
+
+@server.tool(
+    "find_places_to_eat",
+    "Every place you can eat at on one day at one hour. A place trading that "
+    "day is not necessarily trading at that hour, so it checks. Returns their "
+    "names as one comma-separated string.",
+    {
+        "type": "object",
+        "properties": {
+            "day": DAY_PROPERTY,
+            "time": {"type": "string",
+                     "description": "The hour, 24-hour HH:MM, for example '08:00'."},
+        },
+        "required": ["day", "time"],
+    },
+)
+@_plain_errors
+def find_places_to_eat(arguments: dict) -> str:
+    day = _day_argument(arguments)
+    minute = _minute_argument(arguments, "time", "at", "hour", "when", "start", "start_time")
+    if minute is None:
+        raise ToolError("give me the hour in \"time\", 24-hour, for example '08:00'")
+    places = cityclock.open_at(day, minute)
+    if not places:
+        raise ToolError(f"nowhere is open on {day} at {cityclock.to_clock(minute)}")
+    return ", ".join(place["name"] for place in places)
+
+
+@server.tool(
+    "find_meeting_time",
+    "The best window on one day when you and the friends you name can all "
+    "meet. It reads their diaries and your own inbox, keeps anything you "
+    "accepted, ignores anything you declined, and gives up a tentative "
+    "commitment only when nothing else in the range is clear. Returns one "
+    "window as 'HH:MM-HH:MM'.",
+    {
+        "type": "object",
+        "properties": {
+            "day": DAY_PROPERTY,
+            "people": PEOPLE_PROPERTY,
+            "earliest": {"type": "string",
+                         "description": "Earliest the meeting may start, HH:MM."},
+            "latest": {"type": "string",
+                       "description": "Latest the meeting may finish, HH:MM."},
+            "minutes": {"type": "integer",
+                        "description": "How long the meeting is, in minutes. 60 if not said."},
+        },
+        "required": ["day", "people"],
+    },
+)
+@_plain_errors
+def find_meeting_time(arguments: dict) -> str:
+    day = _day_argument(arguments)
+    earliest, latest = _range_argument(arguments)
+    window = cityclock.find_window(
+        day, _people_argument(arguments), earliest, latest, _length_argument(arguments))
+    return f"{cityclock.to_clock(window['start'])}-{cityclock.to_clock(window['end'])}"
+
+
+@server.tool(
+    "find_meeting_point",
+    "The point on the grid that makes the total travel of everyone — you and "
+    "every friend you name — as small as possible. Say where you are going "
+    "afterwards in 'eat_at' if there is somewhere, because that changes the "
+    "point. Returns one point as '[x, y]'.",
+    {
+        "type": "object",
+        "properties": {
+            "day": DAY_PROPERTY,
+            "my_position": POSITION_PROPERTY,
+            "people": PEOPLE_PROPERTY,
+            "eat_at": {"type": "string",
+                       "description": "Optional: where the party goes next, by name."},
+        },
+        "required": ["day", "my_position", "people"],
+    },
+)
+@_plain_errors
+def find_meeting_point(arguments: dict) -> str:
+    day = _day_argument(arguments)
+    positions = cityclock.gather(
+        day, _point_argument(arguments, "my_position", "my_location", "position",
+                             "me", "you", "your_position", "current_position",
+                             "start_position", "location"),
+        _people_argument(arguments))
+    onward = None
+    named = _text(arguments, "eat_at", "then", "next", "afterwards", "then_go_to",
+                  "venue", "place", "destination")
+    if named:
+        onward = cityclock.to_point(named)
+        if onward is None:
+            venue = cityclock.find_venue(day, named)
+            onward = (venue["x"], venue["y"])
+        onward = cityclock.on_grid(onward)
+    x, y = cityclock.best_point(positions, then_on_to=onward)
+    return f"[{x}, {y}]"
+
+
+@server.tool(
+    "plan_outing",
+    "The whole outing in one answer: meet your friends, then go on somewhere "
+    "to eat. It finds the window everyone can make, a place open for the hour "
+    "the meeting ends, and the meeting point that makes the whole journey — "
+    "everyone's travel to the meeting point plus the trip on to the place you "
+    "eat — as short as possible. Returns JSON with 'meeting', 'meeting_point' "
+    "and 'eat_at'.",
+    {
+        "type": "object",
+        "properties": {
+            "day": DAY_PROPERTY,
+            "my_position": POSITION_PROPERTY,
+            "people": PEOPLE_PROPERTY,
+            "earliest": {"type": "string",
+                         "description": "Earliest the meeting may start, HH:MM."},
+            "latest": {"type": "string",
+                       "description": "Latest the meeting may finish, HH:MM."},
+            "minutes": {"type": "integer",
+                        "description": "How long the meeting is, in minutes. 60 if not said."},
+        },
+        "required": ["day", "my_position", "people"],
+    },
+)
+@_plain_errors
+def plan_outing(arguments: dict) -> str:
+    day = _day_argument(arguments)
+    earliest, latest = _range_argument(arguments)
+    plan = cityclock.plan_outing(
+        day,
+        _point_argument(arguments, "my_position", "my_location", "position", "me",
+                        "you", "your_position", "current_position",
+                        "start_position", "location"),
+        _people_argument(arguments),
+        earliest,
+        latest,
+        _length_argument(arguments),
+    )
+    return json.dumps(
+        {
+            "meeting": f"{cityclock.to_clock(plan['start'])}-{cityclock.to_clock(plan['end'])}",
+            "meeting_point": list(plan["point"]),
+            "eat_at": plan["venue"],
+        },
+        ensure_ascii=False,
+    )
+
+
+@server.tool(
+    "get_day_schedule",
+    "One person's day. For a friend it returns the hours they are already "
+    "busy; for your own day — pass 'me' — it also returns the hours you have "
+    "only pencilled in. JSON, times as HH:MM.",
+    {
+        "type": "object",
+        "properties": {
+            "person": {"type": "string",
+                       "description": "A friend's name, or 'me' for your own day."},
+            "day": DAY_PROPERTY,
+        },
+        "required": ["person", "day"],
+    },
+)
+@_plain_errors
+def get_day_schedule(arguments: dict) -> str:
+    day = _day_argument(arguments)
+    written = _text(arguments, "person", "name", "who", "friend", "whose")
+    if written is None:
+        raise ToolError("whose day? give a name, or 'me', in \"person\"")
+    named = cityclock.to_people(written)
+    if not named:  # 'me', 'you', 'myself' — the inbox is the only diary it has
+        accepted, tentative = cityclock.commitments(day)
+        return json.dumps({"busy": _spans(accepted), "tentative": _spans(tentative)})
+    return json.dumps({"busy": _spans(cityclock.busy(named[0], day))})
+
+
+def _spans(spans) -> list[list[str]]:
+    return [[cityclock.to_clock(start), cityclock.to_clock(end)] for start, end in spans]
+
+
+@server.tool(
+    "where_is",
+    "Where one of your friends is on one day. People are somewhere different "
+    "on different days. Returns one point as '[x, y]'.",
+    {
+        "type": "object",
+        "properties": {
+            "person": {"type": "string", "description": "The friend's name, for example 'ada'."},
+            "day": DAY_PROPERTY,
+        },
+        "required": ["person", "day"],
+    },
+)
+@_plain_errors
+def where_is(arguments: dict) -> str:
+    day = _day_argument(arguments)
+    written = _text(arguments, "person", "name", "who", "friend", "whose")
+    named = cityclock.to_people(written or "")
+    if not named:
+        raise ToolError(
+            "give a friend's name in \"person\" — your own position is in the question")
+    x, y = cityclock.position(named[0], day)
+    return f"[{x}, {y}]"
+
 
 
 @router.post("/mcp")

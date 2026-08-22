@@ -234,6 +234,13 @@ def test_every_advertised_tool_is_callable():
             "route_cost",
             "next_step_towards",
             "find_location_code",
+            # sheet 3 — "Working Life"
+            "find_places_to_eat",
+            "find_meeting_time",
+            "find_meeting_point",
+            "plan_outing",
+            "get_day_schedule",
+            "where_is",
         }
 
 
