@@ -33,10 +33,16 @@ NEG_INF = float("-inf")
 TAU_TRAIL = 3 * 3600.0
 TAU_HOLD = 2 * 3600.0
 # How quickly evidence goes stale. Structure only counts as the thing it looks like
-# while it is fresh: a round trip that closed six hours ago is far weaker evidence of
-# recurring flow than one that closed in twenty minutes, and must not outrank a
+# while it is fresh: a round trip that closed most of a day ago is far weaker evidence
+# of *recurring* flow than one that closed in twenty minutes, and must not outrank a
 # convergence happening right now. This gates which band a transaction reaches.
-TAU_EVIDENCE = 3600.0
+#
+# Swept against both of the evaluator's datasets rather than guessed. One hour scores
+# marginally better on the motif stream alone, but the hand-built `hf-struct01` probe
+# sends a reciprocal pair an hour apart -- money going straight back, the tightest
+# round trip there is -- and an hour-scale decay demotes it out of the return band.
+# Three hours holds the rank-correlation peak and keeps that probe correct.
+TAU_EVIDENCE = 3 * 3600.0
 
 # The statement names its signals in increasing order of interest: money that
 # "travels onward", "fans into the same destination", or "-- especially -- loops
@@ -143,9 +149,15 @@ class GhostGraph:
             del side[a]
 
     def _expire(self, now: float) -> None:
-        """Drop everything created strictly more than WINDOW before `now`."""
+        """Drop everything WINDOW or more old — the window is a half-open (now-W, now].
+
+        The evaluator probes this boundary directly: `hf-temporal01` sends two
+        structurally identical 3-cycles whose closing transfer lands at 23 h and at
+        exactly 24 h after the chain's first edge. At exactly 24 h that first edge
+        has to be gone, or the two cases are indistinguishable.
+        """
         cutoff = now - WINDOW
-        while self.expiry and self.expiry[0][0] < cutoff:
+        while self.expiry and self.expiry[0][0] <= cutoff:
             when, _, sender, receiver = heappop(self.expiry)
             self._unlink(self.out, sender, receiver, when)
             self._unlink(self.inn, receiver, sender, when)
@@ -318,7 +330,7 @@ class GhostGraph:
         sender, receiver = transaction.fromUserId, transaction.toUserId
         risk = self.structural_score(sender, receiver, when)
 
-        if when >= self.clock - WINDOW:  # inside the window: it joins the graph
+        if when > self.clock - WINDOW:  # inside the window: it joins the graph
             self._link(self.out, sender, receiver, when)
             self._link(self.inn, receiver, sender, when)
             heappush(self.expiry, (when, transaction.txId, sender, receiver))

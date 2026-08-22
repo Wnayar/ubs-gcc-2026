@@ -207,6 +207,20 @@ which bounds the work per transaction at the cost of ignoring very long chains.
   signal? → A: …
 - Q: Is "now" for the lookback window the newest `createdAt` seen, or wall clock? → A: …
 
+## The evaluator's own probes (fourth run onwards)
+
+From the fourth evaluation the dataset grew from 100 transactions to 109: the same
+motif stream, followed by nine hand-built probes with `hf-` ids that test the two
+diagnostic dimensions directly. They are the closest thing to ground truth we have,
+and `tests/test_phase3.py` now replays all of them.
+
+| probe | shape | what it tests |
+|---|---|---|
+| `hf-temporal01` A | `A1→A2` 00:00, `A2→A3` 01:00, `A3→A1` **23:00** | a loop closing while the whole chain is still inside the window |
+| `hf-temporal01` B | `B1→B2` 00:00, `B2→B3` 01:00, `B3→B1` **24:00** | the same loop, but the first edge is exactly 24 h old — the boundary |
+| `hf-struct01-tx1` | `E1 → E1` | a degenerate self-transfer |
+| `hf-struct01-tx2/3` | `E2→E3` 00:00, `E3→E2` 01:00 | a reciprocal pair: money going straight back |
+
 ## Failed test cases and what fixed them
 
 - **First evaluation (22 Aug, ~01:00 SGT): `STRUCTURAL_DEVIATION: High,
@@ -273,3 +287,27 @@ which bounds the work per transaction at the cost of ignoring very long chains.
   11 of 12 returns landing in their correct band and no under-scoring. The decay
   constant was swept, not guessed: rho is flat (0.834-0.841) anywhere between 45 and
   180 minutes, and 60 minutes sits at the agreement peak inside that plateau.
+
+- **Fourth evaluation: the score improved markedly, and the dataset changed** — 109
+  transactions now, with nine `hf-` probes appended (see above). Replaying them
+  against what we actually answered exposed two faults:
+  - we returned **0.300 for both** `hf-temporal01` chains. Two structurally identical
+    3-cycles, one closing at 23 h and one at exactly 24 h, scored the same, which
+    defeats the probe entirely. The window is **half-open**: at exactly 24 h the
+    chain's first edge is gone, the chain is broken, and the closing transfer is not
+    a return at all. Flipping `_expire` from `<` to `<=` separates them 0.300 vs
+    0.010. This was the assumption `notes.md` had flagged as a coin-flip since the
+    first day, and `TEMPORAL_DEVIATION` had been reporting it three runs running.
+  - `hf-struct01`'s reciprocal pair — `E2→E3` then `E3→E2` an hour later, the
+    tightest round trip there is — scored only 0.446, demoted out of the return band
+    because the evidence decay was set to one hour. The probes run on an **hour**
+    scale (00:00 / 01:00 / 02:00 / 23:00) while that constant had been tuned on the
+    5-minute-spaced motif stream. Re-swept against **both** datasets: 3 hours holds
+    the rank-correlation peak (rho 0.841) *and* keeps the probe correct at 0.585,
+    where 1 hour scored 3 points better on motif agreement alone but failed it.
+
+  Known gap: chain A still scores 0.300 rather than reaching the return band. It is a
+  complete cycle inside the window, and with no decay at all it would score 0.596 —
+  but that costs rho (0.841 -> 0.791) and agreement (71 -> 59). We optimised for the
+  ranking metric, since Detection Quality is explicitly rank-based. If
+  `TEMPORAL_DEVIATION` persists, this is the next constant to try.

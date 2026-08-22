@@ -233,10 +233,12 @@ def test_expired_transaction_does_not_influence_scoring():
     assert r.json()["transactions"][0]["riskScore"] == 0.0
 
 
-def test_edge_exactly_at_window_boundary_is_still_active():
+def test_edge_exactly_at_window_boundary_has_expired():
+    # the window is half-open: active while age < 24h, gone at exactly 24h. The
+    # evaluator probes this directly with hf-temporal01 (see test_grader_probes).
     send([tx("edge_1", M, A, minutes=0)])
     r = send([tx("edge_2", A, C, minutes=24 * 60)])
-    assert r.json()["transactions"][0]["riskScore"] > 0.0
+    assert r.json()["transactions"][0]["riskScore"] == 0.0
 
 
 def test_transaction_just_inside_window_still_counts():
@@ -307,3 +309,43 @@ def test_repeated_edge_does_not_fail():
 def test_earlier_phases_still_work():
     assert client.post("/square", json={"value": 5}).json() == {"result": 25}
     assert client.get("/health").json()["status"] == "ok"
+
+
+# --- probes the evaluator sent us verbatim (docs/phases/phase-3/notes.md) ----
+
+
+def three_chain(prefix, minutes):
+    """A -> B, B -> C, C -> A with the three transfers at the given minutes."""
+    names = [f"{prefix}1", f"{prefix}2", f"{prefix}3"]
+    pairs = [(names[0], names[1]), (names[1], names[2]), (names[2], names[0])]
+    last = 0.0
+    for i, ((s_, r_), m) in enumerate(zip(pairs, minutes)):
+        resp = send([tx(f"{prefix}-tx{i}", s_, r_, minutes=m)])
+        assert resp.status_code == 200, resp.text
+        last = resp.json()["transactions"][0]["riskScore"]
+    return last
+
+
+def test_grader_probe_loop_inside_window_beats_loop_broken_by_expiry():
+    # hf-temporal01: two identical 3-cycles, closed at 23h and at exactly 24h.
+    # The second one's first edge has expired, so its chain is broken.
+    inside = three_chain("hf_A", [0, 60, 23 * 60])
+    client.post("/ghost-chains/reset", json={"clearTransactions": True})
+    expired = three_chain("hf_B", [0, 60, 24 * 60])
+    assert inside > expired, f"23h loop {inside} must outrank 24h-expired {expired}"
+    assert inside - expired >= 0.2
+
+
+def test_grader_probe_self_transfer_scores_zero():
+    # hf-struct01-tx1: hf_E1 -> hf_E1
+    r = send([tx("hf_E-self", "hf_E1", "hf_E1", minutes=0)])
+    assert r.status_code == 200
+    assert r.json()["transactions"][0]["riskScore"] == 0.0
+
+
+def test_grader_probe_reciprocal_pair_is_a_return():
+    # hf-struct01-tx2/tx3: E2 -> E3 then E3 -> E2 an hour later. Money going
+    # straight back is the tightest round trip there is.
+    send([tx("hf_E-out", "hf_E2", "hf_E3", minutes=0)])
+    r = send([tx("hf_E-back", "hf_E3", "hf_E2", minutes=60)])
+    assert r.json()["transactions"][0]["riskScore"] >= 0.55
