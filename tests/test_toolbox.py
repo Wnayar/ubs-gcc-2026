@@ -245,6 +245,12 @@ def test_name_meets_the_stated_criteria():
     assert re.fullmatch(r"[A-Za-z0-9 _'-]+", name), name
 
 
+def test_name_is_not_the_challenge_s_own_word():
+    # "Toolbox" came back to the android as the name of the thing it was
+    # holding; it submitted no answer at all, nine attempts running.
+    assert answer("get_my_name", {}).lower() not in {"toolbox", "tool-box", "tool box"}
+
+
 def test_name_is_stable():
     assert answer("get_my_name", {}) == answer("get_my_name", {})
 
@@ -272,19 +278,43 @@ def test_name_tolerates_stray_arguments():
     ],
 )
 def test_arithmetic(expression, expected):
-    assert answer("calculate", {"expression": expression}).split("=")[-1].strip() == expected
+    assert answer("calculate", {"expression": expression}) == expected
 
 
-def test_arithmetic_echoes_the_expression_it_was_given():
-    assert answer("calculate", {"expression": "2 + 2"}) == "2 + 2 = 4"
+@pytest.mark.parametrize(
+    "expression,expected",
+    [
+        ("2 + 2 + 5", "9"),        # scored 0 eight times as "2 + 2 + 5 = 9"
+        ("5 * 20 / 10", "10"),
+        ("-9 * 2 + 2", "-16"),     # scored 0 three times as "-9 * 2 + 2 = -16"
+        ("5 * 10", "50"),          # the combo challenge, run 7189e270
+        ("4 * 4", "16"),
+        ("3 * 7", "21"),
+        ("50 + 16 + 21", "87"),
+    ],
+)
+def test_sums_the_grader_actually_asked(expression, expected):
+    assert answer("calculate", {"expression": expression}) == expected
+
+
+def test_calculate_returns_the_number_alone():
+    # The regression that cost the arithmetic chain: the android repeats a tool
+    # result verbatim, so anything but the bare number is submitted as the
+    # answer and marked wrong. Every "<expression> = <number>" we returned
+    # scored 0; every bare number scored full marks.
+    for expression in ("2 + 2", "2 + 2 + 5", "(7 - 3) * 5", "-9 * 2 + 2"):
+        result = answer("calculate", {"expression": expression})
+        assert "=" not in result, result
+        assert not any(symbol in result for symbol in "+*/()"), result
+        float(result)  # nothing but a number came back
 
 
 def test_arithmetic_accepts_the_question_verbatim():
-    assert answer("calculate", {"expression": "What is 2 + 2?"}).endswith("4")
+    assert answer("calculate", {"expression": "What is 2 + 2?"}) == "4"
 
 
 def test_arithmetic_accepts_operand_operator_operand():
-    assert answer("calculate", {"a": 12, "operator": "*", "b": -3}).endswith("-36")
+    assert answer("calculate", {"a": 12, "operator": "*", "b": -3}) == "-36"
 
 
 def test_division_by_zero_is_an_error_not_a_number():
@@ -406,7 +436,7 @@ def test_the_three_tools_compose():
     name = answer("get_my_name", {})
     counted = int(answer("count_characters", {"text": name}).split()[0])
     assert counted == len(name)
-    assert answer("calculate", {"expression": f"{counted} * 2"}).endswith(str(counted * 2))
+    assert answer("calculate", {"expression": f"{counted} * 2"}) == str(counted * 2)
 
 
 # --- run callback ----------------------------------------------------------

@@ -21,7 +21,11 @@ router = APIRouter(tags=["tool-box"])
 
 # statement: 3-30 characters, letters, digits, spaces, _, - and '
 NAME_PATTERN = re.compile(r"[A-Za-z0-9 _'-]{3,30}")
-DEFAULT_NAME = "Toolbox"
+# Not "Toolbox": that was the challenge's own noun, and across three runs the
+# android took it from us and then submitted no answer at all (nine attempts,
+# not one evaluation recorded). A plain personal name cannot be mistaken for
+# the name of the thing it is holding.
+DEFAULT_NAME = "Milo"
 
 MAX_TEXT = 4000
 
@@ -51,9 +55,11 @@ def _text(arguments: dict, *keys: str) -> str | None:
 
 @server.tool(
     "get_my_name",
-    "Your own name. You have no other way to know what you are called, so call "
-    "this whenever you are asked, and answer with exactly what it returns.",
-    {"type": "object", "properties": {}},
+    # Phrased like identify_shape, which scored 3 runs out of 3: say what it
+    # does and what comes back, and leave the android's own turn alone.
+    "Say what you are called. Takes no arguments and returns exactly one "
+    "word: your name.",
+    {"type": "object", "properties": {}, "required": []},
 )
 def get_my_name(arguments: dict) -> str:
     configured = os.environ.get("AGENT_NAME", "").strip()
@@ -67,8 +73,7 @@ def get_my_name(arguments: dict) -> str:
 @server.tool(
     "calculate",
     "Work out a sum. Handles + - * / and brackets over whole numbers, for "
-    "example '2 + 2' or '(7 - 3) * 5'. Use it for every calculation. Returns "
-    "the sum followed by '=' and the exact answer.",
+    "example '2 + 2' or '(7 - 3) * 5'. Returns exactly one number: the answer.",
     {
         "type": "object",
         "properties": {
@@ -92,7 +97,11 @@ def calculate(arguments: dict) -> str:
             raise ToolError("give me the sum as text, for example {\"expression\": \"2 + 2\"}")
         expression = f"{left} {operator} {right}"
     try:
-        return f"{clean(expression)} = {format_number(evaluate(expression))}"
+        # The answer and nothing else. We used to return "2 + 2 + 5 = 9"; the
+        # android repeats a tool result verbatim, so it submitted the whole
+        # string where a number was expected and scored 0 on eight attempts out
+        # of nine. Every bare number we have ever returned scored full marks.
+        return format_number(evaluate(expression))
     except ExpressionError as problem:
         raise ToolError(str(problem)) from None
 

@@ -109,11 +109,13 @@ result is handed to the android, which still has two attempts left to fix its
 arguments. Nothing in the MCP path can return 500 — the handler catches
 everything.
 
-**Every tool returns the bare answer.** `4`, `circle`, `Toolbox`. The android
-does not check our work and does not strip prose, so anything decorative is a
-wrong answer waiting to happen. The one exception is `calculate`, which returns
-`2 + 2 = 4`: it costs three tokens and lets the model see the expression it
-actually sent, which is the only self-check available to it.
+**Every tool returns the bare answer, with no exceptions.** `4`, `circle`,
+`Milo`. The android does not check our work and does not strip prose: it
+repeats a tool result verbatim, so anything decorative is submitted as the
+answer. `calculate` originally returned `2 + 2 = 4` on the theory that echoing
+the expression let the model check what it had sent. Three graded runs killed
+that theory outright — see below. There is now a test asserting the calculator
+returns a number and nothing else.
 
 **Arithmetic is a real parser, never `eval`.** `app/expr.py` is a recursive
 descent parser over `+ - * / ( )` and unary minus. `eval` on grader-supplied
@@ -201,4 +203,51 @@ statement uses.
 
 ## Failed test cases and what fixed them
 
--
+Three stage-1 runs on 2026-08-22 scored **12, 50, 12** out of 100. Run records:
+`/run/<teamId>/summary` and `/run/<teamId>/runs/<runId>` on the challenge host,
+which is what the viewer page reads.
+
+### The calculator's expression echo — cost up to 75 points
+
+The run record shows the android's submitted answer next to our tool output:
+
+| we returned | android submitted | score |
+|---|---|---|
+| `2 + 2 + 5 = 9` | `2 + 2 + 5 = 9` (×5 attempts) | **0.0** |
+| `-9 * 2 + 2 = -16` | `-9 * 2 + 2 = -16` (×3) | **0.0** |
+| `2 + 2 + 5 = 9` | `9` (once, attempt 3) | 12.5 |
+| `5 * 20 / 10 = 10` | `10` | 12.5 |
+| `50 + 16 + 21 = 87` | `87` | 12.5 |
+| `circle` / `rectangle` / `triangle` | same word | 12.5 |
+
+Same tool output, different score: the android usually parrots the whole string
+and occasionally strips it to the number. The expected answer type is *a
+number*, so the echo is a wrong answer. Because a zero **ends its chain**, the
+first arithmetic problem failing took the other four arithmetic problems and the
+combo challenge with it — 62.5 + 12.5 points that were never even asked for.
+**Fix:** `calculate` returns the number alone.
+
+### The name — 0 for 9 attempts, no answer ever submitted
+
+Every name attempt in all three runs shows our call succeeding
+(`outcome: ok`, `result: "Toolbox"`, 2 tokens) and then **no `evaluation` block
+at all** — unlike every other problem, which records `Final answer submitted:
+…`. The android took the word and then submitted nothing.
+
+We cannot see its final turn, so this is inference rather than proof: `Toolbox`
+is the challenge's own noun, and an android taught never to guess is being handed
+the name of the *thing it is holding* when it asks what **it** is called.
+**Fix, two parts:** the name is now `Milo`, which cannot be read as anything but
+a name; and `get_my_name`'s description is rewritten in the same shape as
+`identify_shape`'s — the one tool that scored in all three runs — saying what the
+tool does and what comes back, instead of instructing the android how to answer.
+If a further run still shows no answer submitted, the next thing to try is the
+tool name itself (`my_name`, `whoami`).
+
+### What was already right
+
+`identify_shape` scored 12.5 in all three runs and got all three combo shapes
+right. Re-running the six real PNGs from the run records through the current
+code returns the same answers. `count_characters` was never called — the combo
+turned out to be shape × arithmetic — but it is 1 of 4 tools against a cap of
+20, so it stays for sheets 2 and 3.
