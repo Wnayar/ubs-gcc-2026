@@ -31,7 +31,14 @@ from __future__ import annotations
 
 import hashlib
 
-from app.showdown_rules import observe, posterior_for, range_weights, rule_equity, unbeatable
+from app.showdown_rules import (
+    observe,
+    posterior_for,
+    range_weights,
+    rule_equity,
+    rule_equity_ranges,
+    unbeatable,
+)
 
 DECK = 13
 ACTIONS = ("fold", "check", "call", "bet", "raise")
@@ -65,6 +72,15 @@ SHARPNESS_PER_RAISE = 2.2
 # How far to trust that read. The rest stays uniform, which is what stops a
 # bluffer from folding us off every decent number.
 RANGE_TRUST = 0.85
+# How hard the calibrated call cushion compresses as the table fills up. The
+# cushion (CALL_MARGIN, CALL_RISK, tilt) is measured on the heads-up equity
+# axis, where an average hand is 0.5; six-handed an average hand is worth 1/6 of
+# the pot, so an uncompressed CALL_RISK of 0.55 dwarfs the equity it is charged
+# against and folds everything. `share ** FIELD_MARGIN` scales it: 0 keeps the
+# full heads-up cushion, 1 scales it exactly with the axis. Identity at one
+# opponent either way, so phases 1 and 2 cannot be affected. Swept in
+# tools/simulate3.py.
+FIELD_MARGIN = 1.0
 # Phase 2 scores +25 a leg over 40 hands; phase 1 scored +10 over 100. We cannot
 # read the target off the wire, so it keys off whether we are in a multi-leg
 # attempt at all.
@@ -89,6 +105,9 @@ BLUFF_MAX_EQ = 0.34
 # nearly over, marginal calls are worth less than the cushion they risk; if we
 # are still short with the clock running out they are worth more.
 TARGET_DELTA = 10
+# Phase 3 seats six and scores "chip delta >= +10 AND strictly highest at the
+# table". The +10 is the easy half — topping five opponents is the binding one.
+PHASE3_TARGET_DELTA = 10
 ENDGAME_HANDS = 12
 PROTECT_TILT = 0.09
 CHASE_TILT = -0.07
@@ -193,27 +212,139 @@ def _legal(state: dict) -> list[str]:
     return [a for a in raw if a in ACTIONS]
 
 
-def _aggression(state: dict) -> tuple[int, int]:
-    """(their raises, our raises) in the current betting round.
+def _raises_by_seat(state: dict) -> tuple[dict, int]:
+    """(how often each opponent seat bet or raised this round, how often we did).
 
     The forced bets "aren't actions and never appear there", so everything in
-    the log is a voluntary statement about someone's number.
+    the log is a voluntary statement about someone's number. Six-handed it
+    matters *which* seat made it: five limpers are not five raisers.
     """
     actions = state.get("current_hand_actions")
     if not isinstance(actions, list):
-        return 0, 0
+        return {}, 0
     seat = _int(state.get("your_seat"))
-    theirs = ours = 0
+    theirs: dict = {}
+    ours = 0
     for entry in actions:
         if not isinstance(entry, dict) or entry.get("round") != state.get("round"):
             continue
         if entry.get("action") not in ("bet", "raise"):
             continue
-        if seat is not None and _int(entry.get("seat")) == seat:
+        who = _int(entry.get("seat"))
+        if seat is not None and who == seat:
             ours += 1
         else:
-            theirs += 1
+            theirs[who] = theirs.get(who, 0) + 1
     return theirs, ours
+
+
+def _aggression(state: dict) -> tuple[int, int]:
+    """(their raises, our raises) in the current betting round, across the table."""
+    theirs, ours = _raises_by_seat(state)
+    return sum(theirs.values()), ours
+
+
+# ───────────────────────────── reading the table ───────────────────────────────
+
+
+def _seated(state: dict) -> list[dict]:
+    """Every seat at the table, folded and busted included. `players` "is a list
+    in seat order ... Read it as a list rather than assuming a fixed shape"."""
+    players = state.get("players")
+    if not isinstance(players, list):
+        return []
+    return [p for p in players if isinstance(p, dict)]
+
+
+def _is_us(state: dict, player: dict) -> bool:
+    """Seat numbers decide it whenever both sides have one; the name is only a
+    fallback for a seating we cannot read."""
+    seat = _int(state.get("your_seat"))
+    mine = _int(player.get("seat"))
+    if seat is not None and mine is not None:
+        return mine == seat
+    return player.get("name") == "you"
+
+
+def live_opponents(state: dict) -> int:
+    """How many seats are still in this hand, not counting us.
+
+    "Folded players stay in `players` with `folded: true` — the list is the
+    table's seating, not the list of live opponents. Filter on `folded` /
+    `busted` yourself." An all-in seat is still live: it is out of chips for
+    this hand but it is still going to the showdown.
+    """
+    return sum(
+        1
+        for p in _seated(state)
+        if not p.get("folded") and not p.get("busted") and not _is_us(state, p)
+    )
+
+
+def live_seats(state: dict) -> list[int]:
+    """The seat numbers still in the hand, us included, in seat order."""
+    seats = []
+    for p in _seated(state):
+        if p.get("folded") or p.get("busted"):
+            continue
+        seat = _int(p.get("seat"))
+        if seat is not None:
+            seats.append(seat)
+    return sorted(seats)
+
+
+# ──────────────────────────── position at the table ────────────────────────────
+# Nothing about position changes six-handed, "there are just more seats". We read
+# the order but do not yet vary the thresholds by it — see notes.md, assumption 7.
+
+
+def _from_button(button, seats: list[int]) -> list[int]:
+    """`seats` rotated so the button is first."""
+    if not seats:
+        return []
+    if button in seats:
+        index = seats.index(button)
+    else:  # the button is sitting on a busted seat: it moves to the next live one
+        later = [s for s in seats if s > button]
+        index = seats.index(later[0]) if later else 0
+    return seats[index:] + seats[:index]
+
+
+def forced_bet_seats(button: int, seats: list[int]) -> tuple:
+    """(the seat paying 1, the seat paying 2) among the seats still in the match.
+
+    "Forced bets start just past the button: seat 1 pays 1, seat 2 pays 2. The
+    button pays nothing, which is why it's the cheapest seat."
+
+    Two seats is the guide's heads-up table, where that same sentence wraps
+    round onto the button itself: "the button pays the smaller forced bet (1)".
+    """
+    order = _from_button(button, seats)
+    if len(order) < 2:
+        return (None, None)
+    if len(order) == 2:
+        return (order[0], order[1])
+    return (order[1], order[2])
+
+
+def acting_order(button: int, seats: list[int], round_name: str) -> list[int]:
+    """Who acts, in order, in this betting round.
+
+    "Before the reveal, the order opens just past the seat that paid 2, so that
+    seat acts last. After the reveal, the order opens just past the button, so
+    the button acts last — with the most information."
+
+    The two rounds are deliberately not the same order, heads-up or six-handed.
+    """
+    order = _from_button(button, seats)
+    if len(order) < 2:
+        return order
+    if round_name == "pre_reveal":
+        paid_two = 1 if len(order) == 2 else 2
+        opens = (paid_two + 1) % len(order)
+    else:
+        opens = 1
+    return order[opens:] + order[:opens]
 
 
 def _codename(state: dict) -> str:
@@ -221,30 +352,105 @@ def _codename(state: dict) -> str:
     return rule if isinstance(rule, str) and rule else "standard"
 
 
-def _sharpness(state: dict, pot: int, to_call: int) -> float:
-    """How hard the opponent's betting says "my number is strong"."""
-    theirs, _ = _aggression(state)
-    if theirs <= 0:
+def _sharpness(raises: int, pot: int, to_call: int) -> float:
+    """How hard one seat's betting says "my number is strong"."""
+    if raises <= 0:
         return 0.0
     size = min(to_call / max(pot - to_call, 1), 2.0) if to_call > 0 else 1.0
-    return SHARPNESS_PER_RAISE * theirs * (0.5 + 0.5 * size)
+    return SHARPNESS_PER_RAISE * raises * (0.5 + 0.5 * size)
 
 
-def _effective_equity(state: dict, n: int, c: int | None, pot: int, to_call: int) -> float:
-    """Equity under what we believe this table's rule is, against the range the
-    opponent's betting implies.
+def field_share(live: int) -> float:
+    """What an average number is worth against `live` opponents, on the
+    heads-up equity axis.
 
-    Both halves are rule-relative: with the belief spread across rules that
+    Every threshold in this file — VALUE_BET_EQ, RAISE_EQ, CALL_MARGIN,
+    CALL_RISK — was calibrated one-on-one, where 0.5 is an average hand. Six
+    handed an average number is worth 1/6 of the pot, so feeding raw multiway
+    equity into a 0.68 threshold would mean never betting again. Dividing an
+    equity by this puts it back on the axis those numbers were written for;
+    multiplying a margin by it compresses the margin the same way.
+
+    One opponent gives exactly 1.0, so heads-up nothing moves at all.
+    """
+    return 1.0 if live <= 1 else 2.0 / (live + 1)
+
+
+def bluff_rate(live: int) -> float:
+    """A bluff has to get through *every* live opponent, so its chance of
+    working falls off geometrically as the table fills up."""
+    return BLUFF_RATE * (0.5 ** max(live - 1, 0))
+
+
+def _opponent_ranges(state: dict, belief: dict, c: int | None, pot: int,
+                     to_call: int, live: int) -> list:
+    """One range per live opponent: sharpened for the seats that have bet or
+    raised this round, uniform for the seats that are merely still in.
+
+    Phase 2 pointed a single sharpened range at "the opponent". Six-handed that
+    is wrong in both directions: five limpers are not five raisers, and one shove
+    in front of four folds is not a table full of strength.
+    """
+    raises, _ = _raises_by_seat(state)
+    if not raises:
+        return [None] * live
+    ours = _int(state.get("your_seat"))
+    seats = [s for s in live_seats(state) if s != ours]
+    if not seats:
+        # we cannot line the log up with the seating; credit as many opponents
+        # with the aggregate read as there were aggressors
+        sharp = range_weights(belief, c, _sharpness(sum(raises.values()), pot, to_call))
+        return [sharp] * min(len(raises), live) + [None] * max(live - len(raises), 0)
+    lanes: list = []
+    cache: dict[int, dict] = {}
+    for i in range(live):
+        count = raises.get(seats[i], 0) if i < len(seats) else 0
+        if count <= 0:
+            lanes.append(None)
+            continue
+        if count not in cache:
+            cache[count] = range_weights(belief, c, _sharpness(count, pot, to_call))
+        lanes.append(cache[count])
+    return lanes
+
+
+def _equities(state: dict, n: int, c: int | None, pot: int,
+              to_call: int) -> tuple[float, float]:
+    """(our share of the pot, that share on the heads-up axis).
+
+    The first is what a *call* is priced against, because `to_call / (pot +
+    to_call)` is already the correct multiway comparison. The second is what a
+    *bet or raise* is judged on, because every one of those thresholds was
+    calibrated against a single opponent.
+
+    Both halves stay rule-relative: with the belief spread across rules that
     disagree the number collapses toward a coin flip on its own, which is the
     right caution while the table is still unknown.
     """
     belief = posterior_for(_codename(state))
-    honest = rule_equity(belief, n, c)
-    sharpness = _sharpness(state, pot, to_call)
-    if sharpness <= 0:
-        return honest
-    read = rule_equity(belief, n, c, range_weights(belief, c, sharpness))
-    return RANGE_TRUST * read + (1 - RANGE_TRUST) * honest
+    live = live_opponents(state)
+    honest = rule_equity_ranges(belief, n, c, [None] * live)
+    lanes = _opponent_ranges(state, belief, c, pot, to_call, live)
+    if any(lane is not None for lane in lanes):
+        read = rule_equity_ranges(belief, n, c, lanes)
+        eq = RANGE_TRUST * read + (1 - RANGE_TRUST) * honest
+    else:
+        eq = honest
+    return eq, min(1.0, eq / field_share(live))
+
+
+def table_equity(state: dict) -> float:
+    """Our share of the pot as the bot currently reads it, for tests and replays."""
+    n = _number(state.get("your_number"))
+    if n is None:
+        return 0.0
+    return _equities(
+        state,
+        n,
+        _number(state.get("community_number")),
+        max(_int(state.get("pot"), 0) or 0, 0),
+        max(_int(state.get("to_call"), 0) or 0, 0),
+    )[0]
 
 
 def _coin(state: dict, salt: str) -> float:
@@ -269,11 +475,49 @@ def _coin(state: dict, salt: str) -> float:
     return int.from_bytes(hashlib.sha256(key.encode()).digest()[:8], "big") / 2**64
 
 
-def _tilt(state: dict) -> float:
+def objective(state: dict) -> tuple[int, bool]:
+    """(the chip delta this leg needs, whether we also have to top the table).
+
+    Phase 3 seats six: "chip delta >= +10 *and* top the table -> 150 points ...
+    beating four of the five is worth nothing". Phase 2 seats two and wants +25
+    a leg; phase 1 is a single match and wants +10.
+
+    Read off the SEATING, not off who is still alive — busting the table down to
+    two players does not turn a phase 3 leg back into a phase 2 one.
+    """
+    if len(_seated(state)) >= 3:
+        return PHASE3_TARGET_DELTA, True
+    if _int(state.get("leg_number")) is not None:
+        return LEG_TARGET_DELTA, False
+    return TARGET_DELTA, False
+
+
+def _best_rival(state: dict) -> int | None:
+    """The highest chip delta at the table that is not ours.
+
+    Busted seats included: they are still seats, and "top the table" means
+    strictly above every one of them.
+    """
+    best = None
+    for player in _seated(state):
+        if _is_us(state, player):
+            continue
+        delta = _int(player.get("chip_delta"))
+        if delta is not None and (best is None or delta > best):
+            best = delta
+    return best
+
+
+def endgame_tilt(state: dict) -> float:
     """Threshold shift for the run-in: + plays tighter, − takes more risk.
 
     `chip_delta` is frozen at the start of the hand, which is exactly the score
     we are judged on, so it is the right thing to steer by.
+
+    Phase 3 changes what "ahead" means. The leg is a race — "you must finish the
+    leg with strictly highest chip delta at the table", "ties don't count" — so
+    a comfortable second place scores the same zero as busting, and there is
+    nothing to protect until we are actually in front.
     """
     total = _int(state.get("total_hands"))
     hand = _int(state.get("hand_number"))
@@ -285,9 +529,18 @@ def _tilt(state: dict) -> float:
     delta = _int(_me(state).get("chip_delta"))
     if delta is None:
         return 0.0
-    target = LEG_TARGET_DELTA if _int(state.get("leg_number")) is not None else TARGET_DELTA
-    # a cushion big enough that the blinds left to post cannot eat it
-    if delta >= target + 2 * hands_left:
+    target, must_top = objective(state)
+    cushion = 2 * hands_left  # big enough that the blinds left to post cannot eat it
+    banked = delta >= target + cushion
+    if must_top:
+        rival = _best_rival(state)
+        if rival is not None:
+            # level with the leader is still losing, and leading on a delta
+            # under the target still does not clear the leg
+            if delta <= rival or delta < target:
+                return CHASE_TILT
+            return PROTECT_TILT if banked and delta - rival > cushion else 0.0
+    if banked:
         return PROTECT_TILT
     if delta < target:
         return CHASE_TILT
@@ -369,9 +622,12 @@ def _play(state: dict, legal: list[str]) -> dict:
     pot = max(_int(state.get("pot"), 0) or 0, 0)
     to_call = max(_int(state.get("to_call"), 0) or 0, 0)
     stack = max(_int(state.get("your_stack"), 0) or 0, 1)
-    eq = _effective_equity(state, number, community, pot, to_call)
+    live = live_opponents(state)
+    # `eq` is our real share of the pot; `strength` is that share put back on the
+    # one-on-one axis every threshold below was calibrated against
+    eq, strength = _equities(state, number, community, pot, to_call)
     locked = _cannot_lose(state, number, community)
-    tilt = _tilt(state)
+    tilt = endgame_tilt(state)
     mine = _int(_me(state).get("bet_this_round"), 0) or 0
     _, our_raises = _aggression(state)
 
@@ -385,17 +641,20 @@ def _play(state: dict, legal: list[str]) -> dict:
         # `pot` already includes the bet we are facing, so back it out to size
         # the bet against the pot it was aimed at
         pressure = min(risked / max(pot - risked, 1), 2.0)
-        needed = odds + CALL_MARGIN * pressure + tilt + CALL_RISK * (risked / stack)
+        # Pot odds against our real share of the pot is already the correct
+        # multiway comparison. The cushion on top is not: see FIELD_MARGIN.
+        cushion = CALL_MARGIN * pressure + tilt + CALL_RISK * (risked / stack)
+        needed = odds + cushion * (field_share(live) ** FIELD_MARGIN)
         if "raise" in legal:
             # a second raise in one round means the pot is getting away from us —
             # unless the hand cannot lose, in which case there is nothing to fear
             floor = RAISE_EQ + tilt if locked else (RERAISE_EQ if our_raises else RAISE_EQ) + tilt
-            if eq >= floor:
+            if strength >= floor:
                 raised = _put_in(
                     state,
                     "raise",
-                    mine + to_call + (pot + to_call) * _size_for(eq),
-                    eq,
+                    mine + to_call + (pot + to_call) * _size_for(strength),
+                    strength,
                     floor,
                     risk_free=locked,
                 )
@@ -407,15 +666,17 @@ def _play(state: dict, legal: list[str]) -> dict:
     if "bet" in legal:
         # value first, then the smaller "charge them to see a showdown" bet
         for floor, fraction in (
-            (VALUE_BET_EQ + tilt, _size_for(eq)),
+            (VALUE_BET_EQ + tilt, _size_for(strength)),
             (THIN_BET_EQ + tilt, SIZE_THIN),
         ):
-            if eq >= floor:
-                opened = _put_in(state, "bet", mine + pot * fraction, eq, floor, risk_free=locked)
+            if strength >= floor:
+                opened = _put_in(
+                    state, "bet", mine + pot * fraction, strength, floor, risk_free=locked
+                )
                 if opened is not None:
                     return opened
                 break
-        if eq <= BLUFF_MAX_EQ and _coin(state, "bluff") < BLUFF_RATE - tilt:
+        if strength <= BLUFF_MAX_EQ and _coin(state, "bluff") < bluff_rate(live) - tilt:
             # a bluff is priced by the pot, not by our equity, so it bypasses
             # the stack-risk floor — but only ever for a fraction of the pot
             window = _window(state)

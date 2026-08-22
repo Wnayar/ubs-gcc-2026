@@ -314,38 +314,46 @@ def _fit_order(observations) -> dict[int, float]:
     community number — but that covers a large family ("primes beat composites",
     "n mod 3", any fixed reordering of the deck) that no amount of hand-written
     hypotheses would reliably anticipate.
+
+    Phase 3 deals up to six numbers into one showdown, and a six-way pot is
+    worth far more than a heads-up one here: the winner is known to have beaten
+    *five* numbers, not one. What it does NOT tell us is how the losers compare
+    to each other — only that they all lost — so they are never scored against
+    one another. Co-winners split, so they count as a draw between themselves.
     """
     wins: dict[int, float] = {}
     games: dict[int, float] = {}
-    for obs in observations:
-        seats = sorted(obs.numbers)
-        if len(seats) != 2:
-            continue
-        a, b = obs.numbers[seats[0]], obs.numbers[seats[1]]
+
+    def played(a: int, b: int, score_a: float) -> None:
         if a == b:
-            continue
-        if len(obs.winners) == 2:
-            sa = sb = 0.5
-        else:
-            sa = 1.0 if obs.winners[0] == seats[0] else 0.0
-            sb = 1.0 - sa
-        wins[a] = wins.get(a, 0.0) + sa
-        wins[b] = wins.get(b, 0.0) + sb
+            return  # identical numbers cannot separate themselves
+        wins[a] = wins.get(a, 0.0) + score_a
+        wins[b] = wins.get(b, 0.0) + (1.0 - score_a)
         games[a] = games.get(a, 0.0) + 1
         games[b] = games.get(b, 0.0) + 1
+
+    for obs in observations:
+        took_it = set(obs.winners)
+        champions = [obs.numbers[s] for s in obs.winners if s in obs.numbers]
+        losers = [n for s, n in obs.numbers.items() if s not in took_it]
+        for i, a in enumerate(champions):
+            for b in champions[i + 1:]:
+                played(a, b, 0.5)
+            for b in losers:
+                played(a, b, 1.0)
     return {
         n: (wins.get(n, 0.0) + 1.0) / (games.get(n, 0.0) + 2.0) for n in range(1, DECK + 1)
     }
 
 
 def _order_predicts(scores: dict[int, float], obs: "Observation") -> bool:
-    seats = sorted(obs.numbers)
-    ka, kb = scores[obs.numbers[seats[0]]], scores[obs.numbers[seats[1]]]
-    if abs(ka - kb) < 1e-9:
-        predicted = (seats[0], seats[1])
-    else:
-        predicted = (seats[0],) if ka > kb else (seats[1],)
-    return tuple(predicted) == obs.winners
+    """Would the fitted order have called this showdown right? Any number of seats."""
+    keyed = {seat: scores[n] for seat, n in obs.numbers.items()}
+    if not keyed:
+        return False
+    best = max(keyed.values())
+    predicted = tuple(sorted(s for s, v in keyed.items() if abs(v - best) < 1e-9))
+    return predicted == obs.winners
 
 
 SEED_PATH = Path(__file__).resolve().parent / "data" / "showdown_seed.json"
@@ -471,11 +479,75 @@ def learned_summary() -> dict:
 
 ORDERS: dict[str, dict[int, float]] = {}
 
+# The strength of all 13 numbers under one rule at one community number. The
+# multiway product below asks for these in its inner loop, and every fixed rule
+# gives the same answer forever, so they are worked out once.
+_KEYS: dict[tuple[str, int], tuple] = {}
+
+UNIFORM = tuple([1.0 / DECK] * DECK)
+
+
+def _keys_for(name: str, c: int) -> tuple:
+    if name == LEARNED:
+        # refitted whenever a showdown arrives, so never cached
+        order = ORDERS.get("current", {})
+        return tuple((round(order.get(n, 0.5), 9),) for n in range(1, DECK + 1))
+    cached = _KEYS.get((name, c))
+    if cached is None:
+        key = BY_NAME[name].key
+        cached = tuple(key(n, c) for n in range(1, DECK + 1))
+        _KEYS[(name, c)] = cached
+    return cached
+
 
 def _key_for(name: str, n: int, c: int):
-    if name == LEARNED:
-        return (round(ORDERS.get("current", {}).get(n, 0.5), 9),)
-    return BY_NAME[name].key(n, c)
+    return _keys_for(name, c)[n - 1]
+
+
+def _as_range(weights: dict[int, float] | None) -> tuple:
+    """One opponent's range as 13 weights that sum to 1. None means uniform."""
+    if weights is None:
+        return UNIFORM
+    total = sum(weights.values())
+    if total <= 0:
+        return UNIFORM
+    return tuple(weights.get(m, 0.0) / total for m in range(1, DECK + 1))
+
+
+def _pot_share(ours, keys: tuple, lanes: list) -> float:
+    """Our share of the pot holding `ours` against one range per live opponent.
+
+    Each opponent independently either loses to us (probability L), ties us (E)
+    or beats us. Multiplying out `Π (L_i + E_i·x)` puts, in the coefficient of
+    `x**j`, the chance that exactly j opponents tie us and none of the rest beat
+    us — in which case we take `1/(j+1)` of the pot. Summing those gives the
+    exact share, not an `L**k` approximation, and it copes with opponents that
+    have different ranges: the seat that raised is not the seat that limped.
+
+    Against a single opponent it collapses to `L + E/2`, which is the phase 1
+    formula, unchanged — that identity is what lets phase 3 ship without
+    touching heads-up play.
+    """
+    poly = [1.0]
+    for lane in lanes:
+        lose = tie = 0.0
+        for m in range(DECK):
+            w = lane[m]
+            if not w:
+                continue
+            theirs = keys[m]
+            if theirs < ours:
+                lose += w
+            elif theirs == ours:
+                tie += w
+        if not lose and not tie:
+            return 0.0  # this opponent beats us for certain
+        nxt = [0.0] * (len(poly) + 1)
+        for j, v in enumerate(poly):
+            nxt[j] += v * lose
+            nxt[j + 1] += v * tie
+        poly = nxt
+    return sum(v / (j + 1) for j, v in enumerate(poly))
 
 
 def _value(rule: Rule, n: int, m: int, c: int) -> float:
@@ -488,18 +560,23 @@ def _value(rule: Rule, n: int, m: int, c: int) -> float:
     return 0.5
 
 
-def rule_equity(
+def rule_equity_ranges(
     belief: dict[str, float],
     n: int,
     c: int | None,
-    weights: dict[int, float] | None = None,
+    ranges: list,
 ) -> float:
-    """Posterior-averaged chance of taking the pot.
+    """Posterior-averaged share of the pot, one range per live opponent.
 
-    `weights` is the opponent's range over 1..13; None means uniform. With the
-    belief spread across rules that disagree, this collapses toward a coin flip
-    on its own — which is the right amount of caution while the table is unknown.
+    `ranges` has one entry per opponent still in the hand — a weight dict over
+    1..13, or None for uniform. An empty list means nobody is left to beat, so
+    the pot is already ours.
+
+    With the belief spread across rules that disagree this collapses toward a
+    coin flip on its own, which is the right amount of caution while the table
+    is unknown.
     """
+    lanes = [_as_range(w) for w in ranges]
     communities = range(1, DECK + 1) if c is None else (c,)
     total = 0.0
     for name, p in belief.items():
@@ -507,17 +584,25 @@ def rule_equity(
             continue
         acc = 0.0
         for cc in communities:
-            ours = _key_for(name, n, cc)
-            for m in range(1, DECK + 1):
-                w = 1.0 if weights is None else weights.get(m, 0.0)
-                if w:
-                    theirs = _key_for(name, m, cc)
-                    acc += w * (1.0 if ours > theirs else (0.5 if ours == theirs else 0.0))
+            keys = _keys_for(name, cc)
+            acc += _pot_share(keys[n - 1], keys, lanes)
         total += p * acc / len(communities)
-    if weights is not None:
-        scale = sum(weights.values())
-        return total / scale if scale else 0.5
-    return total / DECK
+    return total
+
+
+def rule_equity(
+    belief: dict[str, float],
+    n: int,
+    c: int | None,
+    weights: dict[int, float] | None = None,
+    opponents: int = 1,
+) -> float:
+    """Posterior-averaged chance of taking the pot against `opponents` seats.
+
+    `weights` is the range every one of them is credited with; None means
+    uniform. `opponents=1` is phase 1 and 2's heads-up figure exactly.
+    """
+    return rule_equity_ranges(belief, n, c, [weights] * max(int(opponents), 0))
 
 
 def range_weights(belief: dict[str, float], c: int | None, sharpness: float) -> dict[int, float]:
